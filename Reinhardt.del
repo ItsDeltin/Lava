@@ -1,0 +1,104 @@
+import "Lava.del";
+import "Ball.del";
+
+define playervar chargeStart = null;
+
+rule: "Charge Speed Boost"
+Event.OngoingPlayer
+Player.Reinhardt
+if (IsUsingAbility1())
+{
+    chargeStart = TotalTimeElapsed();
+    SetMoveSpeed(EventPlayer(), 200);
+}
+
+rule: "Charge Speed Boost Revert"
+Event.OngoingPlayer
+Player.Reinhardt
+if (!IsUsingAbility1())
+{
+    SetMoveSpeed(EventPlayer(), 100);
+}
+
+rule: "Hit pole"
+Event.OngoingPlayer
+Player.Reinhardt
+if (!IsUsingAbility1())
+if (TotalTimeElapsed() - chargeStart <= 4)
+if (DistanceBetween(EventPlayer(), PolePos()) < 3)
+{
+    SmallMessage(EventPlayer(), "KA-DONG!");
+    PlayEffect(AllPlayers(), PlayEffect.RingExplosionSound, Color.White, PolePos(), 200);
+    PlayEffect(AllPlayers(), PlayEffect.RingExplosion, Color.SkyBlue, PolePos(), 50);
+
+    // Apply momentum to the player who hit the pole
+    ApplyImpulse(EventPlayer(), DirectionTowards(PolePos(), PositionOf() + Vector(0, 0.5, 0)), 30, Relative.ToWorld, ContraryMotion.Cancel);
+
+    // Apply momentum to the ball
+    if (ballIsOnStand)
+    {
+        ApplyImpulse(ball1, DirectionTowards(EventPlayer(), PolePos() + Vector(0, 0.5, 0)), 30, Relative.ToWorld, ContraryMotion.Cancel);
+        ApplyImpulse(ball2, DirectionTowards(EventPlayer(), PolePos() + Vector(0, 0.5, 0)), 30, Relative.ToWorld, ContraryMotion.Cancel);
+        ballIsOnStand = false;
+    }
+}
+
+rule: "Shield Surf"
+Event.OngoingPlayer
+Player.Reinhardt
+if (IsUsingAbility1())
+if (IsTrueForAny(
+        AllPlayers(),
+        IsButtonHeld(ArrayElement(), Button.SecondaryFire)
+        && HeroOf(ArrayElement()) == Hero.Reinhardt
+        && VerticalFacingAngleOf(ArrayElement()) < -40
+        && DistanceBetween(EventPlayer(), ArrayElement()) <= 5
+        && IsInViewAngle(ArrayElement(), PositionOf(EventPlayer()), 100)
+    ))
+{
+    SmallMessage(EventPlayer(), "Stylish!");
+    Teleport(EventPlayer(), PositionOf(EventPlayer()) + Vector(0, 2, 0));
+    ApplyImpulse(EventPlayer(), Up(), 15, Relative.ToWorld, ContraryMotion.Incorporate);
+}
+
+rule: "debug spawn"
+Event.OngoingPlayer
+if (IsCommunicating(EventPlayer(), Communication.Acknowledge))
+{
+    CreateDummyBot(Hero.Reinhardt, Team.Team2, -1, PositionOf(EventPlayer()), Vector());
+    define dummy = LastCreatedEntity();
+
+    Wait(3);
+    StartHoldingButton(dummy, Button.SecondaryFire);
+    StartFacing(dummy, Vector(-0.74, 0.67, 0.07), 500, Relative.ToWorld, FacingRev.DirectionAndTurnRate);
+}
+
+rule: "Start breaking"
+Event.OngoingPlayer
+Player.Reinhardt
+if (IsUsingAbility1())
+if (IsButtonHeld(EventPlayer(), Button.Crouch))
+if (IsOnGround())
+{
+    StartAccelerating(EventPlayer(), Backward(), 650, 90, Relative.ToPlayer);
+    PlayEffect(AllPlayers(), PlayEffect.BadExplosion, Color.Yellow, PositionOf(), 0.5);
+    PlayEffect(EventPlayer(), PlayEffect.DebuffImpactSound, Color.Yellow, EyePosition(), 100);
+    Wait(0.8);
+    SetStatus(EventPlayer(), null, Status.Frozen, 0.01);
+}
+
+rule: "Stop breaking"
+Event.OngoingPlayer
+Player.Reinhardt
+if (!IsUsingAbility1())
+{
+    StopAccelerating(EventPlayer());
+}
+
+macro chargingPlayer(define player):
+    FirstOf(
+        FilteredArray(
+            AllPlayers(),
+            HasStatus(ArrayElement(), Status.Stunned) && DistanceBetween(ArrayElement(), player) < 3
+        )
+    );

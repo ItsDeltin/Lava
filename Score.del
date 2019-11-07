@@ -1,0 +1,16 @@
+import "Ball.del";
+
+macro blueGoal(): Vector(115, 165, 150);
+macro redGoal(): Vector(-115, 165, 150);
+
+rule: "Blue score"
+if (DistanceBetween(ballLocation(), redGoal()) < 7)
+{
+
+}
+
+rule: "Red score"
+if (DistanceBetween(ballLocation(), redGoal()) < 7)
+{
+
+}
