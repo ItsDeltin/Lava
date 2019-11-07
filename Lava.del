@@ -154,3 +154,25 @@ if (IsCommunicating(EventPlayer(), Communication.Acknowledge))
     StartHoldingButton(dummy, Button.SecondaryFire);
     StartFacing(dummy, Vector(-0.74, 0.67, 0.07), 500, Relative.ToWorld, FacingRev.DirectionAndTurnRate);
 }
+
+rule: "Start breaking"
+Event.OngoingPlayer
+Player.Reinhardt
+if (IsUsingAbility1())
+if (IsButtonHeld(EventPlayer(), Button.Crouch))
+if (IsOnGround())
+{
+    StartAccelerating(EventPlayer(), Backward(), 650, 90, Relative.ToPlayer);
+    PlayEffect(AllPlayers(), PlayEffect.BadExplosion, Color.Yellow, PositionOf(), 0.5);
+    PlayEffect(EventPlayer(), PlayEffect.DebuffImpactSound, Color.Yellow, EyePosition(), 100);
+    Wait(0.8);
+    SetStatus(EventPlayer(), null, Status.Frozen, 0.01);
+}
+
+rule: "Stop breaking"
+Event.OngoingPlayer
+Player.Reinhardt
+if (!IsUsingAbility1())
+{
+    StopAccelerating(EventPlayer());
+}
