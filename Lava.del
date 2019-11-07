@@ -124,3 +124,33 @@ if (DistanceBetween(EventPlayer(), PolePos()) < 3)
 macro PolePos()   : Vector(0, 154.88, 150);
 macro TopPolePos(): Vector(0, 162,    150);
 macro BaseOffset(): Vector(0, 0.5, 0);
+
+rule: "Shield Surf"
+Event.OngoingPlayer
+Player.Reinhardt
+if (IsUsingAbility1())
+if (IsTrueForAny(
+        AllPlayers(),
+        IsButtonHeld(ArrayElement(), Button.SecondaryFire)
+        && HeroOf(ArrayElement()) == Hero.Reinhardt
+        && VerticalFacingAngleOf(ArrayElement()) < -40
+        && DistanceBetween(EventPlayer(), ArrayElement()) <= 5
+        && IsInViewAngle(ArrayElement(), PositionOf(EventPlayer()), 100)
+    ))
+{
+    SmallMessage(EventPlayer(), "Stylish!");
+    Teleport(EventPlayer(), PositionOf(EventPlayer()) + Vector(0, 2, 0));
+    ApplyImpulse(EventPlayer(), Up(), 15, Relative.ToWorld, ContraryMotion.Incorporate);
+}
+
+rule: "debug spawn"
+Event.OngoingPlayer
+if (IsCommunicating(EventPlayer(), Communication.Acknowledge))
+{
+    CreateDummyBot(Hero.Reinhardt, Team.Team2, -1, PositionOf(EventPlayer()), Vector());
+    define dummy = LastCreatedEntity();
+
+    Wait(3);
+    StartHoldingButton(dummy, Button.SecondaryFire);
+    StartFacing(dummy, Vector(-0.74, 0.67, 0.07), 500, Relative.ToWorld, FacingRev.DirectionAndTurnRate);
+}
