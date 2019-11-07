@@ -1,5 +1,30 @@
+import "Lava.del";
+
 define globalvar ball;
-define globalvar ballIsOnStand;
+define globalvar ballIsOnStand = true;
+
+rule: "Setup ball"
+{
+    CreateDummyBot(Hero.Torbjorn, Team.Team2, 3, TopPolePos());
+    ball = LastCreatedEntity();
+    SetStatus(ball, null, Status.Unkillable, 9999);
+}
+
+rule: "Respawn ball"
+Event.OnDeath
+if (ball == EventPlayer())
+{
+    Respawn(EventPlayer());
+}
+
+rule: "Respawn ball TP"
+Event.OngoingPlayer
+if (ball == EventPlayer())
+if (IsAlive())
+{
+    Teleport(EventPlayer(), TopPolePos());
+    ballIsOnStand = true;
+}
 
 rule: "On Ball Hit"
 Event.OnDamageTaken
@@ -14,7 +39,7 @@ Event.OnDamageTaken
 if (ball == EventPlayer())
 if (EventDamage() == 72) // 75 for no armor
 {
-    ApplyImpulse(EventPlayer(), Vector(0, 0.5, 0), 20, Relative.ToWorld, ContraryMotion.Incorporate);
+    ApplyImpulse(EventPlayer(), Vector(0, 1, 0), 15, Relative.ToWorld, ContraryMotion.Incorporate);
 }
 
 define playervar knockedFrom = null;
@@ -41,19 +66,4 @@ if (knockedFrom != null)
 {
     ApplyImpulse(EventPlayer(), DirectionTowards(knockedFrom, PositionOf() + Vector(0, 0.3, 0)), 30, Relative.ToWorld, ContraryMotion.Incorporate);
     knockedFrom = null;
-}
-
-rule: "Fly after being charged"
-Event.OngoingPlayer
-if (ball == EventPlayer())
-if (!HasStatus(EventPlayer(), Status.Stunned))
-if (DistanceBetween())
-{
-
-}
-
-rule: "Debug stunned"
-Event.OngoingPlayer
-{
-    CreateHudText(AllPlayers(), <"<0> <1>", HeroIconString(HeroOf(EventPlayer())), EventPlayer()>, "Is Stunned", HasStatus(EventPlayer(), Status.Stunned), Location.Right);
 }

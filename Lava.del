@@ -12,12 +12,8 @@ if (!IsDummyBot())
     Teleport(EventPlayer(), origin);
 }
 
-rule: "Setup"
+rule: "Setup Arena"
 {
-    CreateDummyBot(Hero.Torbjorn, Team.Team2, 3, TopPolePos());
-    ball = LastCreatedEntity();
-    SetStatus(ball, null, Status.Unkillable, 9999);
-
     OuterWalls();
 
     for (define x = -110; x <= 110; x += 4.4)
@@ -85,13 +81,6 @@ method OuterWalls()
 
 define playervar chargeStart = null;
 
-rule: "Charge debug"
-Event.OngoingPlayer
-Player.Reinhardt
-{
-    CreateHudText(EventPlayer(), IconString(Icon.Bolt), "Charge Time", TotalTimeElapsed() - chargeStart, Location.Top, 1, Color.Turquoise, Color.White, Color.Orange);
-}
-
 rule: "Charge Speed Boost"
 Event.OngoingPlayer
 Player.Reinhardt
@@ -124,10 +113,10 @@ if (DistanceBetween(EventPlayer(), PolePos()) < 3)
     ApplyImpulse(EventPlayer(), DirectionTowards(PolePos(), PositionOf() + Vector(0, 0.5, 0)), 30, Relative.ToWorld, ContraryMotion.Cancel);
 
     // Apply momentum to the ball
-    if (!ballIsOnStand)
+    if (ballIsOnStand)
     {
         ApplyImpulse(ball, DirectionTowards(EventPlayer(), PolePos() + Vector(0, 0.5, 0)), 30, Relative.ToWorld, ContraryMotion.Cancel);
-        ballIsOnStand = true;
+        ballIsOnStand = false;
     }
 }
 
