@@ -28,9 +28,6 @@ rule: "Setup balls"
     SetInvisible(ball2, InvisibleTo.All);
 
     CreateEffect(AllPlayers(), Effect.Sphere, Color.Turquoise, ballLocation(), 1.25, EffectRev.VisibleToPositionAndRadius);
-
-    CreateHudText(AllPlayers(), "Ball Ground", null, PositionOf(rootBall), Location.Top);
-    CreateHudText(AllPlayers(), "Velocity", null, VelocityOf(rootBall), Location.Top);
 }
 
 macro ballLocation(): tpTo != null ? tpTo + Vector(0, 1, 0) : Midpoint(ball1,ball2) + Vector(0, 0.5, 0);
@@ -83,8 +80,10 @@ rule: "Link"
 macro isStunned(define player): HasStatus(player, Status.Stunned);
 
 rule: "Respawn ball"
-if (IsDead(ball1) || IsDead(ball2) || YOf(ballLocation()) < 140 || isOnWall(rootBall))
+if (IsDead(ball1) || IsDead(ball2) || YOf(ballLocation()) < 140 || (isOnWall(rootBall) && ballSpeed() < 1 && !HasStatus(rootBall, Status.Stunned)))
 {
+    SmallMessage(AllPlayers(), "Respawning Ball");
+
     Respawn(ball1);
     Respawn(ball2);
 

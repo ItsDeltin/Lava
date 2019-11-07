@@ -6,7 +6,7 @@ macro redGoal(): Vector(-115, 165, 150);
 rule: "Blue score"
 if (DistanceBetween(ballLocation(), redGoal()) < 7)
 {
-
+    BigMessage(AllPlayers(), <@"<0> scores!", Team.Team1>);
 }
 
 rule: "Red score"
