@@ -1,0 +1,59 @@
+define globalvar ball;
+define globalvar ballIsOnStand;
+
+rule: "On Ball Hit"
+Event.OnDamageTaken
+if (ball == EventPlayer())
+{
+    SmallMessage(AllPlayers(), EventDamage());
+    Heal(EventPlayer(), null, EventDamage());
+}
+
+rule: "On Hammer Hit"
+Event.OnDamageTaken
+if (ball == EventPlayer())
+if (EventDamage() == 72) // 75 for no armor
+{
+    ApplyImpulse(EventPlayer(), Vector(0, 0.5, 0), 20, Relative.ToWorld, ContraryMotion.Incorporate);
+}
+
+define playervar knockedFrom = null;
+
+rule: "On Fire Strike"
+Event.OnDamageTaken
+if (ball == EventPlayer())
+if (EventDamage() == 97) // 100 for no armor
+{
+    SetStatus(EventPlayer(), null, Status.Burning, 3);
+    Wait(3, WaitBehavior.IgnoreCondition);
+
+    PlayEffect(AllPlayers(), PlayEffect.GoodExplosion, Color.Orange, EyePosition(), ExplosionRange());
+    PlayEffect(AllPlayers(), PlayEffect.ExplosionSound, Color.Orange, EyePosition(), 100);
+    Damage(NotBall(), Attacker(), 200);
+    NotBall().knockedFrom = PositionOf();
+}
+macro NotBall(): FilteredArray(AllPlayers(), ArrayElement() != ball && DistanceBetween(ArrayElement(), ball) < ExplosionRange());
+macro ExplosionRange(): 10;
+
+rule: "Knocked"
+Event.OnDamageTaken
+if (knockedFrom != null)
+{
+    ApplyImpulse(EventPlayer(), DirectionTowards(knockedFrom, PositionOf() + Vector(0, 0.3, 0)), 30, Relative.ToWorld, ContraryMotion.Incorporate);
+    knockedFrom = null;
+}
+
+rule: "Fly after being charged"
+Event.OngoingPlayer
+if (ball == EventPlayer())
+if (!HasStatus(EventPlayer(), Status.Stunned))
+if (DistanceBetween())
+{
+
+}
+
+rule: "Debug stunned"
+Event.OngoingPlayer
+{
+    CreateHudText(AllPlayers(), <"<0> <1>", HeroIconString(HeroOf(EventPlayer())), EventPlayer()>, "Is Stunned", HasStatus(EventPlayer(), Status.Stunned), Location.Right);
+}

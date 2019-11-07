@@ -1,0 +1,77 @@
+/*
+rule: "Setup Scoper"
+Event.OngoingPlayer
+if (IsHost())
+{
+    SetupPlayerAsScoper(HostPlayer());
+}
+
+rule: "Setup Lava"
+Event.OngoingPlayer
+if (scoperSetup)
+if (scoper == EventPlayer())
+{
+    for (define i = 0; i < 100; i++)
+    {
+        ActivateScoper(0, i);
+    }
+}
+
+
+rule: "Create Lava Line"
+Event.OnDamageTaken
+if (scoper == EventPlayer())
+if (GetID() == 0)
+{
+    CreateBeamEffect(
+        AllPlayers(),
+        BeamType.BadBeam,
+        origin + Vector(50, lavaHeight, GetData() * 2),
+        origin + Vector(-50, lavaHeight, GetData() * 2),
+        Color.Red,
+        EffectRev.VisibleToPositionAndRadius
+    );
+    CreateBeamEffect(
+        AllPlayers(),
+        BeamType.BadBeam,
+        origin + Vector((GetData() - 50) * 2, lavaHeight, 100),
+        origin + Vector((GetData() - 50) * 2, lavaHeight, 0),
+        Color.Red,
+        EffectRev.VisibleToPositionAndRadius
+    );
+
+    // CreateEffect(
+    //     AllPlayers(),
+    //     Effect.Ring,
+    //     Color.Red,
+    //     origin + Vector(0, lavaHeight, 0),
+    //     GetData(),
+    //     EffectRev.VisibleToPositionAndRadius
+    // );
+}
+
+rule: "Debug: Move lava up"
+Event.OngoingPlayer
+if (IsHost())
+if (IsButtonHeld(EventPlayer(), Button.Jump))
+{
+    ChaseGlobalVariableAtRate(lavaHeight, 2000, 5);
+}
+
+
+rule: "Debug: Move lava down"
+Event.OngoingPlayer
+if (IsHost())
+if (IsButtonHeld(EventPlayer(), Button.Crouch))
+{
+    ChaseGlobalVariableAtRate(lavaHeight, -2000, 5);
+}
+
+rule: "Debug: Stop moving lava"
+Event.OngoingPlayer
+if (IsHost())
+if (!IsButtonHeld(EventPlayer(), Button.Jump) && !IsButtonHeld(EventPlayer(), Button.Crouch))
+{
+    StopChasingGlobalVariable(lavaHeight);
+}
+*/

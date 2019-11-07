@@ -1,0 +1,136 @@
+import "Ball.del";
+import "!Debug Tools.del";
+
+define globalvar origin = Vector(-0.18, 154.88, 60);
+
+rule: "TP to arena"
+Event.OngoingPlayer
+if (HasSpawned())
+if (IsAlive())
+if (!IsDummyBot())
+{
+    Teleport(EventPlayer(), origin);
+}
+
+rule: "Setup"
+{
+    CreateDummyBot(Hero.Torbjorn, Team.Team2, 3, TopPolePos());
+    ball = LastCreatedEntity();
+    SetStatus(ball, null, Status.Unkillable, 9999);
+
+    OuterWalls();
+
+    for (define x = -110; x <= 110; x += 4.4)
+    {
+        CreateBeamEffect(
+            AllPlayers(),
+            BeamType.GrappleBeam,
+            Vector(x, 154.88, 65),
+            Vector(x, 154.88, 215),
+            Color.Red,
+            EffectRev.VisibleTo
+        );
+    }
+
+    for (define z = 64; z <= 215; z += 4.4) //3
+    {
+        CreateBeamEffect(
+            AllPlayers(),
+            BeamType.GrappleBeam,
+            Vector(-110, 154.88, z),
+            Vector(110, 154.88, z),
+            Color.Red,
+            EffectRev.VisibleTo
+        );
+    }
+
+    CreateEffect(AllPlayers(), Effect.Orb, Color.Orange, TopPolePos() - Vector(0, 0.5, 0), 0.25, EffectRev.VisibleTo);
+}
+
+method OuterWalls()
+{
+    CreateBeamEffect(
+        AllPlayers(),
+        BeamType.BadBeam,
+        Vector(-109.08, 158.44, 65.06),
+        Vector(-108.07, 158.44, 214.81),
+        Color.Orange,
+        EffectRev.VisibleTo
+    );
+    CreateBeamEffect(
+        AllPlayers(),
+        BeamType.BadBeam,
+        Vector(-109.08, 158.44, 65.06),
+        Vector(107.07, 158.44, 63.61),
+        Color.Orange,
+        EffectRev.VisibleTo
+    );
+    CreateBeamEffect(
+        AllPlayers(),
+        BeamType.BadBeam,
+        Vector(108.08, 158.44, 213.35),
+        Vector(-108.07, 158.44, 214.81),
+        Color.Orange,
+        EffectRev.VisibleTo
+    );
+    CreateBeamEffect(
+        AllPlayers(),
+        BeamType.BadBeam,
+        Vector(108.08, 158.44, 213.35),
+        Vector(107.07, 158.44, 63.61),
+        Color.Orange,
+        EffectRev.VisibleTo
+    );
+}
+
+define playervar chargeStart = null;
+
+rule: "Charge debug"
+Event.OngoingPlayer
+Player.Reinhardt
+{
+    CreateHudText(EventPlayer(), IconString(Icon.Bolt), "Charge Time", TotalTimeElapsed() - chargeStart, Location.Top, 1, Color.Turquoise, Color.White, Color.Orange);
+}
+
+rule: "Charge Speed Boost"
+Event.OngoingPlayer
+Player.Reinhardt
+if (IsUsingAbility1())
+{
+    chargeStart = TotalTimeElapsed();
+    SetMoveSpeed(EventPlayer(), 200);
+}
+
+rule: "Charge Speed Boost Revert"
+Event.OngoingPlayer
+Player.Reinhardt
+if (!IsUsingAbility1())
+{
+    SetMoveSpeed(EventPlayer(), 100);
+}
+
+rule: "Hit pole"
+Event.OngoingPlayer
+Player.Reinhardt
+if (!IsUsingAbility1())
+if (TotalTimeElapsed() - chargeStart <= 4)
+if (DistanceBetween(EventPlayer(), PolePos()) < 3)
+{
+    SmallMessage(EventPlayer(), "KA-DONG!");
+    PlayEffect(AllPlayers(), PlayEffect.RingExplosionSound, Color.White, PolePos(), 200);
+    PlayEffect(AllPlayers(), PlayEffect.RingExplosion, Color.SkyBlue, PolePos(), 50);
+
+    // Apply momentum to the player who hit the pole
+    ApplyImpulse(EventPlayer(), DirectionTowards(PolePos(), PositionOf() + Vector(0, 0.5, 0)), 30, Relative.ToWorld, ContraryMotion.Cancel);
+
+    // Apply momentum to the ball
+    if (!ballIsOnStand)
+    {
+        ApplyImpulse(ball, DirectionTowards(EventPlayer(), PolePos() + Vector(0, 0.5, 0)), 30, Relative.ToWorld, ContraryMotion.Cancel);
+        ballIsOnStand = true;
+    }
+}
+
+macro PolePos()   : Vector(0, 154.88, 150);
+macro TopPolePos(): Vector(0, 162,    150);
+macro BaseOffset(): Vector(0, 0.5, 0);

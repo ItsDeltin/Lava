@@ -1,0 +1,43 @@
+
+rule: "Create Wall"
+Event.OngoingPlayer
+if (IsButtonHeld(EventPlayer(), Button.Interact))
+{
+    CreateDummyBot(
+        Hero.Mei,
+        Team.Team1,
+        1,
+        RayCastHitPosition(EyePosition(), Destination(EyePosition(), FacingDirectionOf(), 100), null, null, true),
+        Vector(0.1, -1, 0.1)
+    );
+    define dummy = LastCreatedEntity();
+    dummy.owner = EventPlayer();
+}
+
+define playervar owner;
+
+rule: "Mei Wall"
+Event.OngoingPlayer
+Player.Mei
+if (IsDummyBot())
+if (HasSpawned())
+{
+    //SetFacing(EventPlayer(), Vector(0, -1, 0));
+    SetFacing(EventPlayer(),DirectionFromAngles(HorizontalFacingAngleOf(owner), 89));
+    PressButton(EventPlayer(), Button.Ability2);
+    PressButton(EventPlayer(), Button.PrimaryFire);
+    //SetInvisible(EventPlayer(), InvisibleTo.All);
+
+    Wait(0.3);
+
+    CreateDummyBot(
+        Hero.Mei,
+        Team.Team1,
+        1,
+        //RayCastHitPosition(EyePosition(), Destination(EyePosition(), FacingDirectionOf(), 100), null, null, true),
+        PositionOf(),
+        Vector(0.1, -1, 0.1)
+    );
+    define dummy = LastCreatedEntity();
+    dummy.owner = EventPlayer();
+}
