@@ -1,4 +1,5 @@
 import "Ball.del";
+import "Debug Tools.del";
 
 define globalvar origin = Vector(-0.18, 154.88, 60);
 
@@ -27,7 +28,7 @@ rule: "Setup Arena"
         );
     }
 
-    for (define z = 64; z <= 215; z += 4.4) //3
+    for (define z = 65; z <= 215; z += 4.4) //3
     {
         CreateBeamEffect(
             AllPlayers(),

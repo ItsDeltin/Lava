@@ -8,12 +8,14 @@ define globalvar ballIsOnStand = true;
 define globalvar status;
 define globalvar tpFrom;
 define globalvar tpTo;
+define globalvar rootBall;
 
 rule: "Setup balls"
 {
     CreateDummyBot(Hero.Torbjorn, Team.Team1, 5, TopPolePos());
     ball1 = LastCreatedEntity();
     ball1.isBall = true;
+    rootBall = ball1;
 
     CreateDummyBot(Hero.Torbjorn, Team.Team2, 5, TopPolePos() + Vector(0, 1, 0));
     ball2 = LastCreatedEntity();
@@ -29,10 +31,11 @@ rule: "Setup balls"
 
     CreateHudText(AllPlayers(), "Priority", null, TeamOf(tpTo), Location.Top);
     CreateHudText(AllPlayers(), "Ball Speed", null, ballSpeed(), Location.Top);
+    CreateHudText(AllPlayers(), "rootBall", null, TeamOf(rootBall), Location.Top);
 }
 
 macro ballLocation(): tpTo != null ? tpTo + Vector(0, 1, 0) : Midpoint(ball1,ball2) + Vector(0, 0.5, 0);
-macro ballSpeed(): Max(SpeedOf(ball1), SpeedOf(ball2));
+macro ballSpeed(): SpeedOf(rootBall);
 
 rule: "Link"
 {
@@ -71,20 +74,14 @@ rule: "Link"
         }
     }
 
+    if (tpTo != null) rootBall = tpTo;
+
     Teleport(tpFrom, PositionOf(tpTo) + Vector(0, 1, 0));
+
     Wait(0.025);
     Loop();
 }
 macro isStunned(define player): HasStatus(player, Status.Stunned);
-
-rule: "Kill if on boundary"
-Event.OngoingPlayer
-if (isBall)
-if (YOf(PositionOf()) == 158.44)
-if (IsOnGround())
-{
-    Kill();
-}
 
 rule: "Respawn ball"
 if (IsDead(ball1) || IsDead(ball2))
@@ -92,7 +89,7 @@ if (IsDead(ball1) || IsDead(ball2))
     Respawn(ball1);
     Respawn(ball2);
 
-    Wait(5);
+    MinWait();
 
     Teleport(ball1, TopPolePos());
     Teleport(ball2, TopPolePos() + Vector(0, 1, 0));
@@ -102,7 +99,7 @@ if (IsDead(ball1) || IsDead(ball2))
 rule: "On Ball Hit"
 Event.OnDamageTaken
 if (isBall)
-if (!IsInSpawnRoom())
+if (!IsInSpawnRoom(ball1) && !IsInSpawnRoom(ball2))
 {
     SmallMessage(AllPlayers(), EventDamage());
     Heal(EventPlayer(), null, EventDamage());
@@ -125,20 +122,32 @@ if (isBall)
 if (EventDamage() == 97) // 100 for no armor
 if (!IsInSpawnRoom())
 {
-    Wait(3, WaitBehavior.IgnoreCondition);
+    define fuse = 0;
+    ChasePlayerVariableOverTime(EventPlayer(), fuse, 2, 3);
 
-    PlayEffect(AllPlayers(), PlayEffect.GoodExplosion, Color.Orange, EyePosition(), ExplosionRange());
-    PlayEffect(AllPlayers(), PlayEffect.ExplosionSound, Color.Orange, EyePosition(), 100);
+    CreateEffect(AllPlayers(), Effect.BadAura, Color.Orange, ballLocation(), fuse, EffectRev.VisibleToPositionAndRadius);
+    define fuseEffect = LastCreatedEntity();
+    Wait(3, WaitBehavior.IgnoreCondition);
+    DestroyEffect(fuseEffect);
+
+    PlayEffect(AllPlayers(), PlayEffect.GoodExplosion, Color.Orange, ballLocation(), ExplosionRange());
+    PlayEffect(AllPlayers(), PlayEffect.ExplosionSound, Color.Orange, ballLocation(), 100);
     Damage(NotBall(), Attacker(), 200);
-    NotBall().knockedFrom = PositionOf();
+    NotBall().knockedFrom = ballLocation();
 }
-macro NotBall(): FilteredArray(AllPlayers(), !ArrayElement().isBall && DistanceBetween(ArrayElement(), balls[0]) < ExplosionRange());
+macro NotBall(): FilteredArray(AllPlayers(), !ArrayElement().isBall && DistanceBetween(ArrayElement(), ballLocation()) < ExplosionRange());
 macro ExplosionRange(): 10;
 
 rule: "Knocked"
 Event.OnDamageTaken
 if (knockedFrom != null)
 {
-    ApplyImpulse(EventPlayer(), DirectionTowards(knockedFrom, PositionOf() + Vector(0, 0.3, 0)), 30, Relative.ToWorld, ContraryMotion.Incorporate);
+    ApplyImpulse(EventPlayer(), DirectionTowards(knockedFrom, PositionOf() + Vector(0, 1.5, 0)), 30, Relative.ToWorld, ContraryMotion.Incorporate);
     knockedFrom = null;
+}
+
+rule: "Effect when ball hits ground"
+if (IsOnGround(rootBall))
+{
+    PlayEffect(AllPlayers(), PlayEffect.RingExplosion, Color.White, PositionOf(rootBall), 5);
 }
