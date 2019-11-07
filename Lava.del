@@ -1,5 +1,4 @@
 import "Ball.del";
-import "!Debug Tools.del";
 
 define globalvar origin = Vector(-0.18, 154.88, 60);
 
@@ -115,7 +114,8 @@ if (DistanceBetween(EventPlayer(), PolePos()) < 3)
     // Apply momentum to the ball
     if (ballIsOnStand)
     {
-        ApplyImpulse(ball, DirectionTowards(EventPlayer(), PolePos() + Vector(0, 0.5, 0)), 30, Relative.ToWorld, ContraryMotion.Cancel);
+        ApplyImpulse(ball1, DirectionTowards(EventPlayer(), PolePos() + Vector(0, 0.5, 0)), 30, Relative.ToWorld, ContraryMotion.Cancel);
+        ApplyImpulse(ball2, DirectionTowards(EventPlayer(), PolePos() + Vector(0, 0.5, 0)), 30, Relative.ToWorld, ContraryMotion.Cancel);
         ballIsOnStand = false;
     }
 }

@@ -1,34 +1,108 @@
 import "Lava.del";
 
-define globalvar ball;
+define globalvar ball1;
+define globalvar ball2;
+define globalvar balls;
+define playervar isBall;
 define globalvar ballIsOnStand = true;
+define globalvar status;
+define globalvar tpFrom;
+define globalvar tpTo;
 
-rule: "Setup ball"
+rule: "Setup balls"
 {
-    CreateDummyBot(Hero.Torbjorn, Team.Team2, 3, TopPolePos());
-    ball = LastCreatedEntity();
-    SetStatus(ball, null, Status.Unkillable, 9999);
+    CreateDummyBot(Hero.Torbjorn, Team.Team1, 5, TopPolePos());
+    ball1 = LastCreatedEntity();
+    ball1.isBall = true;
+
+    CreateDummyBot(Hero.Torbjorn, Team.Team2, 5, TopPolePos() + Vector(0, 1, 0));
+    ball2 = LastCreatedEntity();
+    ball2.isBall = true;
+
+    balls = [ball1,ball2];
+
+    CreateEffect(AllPlayers(), Effect.Sphere, Color.Turquoise, tpTo != null ? tpTo + Vector(0, 1, 0) : Midpoint(ball1,ball2) + Vector(0, 0.5, 0), 1.25, EffectRev.VisibleToPositionAndRadius);
+
+    CreateHudText(AllPlayers(), "Priority", null, TeamOf(tpTo), Location.Top);
+}
+
+
+rule: "Setup ball status"
+Event.OngoingPlayer
+if (isBall)
+{
+    SetStatus(EventPlayer(), null, Status.Unkillable, 9999);
+}
+
+rule: "Link"
+{
+    if ((IsInAir(ball1) || IsInAir(ball2)))
+    {
+        if (tpTo == null)
+        {
+            if (SpeedOf(ball1) >= SpeedOf(ball2))
+            {
+                tpFrom = ball2;
+                tpTo = ball1;
+            }
+            else
+            {
+                tpFrom = ball1;
+                tpTo = ball2;
+            }
+        }
+    }
+    else
+    {
+        if (isStunned(ball1))
+        {
+            tpFrom = ball2;
+            tpTo = ball1;
+        }
+        else if (isStunned(ball2))
+        {
+            tpFrom = ball1;
+            tpTo = ball2;
+        }
+        else
+        {
+            tpFrom = null;
+            tpTo = null;
+        }
+    }
+
+    Teleport(tpFrom, PositionOf(tpTo) + Vector(0, 1, 0));
+    Wait(0.025);
+    Loop();
+}
+macro isStunned(define player): HasStatus(player, Status.Stunned);
+
+rule: "Kill if on boundary"
+Event.OngoingPlayer
+if (isBall)
+if (YOf(PositionOf()) == 158.44)
+if (IsOnGround())
+{
+    Kill();
 }
 
 rule: "Respawn ball"
-Event.OnDeath
-if (ball == EventPlayer())
+if (IsDead(ball1) || IsDead(ball2))
 {
-    Respawn(EventPlayer());
-}
+    Respawn(ball1);
+    Respawn(ball2);
 
-rule: "Respawn ball TP"
-Event.OngoingPlayer
-if (ball == EventPlayer())
-if (IsAlive())
-{
-    Teleport(EventPlayer(), TopPolePos());
+    Wait(5);
+
+    Teleport(ball1, TopPolePos());
+    Teleport(ball2, TopPolePos() + Vector(0, 1, 0));
     ballIsOnStand = true;
 }
 
 rule: "On Ball Hit"
 Event.OnDamageTaken
-if (ball == EventPlayer())
+if (isBall)
+if (!IsInSpawnRoom())
 {
     SmallMessage(AllPlayers(), EventDamage());
     Heal(EventPlayer(), null, EventDamage());
@@ -36,8 +110,9 @@ if (ball == EventPlayer())
 
 rule: "On Hammer Hit"
 Event.OnDamageTaken
-if (ball == EventPlayer())
+if (isBall)
 if (EventDamage() == 72) // 75 for no armor
+if (!IsInSpawnRoom())
 {
     ApplyImpulse(EventPlayer(), Vector(0, 1, 0), 15, Relative.ToWorld, ContraryMotion.Incorporate);
 }
@@ -46,10 +121,10 @@ define playervar knockedFrom = null;
 
 rule: "On Fire Strike"
 Event.OnDamageTaken
-if (ball == EventPlayer())
+if (isBall)
 if (EventDamage() == 97) // 100 for no armor
+if (!IsInSpawnRoom())
 {
-    SetStatus(EventPlayer(), null, Status.Burning, 3);
     Wait(3, WaitBehavior.IgnoreCondition);
 
     PlayEffect(AllPlayers(), PlayEffect.GoodExplosion, Color.Orange, EyePosition(), ExplosionRange());
@@ -57,7 +132,7 @@ if (EventDamage() == 97) // 100 for no armor
     Damage(NotBall(), Attacker(), 200);
     NotBall().knockedFrom = PositionOf();
 }
-macro NotBall(): FilteredArray(AllPlayers(), ArrayElement() != ball && DistanceBetween(ArrayElement(), ball) < ExplosionRange());
+macro NotBall(): FilteredArray(AllPlayers(), !ArrayElement().isBall && DistanceBetween(ArrayElement(), balls[0]) < ExplosionRange());
 macro ExplosionRange(): 10;
 
 rule: "Knocked"
