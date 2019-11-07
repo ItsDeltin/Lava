@@ -34,13 +34,6 @@ rule: "Setup balls"
 macro ballLocation(): tpTo != null ? tpTo + Vector(0, 1, 0) : Midpoint(ball1,ball2) + Vector(0, 0.5, 0);
 macro ballSpeed(): Max(SpeedOf(ball1), SpeedOf(ball2));
 
-rule: "Setup ball status"
-Event.OngoingPlayer
-if (isBall)
-{
-    
-}
-
 rule: "Link"
 {
     if ((IsInAir(ball1) || IsInAir(ball2)))
