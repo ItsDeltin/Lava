@@ -151,3 +151,12 @@ if (IsOnGround(rootBall))
 {
     PlayEffect(AllPlayers(), PlayEffect.RingExplosion, Color.White, PositionOf(rootBall), 5);
 }
+
+rule: "Fast ball effect"
+if (!ballIsOnStand)
+if (ballSpeed() >= 10 || IsInAir(rootBall))
+{
+    PlayEffect(FilteredArray(AllPlayers(), DistanceBetween(ArrayElement(), rootBall) > 6), PlayEffect.BadExplosion, Color.Turquoise, ballLocation(), 0.3);
+    MinWait();
+    LoopIfConditionIsTrue();
+}
