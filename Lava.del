@@ -72,14 +72,7 @@ define globalvar killzoneRot = -180;
 
 method OuterWalls()
 {
-    CreateBeamEffect(
-        AllPlayers(),
-        BeamType.BadBeam,
-        Vector(-109.08, 158.44, 65.06),
-        Vector(-108.07, 158.44, 214.81),
-        Color.Orange,
-        EffectRev.VisibleTo
-    );
+    // Cliff side
     CreateBeamEffect(
         AllPlayers(),
         BeamType.BadBeam,
@@ -88,6 +81,7 @@ method OuterWalls()
         Color.Orange,
         EffectRev.VisibleTo
     );
+    // Tower side
     CreateBeamEffect(
         AllPlayers(),
         BeamType.BadBeam,
@@ -96,12 +90,22 @@ method OuterWalls()
         Color.Orange,
         EffectRev.VisibleTo
     );
+    // Team 1 side
     CreateBeamEffect(
         AllPlayers(),
         BeamType.BadBeam,
         Vector(108.08, 158.44, 213.35),
         Vector(107.07, 158.44, 63.61),
-        Color.Orange,
+        Color.Team1,
+        EffectRev.VisibleTo
+    );
+    // Team 2 side
+    CreateBeamEffect(
+        AllPlayers(),
+        BeamType.BadBeam,
+        Vector(-109.08, 158.44, 65.06),
+        Vector(-108.07, 158.44, 214.81),
+        Color.Team2,
         EffectRev.VisibleTo
     );
 }
