@@ -41,7 +41,34 @@ rule: "Setup Arena"
     }
 
     CreateEffect(AllPlayers(), Effect.Orb, Color.Orange, TopPolePos() - Vector(0, 0.5, 0), 0.25, EffectRev.VisibleTo);
+
+    CreateBeamEffect(
+        AllPlayers(),
+        BeamType.GoodBeam,
+        flairPos(),
+        TopPolePos(),
+        //Destination(TopPolePos(), DirectionFromAngles(AngleDifference(killzoneRot, 180), 0), 10),
+        Color.Red
+    );
+    
+    ChaseGlobalVariableAtRate(killzoneRot, 180, 25, RateChaseReevaluation.DestinationAndRate);
 }
+
+macro flairPos(): Destination(xyPolePos(136.42), DirectionFromAngles(killzoneRot, 0), 11);
+
+rule: "Reset killzone rot"
+if (killzoneRot == 180)
+{
+    killzoneRot = -180;
+}
+
+rule: "Blip end"
+if (AbsoluteValue(killzoneRot - 22.5) % 45 < 1)
+{
+    PlayEffect(AllPlayers(), PlayEffect.GoodExplosion, Color.Red, flairPos(), 1);
+}
+
+define globalvar killzoneRot = -180;
 
 method OuterWalls()
 {
@@ -124,6 +151,7 @@ if (DistanceBetween(EventPlayer(), PolePos()) < 3)
 macro PolePos()   : Vector(0, 154.88, 150);
 macro TopPolePos(): Vector(0, 162,    150);
 macro BaseOffset(): Vector(0, 0.5, 0);
+macro xyPolePos(define y): Vector(0, y, 150);
 
 rule: "Shield Surf"
 Event.OngoingPlayer
