@@ -13,7 +13,7 @@ define globalvar lasersReady ! = false;
 
 define globalvar rotateLasers = false;
 define globalvar rotationSpeed = 0; // Number of degrees per second
-define globalvar lazerLength = 0;
+define globalvar laserLength = 0;
 define globalvar boundaryLength = 50;
 
 define globalvar midpoint;
@@ -26,6 +26,7 @@ define globalvar laser1Effect !;
 define globalvar laser2Effect !;
 define globalvar laser3Effect !;
 define globalvar ringEffectArray !;
+define globalvar outOfRangeHUD !;
 
 rule: "Setup laser game"
 if (doingLasers)
@@ -37,8 +38,8 @@ if (doingLasers)
     CreateBeamEffect(
         AllPlayers(),
         BeamType.BadBeam,
-        rot(midpoint + Vector(0, 0.5, 0), laser1Rot, lazerLength),
-        inverseRot(midpoint + Vector(0, 0.5, 0), laser1Rot, lazerLength),
+        rot(midpoint + Vector(0, 0.5, 0), laser1Rot, laserLength),
+        inverseRot(midpoint + Vector(0, 0.5, 0), laser1Rot, laserLength),
         Color.Red,
         EffectRev.VisibleToPositionAndRadius
     );
@@ -47,8 +48,8 @@ if (doingLasers)
     CreateBeamEffect(
         AllPlayers(),
         BeamType.BadBeam,
-        rot(midpoint + Vector(0, 2, 0), laser2Rot, lazerLength),
-        inverseRot(midpoint + Vector(0, 2, 0), laser2Rot, lazerLength),
+        rot(midpoint + Vector(0, 2, 0), laser2Rot, laserLength),
+        inverseRot(midpoint + Vector(0, 2, 0), laser2Rot, laserLength),
         Color.Red,
         EffectRev.VisibleToPositionAndRadius
     );
@@ -57,19 +58,63 @@ if (doingLasers)
     CreateBeamEffect(
         AllPlayers(),
         BeamType.BadBeam,
-        rot(midpoint + Vector(0, 3.5, 0), laser3Rot, lazerLength),
-        inverseRot(midpoint + Vector(0, 3.5, 0), laser3Rot, lazerLength),
+        rot(midpoint + Vector(0, 3.5, 0), laser3Rot, laserLength),
+        inverseRot(midpoint + Vector(0, 3.5, 0), laser3Rot, laserLength),
         Color.Red,
         EffectRev.VisibleToPositionAndRadius
     );
     laser3Effect = LastCreatedEntity();
 
-    ChaseGlobalVariableOverTime(lazerLength, 150, 5, TimeChaseReevaluation.None);
-    Wait(5);
-    StopChasingGlobalVariable(lazerLength);
+    if (rotateLasers)
+    {
+        // Create the boundary ring
+        ringEffectArray = [];
+        define fraction ! = 360 / boundarySubdivisions();
+        for (define i ! = 0; i < boundarySubdivisions() - 1; i++)
+        {
+            CreateBeamEffect(
+                AllPlayers(),
+                BeamType.BadBeam,
+                rot(midpoint, fraction * i, boundaryLength),
+                rot(midpoint, fraction * (i + 1), boundaryLength),
+                Color.Blue,
+                EffectRev.None
+            );
 
+            ringEffectArray = Append(ringEffectArray, LastCreatedEntity());
+        }
+
+        // Warn players to get inside the ring
+        outOfRange = AllPlayers();
+        CreateHudText(
+            VisibleTo:outOfRange,
+            Header:IconString(Icon.Warning),
+            Text:"Get inside the ring!",
+            HeaderColor:Color.Red,
+            TextColor:Color.Yellow,
+            Location:Location.Top,
+            Spectators:Spectators.VisibleNever
+        );
+        outOfRangeHUD = LastTextID();
+    }
+
+    ChaseGlobalVariableOverTime(laserLength, 150, 5, TimeChaseReevaluation.None);
+    Wait(5);
+    StopChasingGlobalVariable(laserLength);
     lasersReady = true;
+
+    if (rotateLasers)
+    {
+        ChaseGlobalVariableAtRate(laser1Rot, 360 * 4, rotationSpeed, RateChaseReevaluation.DestinationAndRate);
+        ChaseGlobalVariableAtRate(laser2Rot, -(360 * 4), rotationSpeed * 1.25, RateChaseReevaluation.DestinationAndRate);
+        ChaseGlobalVariableAtRate(laser3Rot, 360 * 3, rotationSpeed * 0.85, RateChaseReevaluation.DestinationAndRate);
+
+        ChaseGlobalVariableOverTime(rotationSpeed, 45, 5, TimeChaseReevaluation.None);
+        Wait(5);
+        StopChasingGlobalVariable(rotationSpeed);
+    }
 }
+macro boundarySubdivisions(): 10;
 
 rule: "Clean up lasers"
 if (!doingLasers)
@@ -77,9 +122,9 @@ if (lasersReady)
 {
     lasersReady = false;
 
-    ChaseGlobalVariableOverTime(lazerLength, 0, 5, TimeChaseReevaluation.None);
+    ChaseGlobalVariableOverTime(laserLength, 0, 5, TimeChaseReevaluation.None);
     Wait(5);
-    StopChasingGlobalVariable(lazerLength);
+    StopChasingGlobalVariable(laserLength);
 
     DestroyEffect(laser1Effect);
     DestroyEffect(laser2Effect);
@@ -100,14 +145,22 @@ macro inverseRot(define pos, define angle, define length): Destination(pos, Dire
 
 macro intersectingFrom(define rotation, define height): RayCastHitPlayer(rotation, midpoint + height, AllLivingPlayers(), null, false);
 
-macro intersectingRot(define rotation, define height)       : intersectingFrom(       rot(midpoint + Vector(0, height, 0), rotation, lazerLength), Vector(0, height, 0));
-macro inverseIntersectingRot(define rotation, define height): intersectingFrom(inverseRot(midpoint + Vector(0, height, 0), rotation, lazerLength), Vector(0, height, 0));
+macro intersectingRot(define rotation, define height)       : intersectingFrom(       rot(midpoint + Vector(0, height, 0), rotation, laserLength), Vector(0, height, 0));
+macro inverseIntersectingRot(define rotation, define height): intersectingFrom(inverseRot(midpoint + Vector(0, height, 0), rotation, laserLength), Vector(0, height, 0));
 
 define playervar lastDamage;
+
+macro getOutOfRange(): RemoveFromArray(AllPlayers(), PlayersWithinRadius(midpoint, boundaryLength, Team.All, RadiusLOS.Off));
 
 rule: "Kill intersecting players"
 if (doingLasers)
 {
+    if (rotateLasers && lasersReady)
+    {
+        outOfRange = getOutOfRange();
+        Damage(outOfRange, null, 2.5);
+    }
+
     define intersecting = [];
 
     // laser 1
@@ -118,7 +171,6 @@ if (doingLasers)
     MinWait();
     intersecting = Append(intersecting, intersectingRot(laser2Rot, 2));
     intersecting = Append(intersecting, inverseIntersectingRot(laser2Rot, 2));
-    //MinWait();
 
     // laser 3
     //intersecting = Append(intersecting, intersectingRot(laser3Rot, 3.5));
@@ -130,41 +182,9 @@ if (doingLasers)
 
     intersecting.lastDamage = TotalTimeElapsed();
 
-    MinWait();
+    Wait(0.02);
     LoopIfConditionIsTrue();
 }
-
-rule: "Do rotate"
-if (doingLasers)
-if (lasersReady)
-if (rotateLasers)
-{
-    // Create the boundary ring
-    ringEffectArray = [];
-    define fraction ! = 360 / boundarySubdivisions();
-    for (define i ! = 0; i < boundarySubdivisions() - 1; i++)
-    {
-        CreateBeamEffect(
-            AllPlayers(),
-            BeamType.BadBeam,
-            rot(midpoint, fraction * i, boundaryLength),
-            rot(midpoint, fraction * (i + 1), boundaryLength),
-            Color.Blue,
-            EffectRev.None
-        );
-
-        ringEffectArray = Append(ringEffectArray, LastCreatedEntity());
-    }
-
-    ChaseGlobalVariableAtRate(laser1Rot, 360 * 4, rotationSpeed, RateChaseReevaluation.DestinationAndRate);
-    ChaseGlobalVariableAtRate(laser2Rot, -(360 * 4), rotationSpeed * 1.25, RateChaseReevaluation.DestinationAndRate);
-    ChaseGlobalVariableAtRate(laser3Rot, 360 * 3, rotationSpeed * 0.85, RateChaseReevaluation.DestinationAndRate);
-
-    ChaseGlobalVariableOverTime(rotationSpeed, 45, 5, TimeChaseReevaluation.None);
-    Wait(5);
-    StopChasingGlobalVariable(rotationSpeed);
-}
-macro boundarySubdivisions(): 10;
 
 rule: "Finished rotating"
 if (doingLasers)
@@ -174,6 +194,7 @@ if (laser1Rot == 360 * 4)
 if (laser2Rot == -(360 * 4))
 if (laser3Rot == 360 * 3)
 {
+    DestroyHudText(outOfRangeHUD);
     DestroyEffectArray(ringEffectArray, 2);
     StopChasingGlobalVariable(laser1Rot);
     StopChasingGlobalVariable(laser2Rot);
@@ -186,60 +207,26 @@ if (laser3Rot == 360 * 3)
     SmallMessage(AllPlayers(), "Finished rotating");
 }
 
-rule: "Laser discharge"
-if (doingLasers)
-if (lasersReady)
-if (rotateLasers)
-if (TotalTimeElapsed() % 3 < 1)
-{
-    PlayEffect(AllPlayers(), PlayEffect.RingExplosion, Color.Red, midpoint, 30);
-}
+define globalvar outOfRange;
 
-rule: "Laser discharge player damage"
-Event.OngoingPlayer
-if (!isBall)
-if (doingLasers)
-if (lasersReady)
-if (rotateLasers)
-if (DistanceBetween(EventPlayer(), midpoint) < 15)
-if (TotalTimeElapsed() % 3 < 1)
-{
-    Damage(EventPlayer(), null, 85);
-    ApplyImpulse(EventPlayer(), DirectionTowards(midpoint, EventPlayer() + Vector(0, 1, 0)), 40, Relative.ToWorld, ContraryMotion.Incorporate);
-}
+// rule: "Laser discharge"
+// if (doingLasers)
+// if (lasersReady)
+// if (rotateLasers)
+// if (TotalTimeElapsed() % 3 < 1)
+// {
+//     PlayEffect(AllPlayers(), PlayEffect.RingExplosion, Color.Red, midpoint, 30);
+// }
 
-define playervar oobDmgID ! = null;
-define playervar oobTextID ! = null;
-
-rule: "Damage far players"
-Event.OngoingPlayer
-if (doingLasers)
-if (lasersReady)
-if (rotateLasers)
-if (oobDmgID == null)
-if (DistanceBetween(EventPlayer(), midpoint) > boundaryLength)
-{
-    StartDamageOverTime(EventPlayer(), null, 9999, 100);
-    oobDmgID = LastDamageOverTime();
-
-    CreateHudText(
-        VisibleTo:EventPlayer(),
-        Header:IconString(Icon.Warning),
-        Text:"Get inside the ring!",
-        HeaderColor:Color.Red,
-        TextColor:Color.Yellow,
-        Location:Location.Top,
-        Spectators:Spectators.VisibleNever
-    );
-    oobTextID = LastTextID();
-}
-
-rule: "Stop damaging far players"
-Event.OngoingPlayer
-if (oobDmgID != null)
-if (!rotateLasers || DistanceBetween(EventPlayer(), midpoint) <= boundaryLength)
-{
-    StopDamageOverTime(oobDmgID);
-    DestroyHudText(oobTextID);
-    oobDmgID = null;
-}
+// rule: "Laser discharge player damage"
+// Event.OngoingPlayer
+// if (!isBall)
+// if (doingLasers)
+// if (lasersReady)
+// if (rotateLasers)
+// if (DistanceBetween(EventPlayer(), midpoint) < 15)
+// if (TotalTimeElapsed() % 3 < 1)
+// {
+//     Damage(EventPlayer(), null, 85);
+//     ApplyImpulse(EventPlayer(), DirectionTowards(midpoint, EventPlayer() + Vector(0, 1, 0)), 40, Relative.ToWorld, ContraryMotion.Incorporate);
+// }

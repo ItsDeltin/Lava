@@ -10,7 +10,7 @@ rule: "TP to arena"
 Event.OngoingPlayer
 if (HasSpawned())
 if (IsAlive())
-if (!IsDummyBot())
+if (!isBall)
 {
     Teleport(EventPlayer(), origin + Vector(20, 0, 20));
 }

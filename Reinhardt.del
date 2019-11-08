@@ -36,6 +36,7 @@ if (!IsUsingAbility1())
 if (TotalTimeElapsed() - chargeStart <= 4)
 if (DistanceBetween(EventPlayer(), PolePos()) < 3)
 {
+    chargeStart = 0;
     SmallMessage(EventPlayer(), "KA-DONG!");
     PlayEffect(AllPlayers(), PlayEffect.RingExplosionSound, Color.White, PolePos(), 200);
     PlayEffect(AllPlayers(), PlayEffect.RingExplosion, Color.SkyBlue, PolePos(), 50);
@@ -72,14 +73,9 @@ if (IsTrueForAny(
 
 rule: "debug spawn"
 Event.OngoingPlayer
-if (IsCommunicating(EventPlayer(), Communication.Acknowledge))
+if (IsButtonHeld(EventPlayer(), Button.Interact))
 {
-    CreateDummyBot(Hero.Reinhardt, Team.Team2, -1, PositionOf(EventPlayer()), Vector());
-    define dummy = LastCreatedEntity();
-
-    Wait(3);
-    StartHoldingButton(dummy, Button.SecondaryFire);
-    StartFacing(dummy, Vector(-0.74, 0.67, 0.07), 500, Relative.ToWorld, FacingRev.DirectionAndTurnRate);
+    CreateDummyBot(Hero.Reinhardt, NumberOfPlayers(Team.Team1) < 6 ? Team.Team1 : Team.Team2, -1, PositionOf(EventPlayer()), Vector());
 }
 
 rule: "Start breaking"
