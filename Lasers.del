@@ -4,13 +4,10 @@ rule: "Debug Toggle"
 Event.OngoingPlayer
 if (IsCommunicating(EventPlayer(), Communication.VoiceLineLeft))
 {
-    if (!doingLaserGame) setupLaserGame = true;
-    else cleanupLaserGame = true;
+    doingLasers = !doingLasers;
 }
 
-define globalvar doingLaserGame !;
-define globalvar setupLaserGame !;
-define globalvar cleanupLaserGame !;
+define globalvar doingLasers ! = false;
 
 //define globalvar rotation = 0;
 define globalvar rotationSpeed = 0; // Number of degrees per second
@@ -27,11 +24,8 @@ define globalvar laser2Rot;
 define globalvar laser3Rot;
 
 rule: "Setup laser game"
-if (setupLaserGame)
+if (doingLasers)
 {
-    doingLaserGame = true;
-    setupLaserGame = false;
-
     SetGravity(AllPlayers(), 90);
 
     midpoint = PolePos();
@@ -87,7 +81,7 @@ macro inverseRot(define pos, define angle): Destination(pos, DirectionFromAngles
 
 rule: "Kill intersecting players"
 Event.OngoingGlobal
-if (doingLaserGame)
+if (doingLasers)
 {
     define intersecting = [];
 
@@ -108,7 +102,7 @@ if (doingLaserGame)
 
 rule: "Finished rotating"
 Event.OngoingPlayer
-if (doingLaserGame)
+if (doingLasers)
 if (laser1Rot == 360 * 4)
 if (laser2Rot == -(360 * 4))
 if (laser3Rot == 360 * 3)
