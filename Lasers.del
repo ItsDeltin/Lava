@@ -82,6 +82,14 @@ if (lasersReady)
     DestroyEffect(laser1Effect);
     DestroyEffect(laser2Effect);
     DestroyEffect(laser3Effect);
+
+    StopChasingGlobalVariable(laser1Rot);
+    StopChasingGlobalVariable(laser2Rot);
+    StopChasingGlobalVariable(laser3Rot);
+    laser1Rot = 0;
+    laser2Rot = 0;
+    laser3Rot = 0;
+    rotateLasers = false;
 }
 
 macro rot(define pos, define angle): Destination(pos, DirectionFromAngles(angle, 0), length);
@@ -149,6 +157,10 @@ if (laser3Rot == 360 * 3)
     StopChasingGlobalVariable(laser1Rot);
     StopChasingGlobalVariable(laser2Rot);
     StopChasingGlobalVariable(laser3Rot);
-    SmallMessage(AllPlayers(), "Finished rotating");
+    laser1Rot = 0;
+    laser2Rot = 0;
+    laser3Rot = 0;
     rotateLasers = false;
+
+    SmallMessage(AllPlayers(), "Finished rotating");
 }

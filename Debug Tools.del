@@ -1,7 +1,10 @@
 rule: "Debug"
 Event.OngoingPlayer
 if (EventPlayer() == HostPlayer())
+if (!wasCreated)
 {
+    wasCreated = true;
+
     CreateHudText(EventPlayer(), null, "Eye Position:", EyePosition(), Location.Left, 0, Color.White, Color.White, Color.Blue);
     CreateHudText(EventPlayer(), null, "Position:", PositionOf(), Location.Left, 1, Color.White, Color.White, Color.Blue);
     CreateHudText(EventPlayer(), null, "Throttle:", ThrottleOf(), Location.Left, 2, Color.White, Color.White, Color.Blue);
@@ -33,6 +36,9 @@ if (EventPlayer() == HostPlayer())
             true
         ), Location.Left, 6, Color.White, Color.White, Color.Blue
     );
+
+    CreateHudText(EventPlayer(), null, "Camera Pos:", <"<0> (<1>)", cameraPos, Destination(cameraPos, FacingDirectionOf(), 1)>, Location.Left, 3, Color.White, Color.White, Color.Blue);
+
     CreateHudText(EventPlayer(), null, "Server Load:", ServerLoad(), Location.Left, 7, Color.White, Color.White, Color.Blue);
     CreateHudText(EventPlayer(), null, "Server Load Average:", ServerLoadAverage(), Location.Left, 8, Color.White, Color.White, Color.Blue);
     CreateHudText(EventPlayer(), null, "Server Load Peak:", ServerLoadPeak(), Location.Left, 9, Color.White, Color.White, Color.Blue);
@@ -42,6 +48,7 @@ if (EventPlayer() == HostPlayer())
     CreateHudText(EventPlayer(), null, "Class Memory Created:", ClassMemoryRemaining(), Location.Left, 12, Color.White, Color.White, Color.Blue);
 }
 
+define globalvar wasCreated ! = false;
 define playervar cam = false;
 define playervar cameraPos;
 
