@@ -129,24 +129,6 @@ method OuterWalls()
         Color.Team2,
         EffectRev.VisibleTo
     );
-
-    // Blue goal
-    CreateEffect(
-        AllPlayers(),
-        Effect.GoodAura,
-        Color.Team1,
-        blueGoal(),
-        10
-    );
-
-    // Red goal
-    CreateEffect(
-        AllPlayers(),
-        Effect.GoodAura,
-        Color.Team2,
-        redGoal(),
-        10
-    );
 }
 
 macro PolePos()   : Vector(0, 154.88, 150);

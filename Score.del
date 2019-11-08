@@ -1,16 +1,51 @@
 import "Ball.del";
 
-macro blueGoal(): Vector(115, 165, 150);
-macro redGoal(): Vector(-115, 165, 150);
+define globalvar blueScore = 0;
+define globalvar redScore = 0;
+
+macro blueGoal(): Vector(120, 165, 150);
+macro redGoal(): Vector(-123, 165, 150);
 
 rule: "Blue score"
-if (DistanceBetween(ballLocation(), redGoal()) < 7)
+if (DistanceBetween(ballLocation(), redGoal()) <= 13)
 {
-    BigMessage(AllPlayers(), <@"<0> scores!", Team.Team1>);
+    PlayEffect(AllPlayers(), PlayEffect.RingExplosion, Color.Team1, redGoal(), 100);
+    PlayEffect(AllPlayers(), PlayEffect.GoodExplosion, Color.Team1, redGoal(), 10);
+    PlayEffect(AllPlayers(Team.Team1), PlayEffect.BuffExplosionSound, Color.White, redGoal(), 1000);
+    PlayEffect(AllPlayers(Team.Team2), PlayEffect.DebuffImpactSound, Color.White, redGoal(), 1000);
+
+    blueScore++;
+    messageThrower(Team.Team1);
 }
 
 rule: "Red score"
-if (DistanceBetween(ballLocation(), redGoal()) < 7)
+if (DistanceBetween(ballLocation(), blueGoal()) <= 13)
 {
+    PlayEffect(AllPlayers(), PlayEffect.RingExplosion, Color.Team2, blueGoal(), 100);
+    PlayEffect(AllPlayers(), PlayEffect.GoodExplosion, Color.Team2, blueGoal(), 10);
+    PlayEffect(AllPlayers(Team.Team2), PlayEffect.BuffExplosionSound, Color.White, blueGoal(), 1000);
+    PlayEffect(AllPlayers(Team.Team1), PlayEffect.DebuffImpactSound, Color.White, blueGoal(), 1000);
 
+    redScore++;
+    messageThrower(Team.Team2);
+}
+
+method messageThrower(define team)
+{
+    if (TeamOf(thrower) != team)
+    {
+        BigMessage(AllPlayers(), <"Wrong goal, <0>!", thrower>);
+    }
+    else if (throwType == 0)
+    {
+        BigMessage(AllPlayers(), <"<0> scores a hammer shot!", thrower>);
+    }
+    else if (throwType == 1)
+    {
+        BigMessage(AllPlayers(), <"<0> scores a bump shot!", thrower>);
+    }
+    else if (throwType == 2)
+    {
+        BigMessage(AllPlayers(), <"<0> scores a charge shot!", thrower>);
+    }
 }

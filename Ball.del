@@ -1,17 +1,71 @@
 import "Lava.del";
 
+define globalvar ballGame = false;
+
 define globalvar ball1;
 define globalvar ball2;
-define globalvar balls;
 define playervar isBall;
 define globalvar ballIsOnStand = true;
-define globalvar status;
 define globalvar tpFrom;
 define globalvar tpTo;
 define globalvar rootBall;
 
+define globalvar thrower = null;
+define globalvar throwType = 0;
+
+define globalvar blueScoreText !;
+define globalvar redScoreText !;
+define globalvar blueGoalEffect !;
+define globalvar redGoalEffect !;
+define globalvar ballEffect !;
+
 rule: "Setup balls"
+if (ballGame)
 {
+    // Blue's score text
+    CreateHudText(
+        VisibleTo   :AllPlayers(Team.Team1),
+        Header      :<"<0> - <1>", blueScore, redScore>,
+        Location    :Location.Top,
+        SortOrder   :2,
+        HeaderColor :Color.White,
+        Reevaluation:StringRev.VisibleToAndString,
+        Spectators  :Spectators.VisibleAlways
+    );
+    blueScoreText = LastTextID();
+
+    // Red's score text
+    CreateHudText(
+        VisibleTo   :AllPlayers(Team.Team2),
+        Header      :<"<0> - <1>", redScore, blueScore>,
+        Location    :Location.Top,
+        SortOrder   :2,
+        HeaderColor :Color.White,
+        Reevaluation:StringRev.VisibleToAndString,
+        Spectators  :Spectators.VisibleAlways
+    );
+    redScoreText = LastTextID();
+
+    // Blue goal
+    CreateEffect(
+        AllPlayers(),
+        Effect.GoodAura,
+        Color.Team1,
+        blueGoal(),
+        10
+    );
+    blueGoalEffect = LastCreatedEntity();
+
+    // Red goal
+    CreateEffect(
+        AllPlayers(),
+        Effect.GoodAura,
+        Color.Team2,
+        redGoal(),
+        10
+    );
+    redGoalEffect = LastCreatedEntity();
+
     CreateDummyBot(Hero.Torbjorn, Team.Team1, 5, TopPolePos());
     ball1 = LastCreatedEntity();
     ball1.isBall = true;
@@ -21,21 +75,37 @@ rule: "Setup balls"
     ball2 = LastCreatedEntity();
     ball2.isBall = true;
 
-    balls = [ball1,ball2];
     SetStatus(ball1, null, Status.Unkillable, 9999);
     SetStatus(ball2, null, Status.Unkillable, 9999);
     SetInvisible(ball1, InvisibleTo.All);
     SetInvisible(ball2, InvisibleTo.All);
 
     CreateEffect(AllPlayers(), Effect.Sphere, Color.Turquoise, ballLocation(), 1.25, EffectRev.VisibleToPositionAndRadius);
+    ballEffect = LastCreatedEntity();
+}
+
+rule: "Clean up ball game"
+if (!ballGame)
+{
+    DestroyHudText(blueScoreText);
+    DestroyHudText(redScoreText);
+    DestroyEffect(blueGoalEffect);
+    DestroyEffect(redGoalEffect);
+    DestroyEffect(ballEffect);
+    DestroyDummyBot(ball1);
+    DestroyDummyBot(ball2);
+    tpFrom = null;
+    tpTo = null;
+    rootBall = null;
 }
 
 macro ballLocation(): tpTo != null ? tpTo + Vector(0, 1, 0) : Midpoint(ball1,ball2) + Vector(0, 0.5, 0);
 macro ballSpeed(): SpeedOf(rootBall);
 
 rule: "Link"
+if (ballGame)
 {
-    if ((IsInAir(ball1) || IsInAir(ball2)))
+    if (IsInAir(ball1) || IsInAir(ball2))
     {
         if (tpTo == null)
         {
@@ -80,7 +150,7 @@ rule: "Link"
 macro isStunned(define player): HasStatus(player, Status.Stunned);
 
 rule: "Respawn ball"
-if (IsDead(ball1) || IsDead(ball2) || YOf(ballLocation()) < 140 || (isOnWall(rootBall) && ballSpeed() < 1 && !HasStatus(rootBall, Status.Stunned)))
+if (IsDead(ball1) || IsDead(ball2) || YOf(ballLocation()) < 140 || (!ballIsOnStand && isOnWall(rootBall) && ballSpeed() < 1 && !HasStatus(rootBall, Status.Stunned)))
 {
     SmallMessage(AllPlayers(), "Respawning Ball");
 
@@ -109,7 +179,19 @@ if (isBall)
 if (EventDamage() == 72) // 75 for no armor
 if (!IsInSpawnRoom())
 {
-    ApplyImpulse(EventPlayer(), Vector(0, 1, 0), 15, Relative.ToWorld, ContraryMotion.Incorporate);
+    ApplyImpulse(EventPlayer(), Vector(0, 1, 0), 20, Relative.ToWorld, ContraryMotion.Incorporate);
+    thrower = Attacker();
+    throwType = 0;
+}
+
+rule: "On Charge Whiff"
+Event.OnDamageTaken
+if (isBall)
+if (EventDamage() == 47) // 50 for no armor
+if (!IsInSpawnRoom())
+{
+    thrower = Attacker();
+    throwType = 1;
 }
 
 define playervar knockedFrom = null;
@@ -142,6 +224,24 @@ if (knockedFrom != null)
 {
     ApplyImpulse(EventPlayer(), DirectionTowards(knockedFrom, PositionOf() + Vector(0, 1.5, 0)), 30, Relative.ToWorld, ContraryMotion.Incorporate);
     knockedFrom = null;
+}
+
+rule: "Getting charged"
+Event.OngoingPlayer
+if (isBall)
+if (HasStatus(EventPlayer(), Status.Stunned))
+{
+    define closest = 
+        FirstOf(FilteredArray(
+            AllPlayers(),
+            HeroOf(ArrayElement()) == Hero.Reinhardt && DistanceBetween(ArrayElement(), EventPlayer()) < 3 && IsUsingAbility1(ArrayElement())
+        ));
+
+    if (closest != null)
+    {
+        thrower = closest;
+        throwType = 2;
+    }
 }
 
 rule: "Effect when ball hits ground"
