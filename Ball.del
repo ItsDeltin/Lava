@@ -90,8 +90,8 @@ if (cleanupBallGame)
     DestroyHudText(blueScoreText);
     DestroyHudText(redScoreText);
     DestroyEffect(ballEffect);
-    DestroyDummyBot(ball1);
-    DestroyDummyBot(ball2);
+    DestroyDummyBot(TeamOf(ball1), SlotOf(ball1));
+    DestroyDummyBot(TeamOf(ball2), SlotOf(ball2));
     tpFrom = null;
     tpTo = null;
     rootBall = null;
@@ -144,8 +144,8 @@ if (ballSpawned)
 
     Teleport(tpFrom, PositionOf(tpTo) + Vector(0, 1, 0));
 
-    Wait(0.025);
-    Loop();
+    Wait(0.1);
+    LoopIfConditionIsTrue();
 }
 macro isStunned(define player): HasStatus(player, Status.Stunned);
 
