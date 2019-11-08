@@ -5,11 +5,13 @@ Event.OngoingPlayer
 if (IsCommunicating(EventPlayer(), Communication.VoiceLineLeft))
 {
     doingLasers = !doingLasers;
+    rotateLasers = true;
 }
 
 define globalvar doingLasers ! = false;
+define globalvar lasersReady ! = false;
 
-//define globalvar rotation = 0;
+define globalvar rotateLasers = false;
 define globalvar rotationSpeed = 0; // Number of degrees per second
 define globalvar length = 0;
 
@@ -64,14 +66,22 @@ if (doingLasers)
     Wait(5);
     StopChasingGlobalVariable(length);
 
-    //ChaseGlobalVariableAtRate(rotation, 10000, rotationSpeed, RateChaseReevaluation.DestinationAndRate);
-    ChaseGlobalVariableAtRate(laser1Rot, 360 * 4, rotationSpeed, RateChaseReevaluation.DestinationAndRate);
-    ChaseGlobalVariableAtRate(laser2Rot, -(360 * 4), rotationSpeed * 1.25, RateChaseReevaluation.DestinationAndRate);
-    ChaseGlobalVariableAtRate(laser3Rot, 360 * 3, rotationSpeed * 0.85, RateChaseReevaluation.DestinationAndRate);
+    lasersReady = true;
+}
 
-    ChaseGlobalVariableOverTime(rotationSpeed, 45, 5, TimeChaseReevaluation.None);
-    Wait(10);
-    StopChasingGlobalVariable(rotationSpeed);
+rule: "Clean up lasers"
+if (!doingLasers)
+if (lasersReady)
+{
+    lasersReady = false;
+
+    ChaseGlobalVariableOverTime(length, 0, 5, TimeChaseReevaluation.None);
+    Wait(5);
+    StopChasingGlobalVariable(length);
+
+    DestroyEffect(laser1Effect);
+    DestroyEffect(laser2Effect);
+    DestroyEffect(laser3Effect);
 }
 
 macro rot(define pos, define angle): Destination(pos, DirectionFromAngles(angle, 0), length);
@@ -97,12 +107,30 @@ if (doingLasers)
     Damage(FilteredArray(intersecting, ArrayElement() != null), null, 250);
 
     MinWait();
-    Loop();
+    LoopIfConditionIsTrue();
+}
+
+macro intersectingFrom(define rotation, define height): RayCastHitPlayer(rotation, midpoint + height, AllLivingPlayers(), null, false);
+
+rule: "Do rotate"
+if (doingLasers)
+if (lasersReady)
+if (rotateLasers)
+{
+    ChaseGlobalVariableAtRate(laser1Rot, 360 * 4, rotationSpeed, RateChaseReevaluation.DestinationAndRate);
+    ChaseGlobalVariableAtRate(laser2Rot, -(360 * 4), rotationSpeed * 1.25, RateChaseReevaluation.DestinationAndRate);
+    ChaseGlobalVariableAtRate(laser3Rot, 360 * 3, rotationSpeed * 0.85, RateChaseReevaluation.DestinationAndRate);
+
+    ChaseGlobalVariableOverTime(rotationSpeed, 45, 5, TimeChaseReevaluation.None);
+    Wait(5);
+    StopChasingGlobalVariable(rotationSpeed);
 }
 
 rule: "Finished rotating"
 Event.OngoingPlayer
 if (doingLasers)
+if (lasersReady)
+if (rotateLasers)
 if (laser1Rot == 360 * 4)
 if (laser2Rot == -(360 * 4))
 if (laser3Rot == 360 * 3)
@@ -111,6 +139,5 @@ if (laser3Rot == 360 * 3)
     StopChasingGlobalVariable(laser2Rot);
     StopChasingGlobalVariable(laser3Rot);
     SmallMessage(AllPlayers(), "Finished rotating");
+    rotateLasers = false;
 }
-
-macro intersectingFrom(define rotation, define height): RayCastHitPlayer(rotation, midpoint + height, AllLivingPlayers(), null, false);
