@@ -15,36 +15,45 @@ if (!IsDummyBot())
     Teleport(EventPlayer(), origin + Vector(20, 0, 20));
 }
 
+macro rowCount(): 50;
+macro columnCount(): 35;
+
 rule: "Setup Arena"
 {
     OuterWalls();
 
-    for (define x = -110; x <= 110; x += 4.4)
+    define cliffBlue ! = Vector(107.07, 154.88, 63.61);
+    define cliffRed ! = Vector(-109.08, 154.88, 65.06);
+    define towerBlue ! = Vector(108.08, 154.88, 213.35);
+    define towerRed ! = Vector(-108.07, 154.88, 214.81);
+    define rowFraction ! = 1/rowCount();
+    define columnFraction ! = 1/columnCount();
+
+    for (define x ! = 0; x <= rowCount(); x++)
     {
         CreateBeamEffect(
             AllPlayers(),
             BeamType.GrappleBeam,
-            Vector(x, 154.88, 65),
-            Vector(x, 154.88, 215),
+            LinearInterpolate(cliffBlue, cliffRed, x*rowFraction),
+            LinearInterpolate(towerBlue, towerRed, x*rowFraction),
+            Color.Red,
+            EffectRev.VisibleTo
+        );
+    }
+    for (define z ! = 0; z <= columnCount(); z++)
+    {
+        CreateBeamEffect(
+            AllPlayers(),
+            BeamType.GrappleBeam,
+            LinearInterpolate(cliffBlue, towerBlue, z*columnFraction),
+            LinearInterpolate(cliffRed, towerRed, z*columnFraction),
             Color.Red,
             EffectRev.VisibleTo
         );
     }
 
-    for (define z = 65; z <= 215; z += 4.4) //3
-    {
-        CreateBeamEffect(
-            AllPlayers(),
-            BeamType.GrappleBeam,
-            Vector(-110, 154.88, z),
-            Vector(110, 154.88, z),
-            Color.Red,
-            EffectRev.VisibleTo
-        );
-    }
-
+    // Pole flair
     CreateEffect(AllPlayers(), Effect.Orb, Color.Orange, TopPolePos(), 0.25, EffectRev.VisibleTo);
-
     CreateBeamEffect(
         AllPlayers(),
         BeamType.GoodBeam,
@@ -52,7 +61,6 @@ rule: "Setup Arena"
         TopPolePos(),
         Color.Red
     );
-    
     ChaseGlobalVariableAtRate(killzoneRot, 180, 25, RateChaseReevaluation.DestinationAndRate);
 }
 
