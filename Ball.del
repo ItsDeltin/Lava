@@ -1,7 +1,5 @@
 import "Lava.del";
 
-define globalvar ballGame = false;
-
 define globalvar ball1;
 define globalvar ball2;
 define playervar isBall;
@@ -19,9 +17,23 @@ define globalvar blueGoalEffect !;
 define globalvar redGoalEffect !;
 define globalvar ballEffect !;
 
-rule: "Setup balls"
-if (ballGame)
+define globalvar doingBallGame ! = false;
+define globalvar setupBallGame !;
+define globalvar cleanupBallGame !;
+
+rule: "Debug Toggle"
+Event.OngoingPlayer
+if (IsCommunicating(EventPlayer(), Communication.VoiceLineUp))
 {
+    if (!doingBallGame) setupBallGame = true;
+    else cleanupBallGame = true;
+}
+
+rule: "Setup balls"
+if (setupBallGame)
+{
+    doingBallGame = true;
+
     // Blue's score text
     CreateHudText(
         VisibleTo   :AllPlayers(Team.Team1),
@@ -82,10 +94,12 @@ if (ballGame)
 
     CreateEffect(AllPlayers(), Effect.Sphere, Color.Turquoise, ballLocation(), 1.25, EffectRev.VisibleToPositionAndRadius);
     ballEffect = LastCreatedEntity();
+
+    setupBallGame = false;
 }
 
 rule: "Clean up ball game"
-if (!ballGame)
+if (cleanupBallGame)
 {
     DestroyHudText(blueScoreText);
     DestroyHudText(redScoreText);
@@ -97,13 +111,15 @@ if (!ballGame)
     tpFrom = null;
     tpTo = null;
     rootBall = null;
+    cleanupBallGame = false;
+    doingBallGame = false;
 }
 
 macro ballLocation(): tpTo != null ? tpTo + Vector(0, 1, 0) : Midpoint(ball1,ball2) + Vector(0, 0.5, 0);
 macro ballSpeed(): SpeedOf(rootBall);
 
 rule: "Link"
-if (ballGame)
+if (doingBallGame)
 {
     if (IsInAir(ball1) || IsInAir(ball2))
     {
@@ -150,6 +166,7 @@ if (ballGame)
 macro isStunned(define player): HasStatus(player, Status.Stunned);
 
 rule: "Respawn ball"
+if (doingBallGame)
 if (IsDead(ball1) || IsDead(ball2) || YOf(ballLocation()) < 140 || (!ballIsOnStand && isOnWall(rootBall) && ballSpeed() < 1 && !HasStatus(rootBall, Status.Stunned)))
 {
     SmallMessage(AllPlayers(), "Respawning Ball");
@@ -245,12 +262,14 @@ if (HasStatus(EventPlayer(), Status.Stunned))
 }
 
 rule: "Effect when ball hits ground"
+if (doingBallGame)
 if (IsOnGround(rootBall))
 {
-    PlayEffect(AllPlayers(), PlayEffect.RingExplosion, Color.White, PositionOf(rootBall), 5);
+    PlayEffect(AllPlayers(), PlayEffect.RingExplosion, Color.Turquoise, PositionOf(rootBall), 5);
 }
 
 rule: "Fast ball effect"
+if (doingBallGame)
 if (!ballIsOnStand)
 if (ballSpeed() >= 10 || IsInAir(rootBall))
 {

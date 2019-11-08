@@ -7,6 +7,7 @@ macro blueGoal(): Vector(120, 165, 150);
 macro redGoal(): Vector(-123, 165, 150);
 
 rule: "Blue score"
+if (doingBallGame)
 if (DistanceBetween(ballLocation(), redGoal()) <= 13)
 {
     PlayEffect(AllPlayers(), PlayEffect.RingExplosion, Color.Team1, redGoal(), 100);
@@ -19,6 +20,7 @@ if (DistanceBetween(ballLocation(), redGoal()) <= 13)
 }
 
 rule: "Red score"
+if (doingBallGame)
 if (DistanceBetween(ballLocation(), blueGoal()) <= 13)
 {
     PlayEffect(AllPlayers(), PlayEffect.RingExplosion, Color.Team2, blueGoal(), 100);

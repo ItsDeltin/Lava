@@ -3,6 +3,15 @@ import "Ball.del";
 
 define playervar chargeStart = null;
 
+macro defaultMoveSpeed(): 150;
+
+rule: "Setup"
+Event.OngoingPlayer
+Player.Reinhardt
+{
+    SetMoveSpeed(EventPlayer(), defaultMoveSpeed());
+}
+
 rule: "Charge Speed Boost"
 Event.OngoingPlayer
 Player.Reinhardt
@@ -17,7 +26,7 @@ Event.OngoingPlayer
 Player.Reinhardt
 if (!IsUsingAbility1())
 {
-    SetMoveSpeed(EventPlayer(), 100);
+    SetMoveSpeed(EventPlayer(), defaultMoveSpeed());
 }
 
 rule: "Hit pole"
