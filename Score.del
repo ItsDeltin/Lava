@@ -1,13 +1,49 @@
 import "Ball.del";
 
+define globalvar goals;
+define globalvar blueGoalEffect !;
+define globalvar redGoalEffect !;
+
 define globalvar blueScore = 0;
 define globalvar redScore = 0;
 
 macro blueGoal(): Vector(120, 165, 150);
 macro redGoal(): Vector(-123, 165, 150);
 
+rule: "Spawn goals"
+if (goals)
+{
+    // Blue goal
+    CreateEffect(
+        AllPlayers(),
+        Effect.GoodAura,
+        Color.Team1,
+        blueGoal(),
+        10
+    );
+    blueGoalEffect = LastCreatedEntity();
+
+    // Red goal
+    CreateEffect(
+        AllPlayers(),
+        Effect.GoodAura,
+        Color.Team2,
+        redGoal(),
+        10
+    );
+    redGoalEffect = LastCreatedEntity();
+}
+
+rule: "Destroy goals"
+if (!goals)
+{
+    DestroyEffect(blueGoalEffect);
+    DestroyEffect(redGoalEffect);
+}
+
 rule: "Blue score"
-if (doingBallGame)
+if (ballSpawned)
+if (goals)
 if (DistanceBetween(ballLocation(), redGoal()) <= 13)
 {
     PlayEffect(AllPlayers(), PlayEffect.RingExplosion, Color.Team1, redGoal(), 100);
@@ -20,7 +56,8 @@ if (DistanceBetween(ballLocation(), redGoal()) <= 13)
 }
 
 rule: "Red score"
-if (doingBallGame)
+if (ballSpawned)
+if (goals)
 if (DistanceBetween(ballLocation(), blueGoal()) <= 13)
 {
     PlayEffect(AllPlayers(), PlayEffect.RingExplosion, Color.Team2, blueGoal(), 100);
@@ -40,14 +77,14 @@ method messageThrower(define team)
     }
     else if (throwType == 0)
     {
-        BigMessage(AllPlayers(), <"<0> scores a hammer shot!", thrower>);
+        BigMessage(AllPlayers(), <"<0> scored a hammer shot!", thrower>);
     }
     else if (throwType == 1)
     {
-        BigMessage(AllPlayers(), <"<0> scores a bump shot!", thrower>);
+        BigMessage(AllPlayers(), <"<0> scored a bump shot!", thrower>);
     }
     else if (throwType == 2)
     {
-        BigMessage(AllPlayers(), <"<0> scores a charge shot!", thrower>);
+        BigMessage(AllPlayers(), <"<0> scored a charge shot!", thrower>);
     }
 }
