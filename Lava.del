@@ -1,7 +1,8 @@
-import "Ball.del";
 import "Debug Tools.del";
 import "Reinhardt.del";
+import "Ball.del";
 import "Score.del";
+import "Lasers.del";
 
 define globalvar origin = Vector(-0.18, 154.88, 60);
 
@@ -11,7 +12,7 @@ if (HasSpawned())
 if (IsAlive())
 if (!IsDummyBot())
 {
-    Teleport(EventPlayer(), origin);
+    Teleport(EventPlayer(), origin + Vector(20, 0, 20));
 }
 
 rule: "Setup Arena"

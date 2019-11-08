@@ -1,0 +1,122 @@
+import "Lava.del";
+
+rule: "Debug Toggle"
+Event.OngoingPlayer
+if (IsCommunicating(EventPlayer(), Communication.VoiceLineLeft))
+{
+    if (!doingLaserGame) setupLaserGame = true;
+    else cleanupLaserGame = true;
+}
+
+define globalvar doingLaserGame !;
+define globalvar setupLaserGame !;
+define globalvar cleanupLaserGame !;
+
+//define globalvar rotation = 0;
+define globalvar rotationSpeed = 0; // Number of degrees per second
+define globalvar length = 0;
+
+define globalvar laser1Effect !;
+define globalvar laser2Effect !;
+define globalvar laser3Effect !;
+
+define globalvar midpoint;
+
+define globalvar laser1Rot;
+define globalvar laser2Rot;
+define globalvar laser3Rot;
+
+rule: "Setup laser game"
+if (setupLaserGame)
+{
+    doingLaserGame = true;
+    setupLaserGame = false;
+
+    SetGravity(AllPlayers(), 90);
+
+    midpoint = PolePos();
+
+    CreateBeamEffect(
+        AllPlayers(),
+        BeamType.BadBeam,
+        rot(midpoint + Vector(0, 0.5, 0), laser1Rot),
+        inverseRot(midpoint + Vector(0, 0.5, 0), laser1Rot),
+        Color.Red,
+        EffectRev.VisibleToPositionAndRadius
+    );
+    laser1Effect = LastCreatedEntity();
+
+    CreateBeamEffect(
+        AllPlayers(),
+        BeamType.BadBeam,
+        rot(midpoint + Vector(0, 2, 0), laser2Rot),
+        inverseRot(midpoint + Vector(0, 2, 0), laser2Rot),
+        Color.Red,
+        EffectRev.VisibleToPositionAndRadius
+    );
+    laser2Effect = LastCreatedEntity();
+
+    CreateBeamEffect(
+        AllPlayers(),
+        BeamType.BadBeam,
+        rot(midpoint + Vector(0, 3.5, 0), laser3Rot),
+        inverseRot(midpoint + Vector(0, 3.5, 0), laser3Rot),
+        Color.Red,
+        EffectRev.VisibleToPositionAndRadius
+    );
+    laser3Effect = LastCreatedEntity();
+
+    ChaseGlobalVariableOverTime(length, 150, 5, TimeChaseReevaluation.None);
+    Wait(5);
+    StopChasingGlobalVariable(length);
+
+    //ChaseGlobalVariableAtRate(rotation, 10000, rotationSpeed, RateChaseReevaluation.DestinationAndRate);
+    ChaseGlobalVariableAtRate(laser1Rot, 360 * 4, rotationSpeed, RateChaseReevaluation.DestinationAndRate);
+    ChaseGlobalVariableAtRate(laser2Rot, -(360 * 4), rotationSpeed * 1.25, RateChaseReevaluation.DestinationAndRate);
+    ChaseGlobalVariableAtRate(laser3Rot, 360 * 3, rotationSpeed * 0.85, RateChaseReevaluation.DestinationAndRate);
+
+    ChaseGlobalVariableOverTime(rotationSpeed, 45, 5, TimeChaseReevaluation.None);
+    Wait(10);
+    StopChasingGlobalVariable(rotationSpeed);
+}
+
+macro rot(define pos, define angle): Destination(pos, DirectionFromAngles(angle, 0), length);
+macro inverseRot(define pos, define angle): Destination(pos, DirectionFromAngles(angle + 180, 0), length);
+
+// Destination(xyPolePos(136.42), DirectionFromAngles(killzoneRot, 0), 11)
+
+rule: "Kill intersecting players"
+Event.OngoingGlobal
+if (doingLaserGame)
+{
+    define intersecting = [];
+
+    intersecting = Append(intersecting, intersectingFrom(       rot(midpoint + Vector(0, 0.5, 0), laser1Rot), Vector(0, 0.5, 0)));
+    intersecting = Append(intersecting, intersectingFrom(inverseRot(midpoint + Vector(0, 0.5, 0), laser1Rot), Vector(0, 0.5, 0)));
+    intersecting = Append(intersecting, intersectingFrom(       rot(midpoint + Vector(0, 2, 0), laser2Rot), Vector(0, 2, 0)));
+    MinWait();
+    intersecting = Append(intersecting, intersectingFrom(inverseRot(midpoint + Vector(0, 2, 0), laser2Rot), Vector(0, 2, 0)));
+    intersecting = Append(intersecting, intersectingFrom(       rot(midpoint + Vector(0, 3.5, 0), laser3Rot), Vector(0, 3.5, 0)));
+    intersecting = Append(intersecting, intersectingFrom(inverseRot(midpoint + Vector(0, 3.5, 0), laser3Rot), Vector(0, 3.5, 0)));
+
+    //Kill(intersecting, null);
+    Damage(FilteredArray(intersecting, ArrayElement() != null), null, 250);
+
+    MinWait();
+    Loop();
+}
+
+rule: "Finished rotating"
+Event.OngoingPlayer
+if (doingLaserGame)
+if (laser1Rot == 360 * 4)
+if (laser2Rot == -(360 * 4))
+if (laser3Rot == 360 * 3)
+{
+    StopChasingGlobalVariable(laser1Rot);
+    StopChasingGlobalVariable(laser2Rot);
+    StopChasingGlobalVariable(laser3Rot);
+    SmallMessage(AllPlayers(), "Finished rotating");
+}
+
+macro intersectingFrom(define rotation, define height): RayCastHitPlayer(rotation, midpoint + height, AllLivingPlayers(), null, false);
