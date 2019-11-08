@@ -87,7 +87,12 @@ if (lasersReady)
 macro rot(define pos, define angle): Destination(pos, DirectionFromAngles(angle, 0), length);
 macro inverseRot(define pos, define angle): Destination(pos, DirectionFromAngles(angle + 180, 0), length);
 
-// Destination(xyPolePos(136.42), DirectionFromAngles(killzoneRot, 0), 11)
+macro intersectingFrom(define rotation, define height): RayCastHitPlayer(rotation, midpoint + height, AllLivingPlayers(), null, false);
+
+macro intersectingRot(define rotation, define height)       : intersectingFrom(       rot(midpoint + Vector(0, height, 0), rotation), Vector(0, height, 0));
+macro inverseIntersectingRot(define rotation, define height): intersectingFrom(inverseRot(midpoint + Vector(0, height, 0), rotation), Vector(0, height, 0));
+
+define playervar lastDamage;
 
 rule: "Kill intersecting players"
 Event.OngoingGlobal
@@ -95,22 +100,28 @@ if (doingLasers)
 {
     define intersecting = [];
 
-    intersecting = Append(intersecting, intersectingFrom(       rot(midpoint + Vector(0, 0.5, 0), laser1Rot), Vector(0, 0.5, 0)));
-    intersecting = Append(intersecting, intersectingFrom(inverseRot(midpoint + Vector(0, 0.5, 0), laser1Rot), Vector(0, 0.5, 0)));
-    intersecting = Append(intersecting, intersectingFrom(       rot(midpoint + Vector(0, 2, 0), laser2Rot), Vector(0, 2, 0)));
-    MinWait();
-    intersecting = Append(intersecting, intersectingFrom(inverseRot(midpoint + Vector(0, 2, 0), laser2Rot), Vector(0, 2, 0)));
-    intersecting = Append(intersecting, intersectingFrom(       rot(midpoint + Vector(0, 3.5, 0), laser3Rot), Vector(0, 3.5, 0)));
-    intersecting = Append(intersecting, intersectingFrom(inverseRot(midpoint + Vector(0, 3.5, 0), laser3Rot), Vector(0, 3.5, 0)));
+    // laser 1
+    intersecting = Append(intersecting, intersectingRot(laser1Rot, 0.5));
+    intersecting = Append(intersecting, inverseIntersectingRot(laser1Rot, 0.5));
 
-    //Kill(intersecting, null);
-    Damage(FilteredArray(intersecting, ArrayElement() != null), null, 250);
+    // laser 2
+    intersecting = Append(intersecting, intersectingRot(laser2Rot, 2));
+    MinWait();
+    intersecting = Append(intersecting, inverseIntersectingRot(laser2Rot, 2));
+
+    // laser 3
+    intersecting = Append(intersecting, intersectingRot(laser3Rot, 3.5));
+    intersecting = Append(intersecting, inverseIntersectingRot(laser3Rot, 3.5));
+
+    intersecting = FilteredArray(intersecting, ArrayElement() != null && TotalTimeElapsed() - ArrayElement().lastDamage > 1);
+
+    Damage(intersecting, null, 170);
+
+    intersecting.lastDamage = TotalTimeElapsed();
 
     MinWait();
     LoopIfConditionIsTrue();
 }
-
-macro intersectingFrom(define rotation, define height): RayCastHitPlayer(rotation, midpoint + height, AllLivingPlayers(), null, false);
 
 rule: "Do rotate"
 if (doingLasers)
