@@ -167,7 +167,7 @@ if (lasersReady)
     if (rotateLasers)
     {
         outOfRange = getOutOfRange();
-        Damage(outOfRange, null, 6);
+        Damage(outOfRange, null, 10);
     }
 
     define intersecting = [];

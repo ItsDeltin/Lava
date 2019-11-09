@@ -33,6 +33,7 @@ rule: "Hit pole"
 Event.OngoingPlayer
 Player.Reinhardt
 if (!IsUsingAbility1())
+if (IsAlive())
 if (TotalTimeElapsed() - chargeStart <= 4)
 if (DistanceBetween(EventPlayer(), PolePos()) < 3)
 {
@@ -112,10 +113,13 @@ Event.OngoingPlayer
 if (IsButtonHeld(EventPlayer(), Button.Interact))
 {
     CreateDummyBot(Hero.Reinhardt, NumberOfPlayers(Team.Team1) < 6 ? Team.Team1 : Team.Team2, -1, PositionOf(EventPlayer()), Vector());
-    // define dummy = LastCreatedEntity();
-    // Wait(2);
-    // Teleport(dummy, EventPlayer());
+    if (IsButtonHeld(EventPlayer(), Button.Crouch))
+    {
+        define dummy = LastCreatedEntity();
+        Wait(1);
+        Teleport(dummy, EventPlayer());
 
-    // StartHoldingButton(dummy, Button.SecondaryFire);
-    // SetFacing(dummy, DirectionFromAngles(HorizontalFacingAngleOf(), -45));
+        StartHoldingButton(dummy, Button.SecondaryFire);
+        SetFacing(dummy, DirectionFromAngles(HorizontalFacingAngleOf(), -45));
+    }
 }

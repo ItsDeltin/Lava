@@ -136,7 +136,7 @@ method sideSwitched()
     StopChasingGlobalVariable(detonationCounter);
     detonationCounter = detonationTime;
     isCountingDown = false;
-    detonationTime = Max(0, detonationTime - 1);
+    detonationTime = Max(2, detonationTime - 1);
 
     // volleyBallTimeReduction++;
     // if (volleyBallTimeReduction == 2)
@@ -152,15 +152,23 @@ if (IsOnGround(rootBall))
 if (isCountingDown)
 if (detonationCounter == 0)
 {
-    SmallMessage(AllPlayers(), <"<0> loses, unfortunately.", onTeam>);
     PlayEffect(AllPlayers(), PlayEffect.RingExplosionSound, Color.Team1, PositionOf(rootBall), 150);
+
+    BigMessage(AllPlayers(OppositeTeamOf(onTeam)), <"<0> Your team scores! <0>", IconString(Icon.Fire)>);
+    BigMessage(AllPlayers(onTeam), <"<0> The enemy team scores! <0>", IconString(Icon.Recycle)>);
     
     // Team 1 scores
     if (onTeam == Team.Team2)
+    {
         PlayEffect(AllPlayers(), PlayEffect.RingExplosion, Color.Team1, PositionOf(rootBall), 150);
+        blueScore++;
+    }
     // Team 2 scores
     else
+    {
         PlayEffect(AllPlayers(), PlayEffect.RingExplosion, Color.Team2, PositionOf(rootBall), 150);
+        redScore++;
+    }
     
     isCountingDown = false;
     //volleyBallTimeReduction = 0;
