@@ -28,6 +28,18 @@ define globalvar laser3Effect !;
 define globalvar ringEffectArray !;
 define globalvar outOfRangeHUD !;
 
+// rule: "depression"
+// Event.OngoingPlayer
+// {
+//     CreateHudText(AllPlayers(), isOnLine(laser1Rot, EventPlayer()), null, null, Location.Top);
+// }
+macro isOnLine(define rotate, define player): AbsoluteValue(cross(rotate, PositionOf(player))) < 100;
+macro cross(define rotate, define player)   : dxc(rotate, player) * dyl(rotate) - dyc(rotate, player) * dxl(rotate);
+macro dxc(define rotate, define player)     : XOf(player) - XOf(rot(midpoint, rotate, laserLength));
+macro dyc(define rotate, define player)     : ZOf(player) - ZOf(rot(midpoint, rotate, laserLength));
+macro dxl(define rotate)                    : XOf(midpoint) - XOf(rot(midpoint, rotate, laserLength));
+macro dyl(define rotate)                    : ZOf(midpoint) - ZOf(rot(midpoint, rotate, laserLength));
+
 rule: "Setup laser game"
 if (doingLasers)
 {

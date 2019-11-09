@@ -15,7 +15,6 @@ define globalvar isCountingDown;
 define globalvar onTeam;
 define globalvar counterText1 !;
 define globalvar counterText2 !;
-//define globalvar volleyBallTimeReduction;
 
 rule: "Setup volleyball"
 if (volleyball)
@@ -168,6 +167,6 @@ if (detonationCounter == 0)
     detonationTime = 10;
     DestroyInWorldText(counterText1);
     DestroyInWorldText(counterText2);
-    
+
     respawnBall();
 }
