@@ -1,6 +1,6 @@
 import "Lava.del";
 
-rule: "Debug Toggle"
+rule: "Debug Laser Dodge"
 Event.OngoingPlayer
 if (IsCommunicating(EventPlayer(), Communication.VoiceLineLeft))
 {
@@ -8,7 +8,7 @@ if (IsCommunicating(EventPlayer(), Communication.VoiceLineLeft))
     rotateLasers = true;
 }
 
-define globalvar doingLasers ! = false;
+define globalvar doingLasers = false;
 define globalvar lasersReady ! = false;
 
 define globalvar rotateLasers = false;

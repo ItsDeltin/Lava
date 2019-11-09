@@ -71,13 +71,6 @@ if (IsTrueForAny(
     ApplyImpulse(EventPlayer(), Up(), 15, Relative.ToWorld, ContraryMotion.Incorporate);
 }
 
-rule: "debug spawn"
-Event.OngoingPlayer
-if (IsButtonHeld(EventPlayer(), Button.Interact))
-{
-    CreateDummyBot(Hero.Reinhardt, NumberOfPlayers(Team.Team1) < 6 ? Team.Team1 : Team.Team2, -1, PositionOf(EventPlayer()), Vector());
-}
-
 rule: "Start breaking"
 Event.OngoingPlayer
 Player.Reinhardt
@@ -112,4 +105,17 @@ if (!isBall)
 {
     ApplyImpulse(EventPlayer(), DirectionTowards(knockedFrom, PositionOf() + Vector(0, heightOffset, 0)), force, Relative.ToWorld, ContraryMotion.Incorporate);
     knockedFrom = null;
+}
+
+rule: "debug spawn"
+Event.OngoingPlayer
+if (IsButtonHeld(EventPlayer(), Button.Interact))
+{
+    CreateDummyBot(Hero.Reinhardt, NumberOfPlayers(Team.Team1) < 6 ? Team.Team1 : Team.Team2, -1, PositionOf(EventPlayer()), Vector());
+    define dummy = LastCreatedEntity();
+    Wait(2);
+    Teleport(dummy, EventPlayer());
+
+    StartHoldingButton(dummy, Button.SecondaryFire);
+    SetFacing(dummy, DirectionFromAngles(HorizontalFacingAngleOf(), -45));
 }

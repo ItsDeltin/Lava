@@ -1,6 +1,6 @@
 import "Lava.del";
 
-rule: "Debug Toggle"
+rule: "Debug Ball"
 Event.OngoingPlayer
 if (IsCommunicating(EventPlayer(), Communication.VoiceLineUp))
 {
@@ -32,7 +32,7 @@ define globalvar redScoreText !;
 define globalvar ballEffect !;
 
 define globalvar ballSpawned ! = false;
-define globalvar setupBallGame !;
+define globalvar setupBallGame;
 define globalvar cleanupBallGame !;
 
 rule: "Setup balls"
@@ -172,34 +172,26 @@ if (!IsInSpawnRoom(ball1) && !IsInSpawnRoom(ball2))
 {
     SmallMessage(AllPlayers(), EventDamage());
     Heal(EventPlayer(), null, EventDamage());
-}
 
-rule: "On Hammer Hit"
-Event.OnDamageTaken
-if (isBall)
-if (EventDamage() == 72) // 75 for no armor
-if (!IsInSpawnRoom())
-{
-    ApplyImpulse(EventPlayer(), Vector(0, 1, 0), 20, Relative.ToWorld, ContraryMotion.Incorporate);
-    thrower = Attacker();
-    throwType = 0;
-}
-
-rule: "On Charge Whiff"
-Event.OnDamageTaken
-if (isBall)
-if (EventDamage() == 47) // 50 for no armor
-if (!IsInSpawnRoom())
-{
-    thrower = Attacker();
-    throwType = 1;
+    // Hammer hit
+    if (EventDamage() == 72)
+    {
+        ApplyImpulse(EventPlayer(), Vector(0, 1, 0), 20, Relative.ToWorld, ContraryMotion.Incorporate);
+        thrower = Attacker();
+        throwType = 0;
+    }
+    // Charge bump
+    else if (EventDamage() == 47)
+    {
+        thrower = Attacker();
+        throwType = 1;
+    }
 }
 
 rule: "On Fire Strike"
 Event.OnDamageTaken
 if (isBall)
-if (EventDamage() == 97) // 100 for no armor
-if (!IsInSpawnRoom())
+if (EventDamage() == 97)
 {
     define fuse = 0;
     ChasePlayerVariableOverTime(EventPlayer(), fuse, 2, 3);
@@ -212,14 +204,13 @@ if (!IsInSpawnRoom())
     PlayEffect(AllPlayers(), PlayEffect.GoodExplosion, Color.Orange, ballLocation(), ExplosionRange());
     PlayEffect(AllPlayers(), PlayEffect.ExplosionSound, Color.Orange, ballLocation(), 100);
 
-    define inExplosionRange = NotBall();
+    define inExplosionRange = FilteredArray(AllPlayers(), DistanceBetween(ArrayElement(), ballLocation()) < ExplosionRange());
 
     Damage(inExplosionRange, Attacker(), 200);
     inExplosionRange.knockedFrom = ballLocation();
     inExplosionRange.force = 30;
     inExplosionRange.heightOffset = 1.5;
 }
-macro NotBall(): FilteredArray(AllPlayers(), !ArrayElement().isBall && DistanceBetween(ArrayElement(), ballLocation()) < ExplosionRange());
 macro ExplosionRange(): 10;
 
 rule: "Getting charged"
