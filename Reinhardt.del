@@ -99,7 +99,7 @@ define playervar force;
 define playervar heightOffset;
 
 rule: "Knocked"
-Event.OnDamageTaken
+Event.OngoingPlayer
 if (knockedFrom != null)
 if (!isBall)
 {
@@ -112,10 +112,10 @@ Event.OngoingPlayer
 if (IsButtonHeld(EventPlayer(), Button.Interact))
 {
     CreateDummyBot(Hero.Reinhardt, NumberOfPlayers(Team.Team1) < 6 ? Team.Team1 : Team.Team2, -1, PositionOf(EventPlayer()), Vector());
-    define dummy = LastCreatedEntity();
-    Wait(2);
-    Teleport(dummy, EventPlayer());
+    // define dummy = LastCreatedEntity();
+    // Wait(2);
+    // Teleport(dummy, EventPlayer());
 
-    StartHoldingButton(dummy, Button.SecondaryFire);
-    SetFacing(dummy, DirectionFromAngles(HorizontalFacingAngleOf(), -45));
+    // StartHoldingButton(dummy, Button.SecondaryFire);
+    // SetFacing(dummy, DirectionFromAngles(HorizontalFacingAngleOf(), -45));
 }

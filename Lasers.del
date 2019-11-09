@@ -28,17 +28,12 @@ define globalvar laser3Effect !;
 define globalvar ringEffectArray !;
 define globalvar outOfRangeHUD !;
 
-// rule: "depression"
-// Event.OngoingPlayer
-// {
-//     CreateHudText(AllPlayers(), isOnLine(laser1Rot, EventPlayer()), null, null, Location.Top);
-// }
-macro isOnLine(define rotate, define player): AbsoluteValue(cross(rotate, PositionOf(player))) < 100;
-macro cross(define rotate, define player)   : dxc(rotate, player) * dyl(rotate) - dyc(rotate, player) * dxl(rotate);
-macro dxc(define rotate, define player)     : XOf(player) - XOf(rot(midpoint, rotate, laserLength));
-macro dyc(define rotate, define player)     : ZOf(player) - ZOf(rot(midpoint, rotate, laserLength));
-macro dxl(define rotate)                    : XOf(midpoint) - XOf(rot(midpoint, rotate, laserLength));
-macro dyl(define rotate)                    : ZOf(midpoint) - ZOf(rot(midpoint, rotate, laserLength));
+macro isOnLine(define line, define player): AbsoluteValue(cross(line, PositionOf(player))) < 200;
+macro cross(define line, define pos)   : dxc(line, pos) * dyl(line) - dyc(line, pos) * dxl(line);
+macro dxc(define line, define pos)     : XOf(pos) - XOf(line);
+macro dyc(define line, define pos)     : ZOf(pos) - ZOf(line);
+macro dxl(define line)                 : XOf(midpoint) - XOf(line);
+macro dyl(define line)                 : ZOf(midpoint) - ZOf(line);
 
 rule: "Setup laser game"
 if (doingLasers)
@@ -167,35 +162,31 @@ macro getOutOfRange(): RemoveFromArray(AllPlayers(), PlayersWithinRadius(midpoin
 
 rule: "Kill intersecting players"
 if (doingLasers)
+if (lasersReady)
 {
-    if (rotateLasers && lasersReady)
+    if (rotateLasers)
     {
         outOfRange = getOutOfRange();
-        Damage(outOfRange, null, 4);
+        Damage(outOfRange, null, 6);
     }
 
     define intersecting = [];
 
-    // laser 1
-    intersecting = Append(intersecting, intersectingRot(laser1Rot, 0.5));
-    intersecting = Append(intersecting, inverseIntersectingRot(laser1Rot, 0.5));
+    define line1 = rot(midpoint, laser1Rot, laserLength);
+    ModifyGlobalVariable(intersecting, Operation.AppendToArray,
+        FilteredArray(AllPlayers(), !IsInAir(ArrayElement()) && isOnLine(line1, ArrayElement())));
 
-    // laser 2
-    MinWait();
-    intersecting = Append(intersecting, intersectingRot(laser2Rot, 2));
-    intersecting = Append(intersecting, inverseIntersectingRot(laser2Rot, 2));
+    Wait(0.05);
 
-    // laser 3
-    //intersecting = Append(intersecting, intersectingRot(laser3Rot, 3.5));
-    //intersecting = Append(intersecting, inverseIntersectingRot(laser3Rot, 3.5));
-
-    intersecting = FilteredArray(intersecting, ArrayElement() != null && TotalTimeElapsed() - ArrayElement().lastDamage > 1);
-
+    define line2 = rot(midpoint, laser2Rot, laserLength);
+    ModifyGlobalVariable(intersecting, Operation.AppendToArray, 
+        FilteredArray(AllPlayers(), !(IsCrouching(ArrayElement()) || (IsOnGround(ArrayElement()) && IsUsingAbility1(ArrayElement()))) && isOnLine(line2, ArrayElement())));
+    
+    intersecting = FilteredArray(intersecting, TotalTimeElapsed() - ArrayElement().lastDamage > 1);
+    intersecting.lastDamage = TotalTimeElapsed();
     Damage(intersecting, null, 170);
 
-    intersecting.lastDamage = TotalTimeElapsed();
-
-    Wait(0.02);
+    Wait(0.05);
     LoopIfConditionIsTrue();
 }
 
