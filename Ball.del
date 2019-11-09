@@ -160,6 +160,14 @@ if (IsDead(ball1) || IsDead(ball2) || YOf(ballLocation()) < 140 || (!ballIsOnSta
 
     MinWait();
 
+    respawnBall();   
+}
+
+method respawnBall()
+{
+    Teleport(ball1, TopPolePos());
+    Teleport(ball2, TopPolePos() + Vector(0, 1, 0));
+    MinWait();
     Teleport(ball1, TopPolePos());
     Teleport(ball2, TopPolePos() + Vector(0, 1, 0));
     ballIsOnStand = true;

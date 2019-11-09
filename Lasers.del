@@ -130,6 +130,7 @@ if (lasersReady)
     DestroyEffect(laser2Effect);
     DestroyEffect(laser3Effect);
     DestroyEffectArray(ringEffectArray, 2);
+    DestroyHudText(outOfRangeHUD);
 
     StopChasingGlobalVariable(laser1Rot);
     StopChasingGlobalVariable(laser2Rot);

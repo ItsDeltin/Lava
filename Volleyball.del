@@ -8,7 +8,14 @@ if (IsCommunicating(EventPlayer(), Communication.VoiceLineRight))
 }
 
 define globalvar volleyball;
-define globalvar netLength;
+define globalvar netLength !;
+define globalvar detonationCounter;
+define globalvar detonationTime;
+define globalvar isCountingDown;
+define globalvar onTeam;
+define globalvar counterText1 !;
+define globalvar counterText2 !;
+//define globalvar volleyBallTimeReduction;
 
 rule: "Setup volleyball"
 if (volleyball)
@@ -46,16 +53,51 @@ if (volleyball)
     laser3Effect = LastCreatedEntity();
 
     netLength = 150;
+    detonationTime = 10;
+}
 
-    // For animation:
-    // ChaseGlobalVariableOverTime(netLength, 150, 5, TimeChaseReevaluation.None);
-    // Wait(5);
-    // StopChasingGlobalVariable(netLength);
+rule: "Cleanup volleyball"
+if (!volleyball)
+{
+    setupBallGame = false;
+    DestroyEffect(laser1Effect);
+    DestroyEffect(laser2Effect);
+    DestroyEffect(laser3Effect);
+    DestroyInWorldText(counterText1);
+    DestroyInWorldText(counterText2);
+}
+
+rule: "Show counter"
+if (volleyball)
+if (!ballIsOnStand)
+{
+    CreateInWorldText(
+        VisibleTo:AllPlayers(OppositeTeamOf(onTeam)),
+        Header:detonationCounter,
+        Position:ballLocation() + Vector(0, 0.5, 0),
+        Scale:2,
+        Clipping:Clipping.ClipAgainstSurfaces,
+        TextColor:Color.White,
+        Spectators:Spectators.VisibleAlways
+    );
+    counterText1 = LastTextID();
+
+    CreateInWorldText(
+        VisibleTo:AllPlayers(onTeam),
+        Header:<"<1> <0> <1>", detonationCounter, IconString(Icon.Warning)>,
+        Position:ballLocation() + Vector(0, 0.5, 0),
+        Scale:2,
+        Clipping:Clipping.ClipAgainstSurfaces,
+        TextColor:Color.Red,
+        Spectators:Spectators.VisibleAlways
+    );
+    counterText2 = LastTextID();
 }
 
 rule: "Kill players touching net"
 Event.OngoingPlayer
 if (volleyball)
+if (!isBall)
 // The net is at x=0 of the map, so just test if the player has a low X coordinate.
 if (AbsoluteValue(XOf(PositionOf())) < 0.8)
 // 158.38 is the base position plus the height of the tallest net beam effect.
@@ -64,8 +106,68 @@ if (YOf(PositionOf()) < 158.38)
     Kill(EventPlayer(), null);
 }
 
-rule: "Cleanup volleyball"
-if (!volleyball)
+rule: "Start volleyball counter"
+if (volleyball)
+if (IsOnGround(rootBall))
+if (!isCountingDown)
+if (!ballIsOnStand)
 {
-    setupBallGame = false;
+    ChaseGlobalVariableAtRate(detonationCounter, 0, 1, RateChaseReevaluation.None);
+    isCountingDown = true;
+}
+
+rule: "Ball on Team 1's side"
+if (volleyball)
+if (XOf(PositionOf(rootBall)) > 0)
+{
+    onTeam = Team.Team1;
+    sideSwitched();
+}
+
+rule: "Ball on Team 2's side"
+if (volleyball)
+if (XOf(PositionOf(rootBall)) < 0)
+{
+    onTeam = Team.Team2;
+    sideSwitched();
+}
+
+method sideSwitched()
+{
+    StopChasingGlobalVariable(detonationCounter);
+    detonationCounter = detonationTime;
+    isCountingDown = false;
+    detonationTime = Max(0, detonationTime - 1);
+
+    // volleyBallTimeReduction++;
+    // if (volleyBallTimeReduction == 2)
+    // {
+    //     detonationTime = Max(0, detonationTime - 1);
+    //     volleyBallTimeReduction = 0;
+    // }
+}
+
+rule: "Volleyball detonates"
+if (volleyball)
+if (IsOnGround(rootBall))
+if (isCountingDown)
+if (detonationCounter == 0)
+{
+    SmallMessage(AllPlayers(), <"<0> loses, unfortunately.", onTeam>);
+    PlayEffect(AllPlayers(), PlayEffect.RingExplosionSound, Color.Team1, PositionOf(rootBall), 150);
+    
+    // Team 1 scores
+    if (onTeam == Team.Team2)
+        PlayEffect(AllPlayers(), PlayEffect.RingExplosion, Color.Team1, PositionOf(rootBall), 150);
+    // Team 2 scores
+    else
+        PlayEffect(AllPlayers(), PlayEffect.RingExplosion, Color.Team2, PositionOf(rootBall), 150);
+    
+    isCountingDown = false;
+    //volleyBallTimeReduction = 0;
+    detonationTime = 10;
+    DestroyInWorldText(counterText1);
+    DestroyInWorldText(counterText2);
+    
+    respawnBall();
 }
