@@ -208,25 +208,25 @@ if (laser3Rot == 360 * 3)
 }
 
 define globalvar outOfRange;
+define playervar tooClose;
 
-// rule: "Laser discharge"
-// if (doingLasers)
-// if (lasersReady)
-// if (rotateLasers)
-// if (TotalTimeElapsed() % 3 < 1)
-// {
-//     PlayEffect(AllPlayers(), PlayEffect.RingExplosion, Color.Red, midpoint, 30);
-// }
+rule: "Laser discharge"
+if (doingLasers)
+if (lasersReady)
+if (rotateLasers)
+{
+    PlayEffect(AllPlayers(), PlayEffect.RingExplosion, Color.Red, midpoint, 30);
+    AllPlayers().tooClose = false;
+    PlayersWithinRadius(midpoint, 15, Team.All, RadiusLOS.Off).tooClose = true;
+    Wait(5);
+    LoopIfConditionIsTrue();
+}
 
-// rule: "Laser discharge player damage"
-// Event.OngoingPlayer
-// if (!isBall)
-// if (doingLasers)
-// if (lasersReady)
-// if (rotateLasers)
-// if (DistanceBetween(EventPlayer(), midpoint) < 15)
-// if (TotalTimeElapsed() % 3 < 1)
-// {
-//     Damage(EventPlayer(), null, 85);
-//     ApplyImpulse(EventPlayer(), DirectionTowards(midpoint, EventPlayer() + Vector(0, 1, 0)), 40, Relative.ToWorld, ContraryMotion.Incorporate);
-// }
+rule: "Laser discharge player damage"
+Event.OngoingPlayer
+if (!isBall)
+if (tooClose)
+{
+    Damage(EventPlayer(), null, 85);
+    ApplyImpulse(EventPlayer(), DirectionTowards(midpoint, EventPlayer() + Vector(0, 1, 0)), 40, Relative.ToWorld, ContraryMotion.Incorporate);
+}
