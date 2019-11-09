@@ -195,8 +195,6 @@ if (!IsInSpawnRoom())
     throwType = 1;
 }
 
-define playervar knockedFrom = null;
-
 rule: "On Fire Strike"
 Event.OnDamageTaken
 if (isBall)
@@ -213,19 +211,16 @@ if (!IsInSpawnRoom())
 
     PlayEffect(AllPlayers(), PlayEffect.GoodExplosion, Color.Orange, ballLocation(), ExplosionRange());
     PlayEffect(AllPlayers(), PlayEffect.ExplosionSound, Color.Orange, ballLocation(), 100);
-    Damage(NotBall(), Attacker(), 200);
-    NotBall().knockedFrom = ballLocation();
+
+    define inExplosionRange = NotBall();
+
+    Damage(inExplosionRange, Attacker(), 200);
+    inExplosionRange.knockedFrom = ballLocation();
+    inExplosionRange.force = 30;
+    inExplosionRange.heightOffset = 1.5;
 }
 macro NotBall(): FilteredArray(AllPlayers(), !ArrayElement().isBall && DistanceBetween(ArrayElement(), ballLocation()) < ExplosionRange());
 macro ExplosionRange(): 10;
-
-rule: "Knocked"
-Event.OnDamageTaken
-if (knockedFrom != null)
-{
-    ApplyImpulse(EventPlayer(), DirectionTowards(knockedFrom, PositionOf() + Vector(0, 1.5, 0)), 30, Relative.ToWorld, ContraryMotion.Incorporate);
-    knockedFrom = null;
-}
 
 rule: "Getting charged"
 Event.OngoingPlayer

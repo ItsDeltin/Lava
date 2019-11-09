@@ -100,3 +100,16 @@ macro chargingPlayer(define player):
             HasStatus(ArrayElement(), Status.Stunned) && DistanceBetween(ArrayElement(), player) < 3
         )
     );
+
+define playervar knockedFrom = null;
+define playervar force;
+define playervar heightOffset;
+
+rule: "Knocked"
+Event.OnDamageTaken
+if (knockedFrom != null)
+if (!isBall)
+{
+    ApplyImpulse(EventPlayer(), DirectionTowards(knockedFrom, PositionOf() + Vector(0, heightOffset, 0)), force, Relative.ToWorld, ContraryMotion.Incorporate);
+    knockedFrom = null;
+}

@@ -158,7 +158,7 @@ if (doingLasers)
     if (rotateLasers && lasersReady)
     {
         outOfRange = getOutOfRange();
-        Damage(outOfRange, null, 2.5);
+        Damage(outOfRange, null, 4);
     }
 
     define intersecting = [];
@@ -208,7 +208,6 @@ if (laser3Rot == 360 * 3)
 }
 
 define globalvar outOfRange;
-define playervar tooClose;
 
 rule: "Laser discharge"
 if (doingLasers)
@@ -216,17 +215,12 @@ if (lasersReady)
 if (rotateLasers)
 {
     PlayEffect(AllPlayers(), PlayEffect.RingExplosion, Color.Red, midpoint, 30);
-    AllPlayers().tooClose = false;
-    PlayersWithinRadius(midpoint, 15, Team.All, RadiusLOS.Off).tooClose = true;
+
+    define knockPlayers = PlayersWithinRadius(midpoint, 15, Team.All, RadiusLOS.Off);
+    knockPlayers.knockedFrom = midpoint;
+    knockPlayers.force = 40;
+    knockPlayers.heightOffset = 1;
+
     Wait(5);
     LoopIfConditionIsTrue();
-}
-
-rule: "Laser discharge player damage"
-Event.OngoingPlayer
-if (!isBall)
-if (tooClose)
-{
-    Damage(EventPlayer(), null, 85);
-    ApplyImpulse(EventPlayer(), DirectionTowards(midpoint, EventPlayer() + Vector(0, 1, 0)), 40, Relative.ToWorld, ContraryMotion.Incorporate);
 }
