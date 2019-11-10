@@ -62,7 +62,7 @@ if (volleyball)
         Text           : "Keep the ball on the enemy side!",
         TextColor      : Color.White,
         Subheader      : <"<0> seconds", detonationTime>,
-        SubheaderColor : Color.Red,
+        SubheaderColor : Color.Orange,
         Location       : Location.Top,
         SortOrder      : 2,
         Spectators     : Spectators.VisibleAlways
@@ -175,12 +175,6 @@ if (IsOnGround(rootBall))
 if (isCountingDown)
 if (detonationCounter == 0)
 {
-    isCountingDown = false;
-    detonationTime = 10;
-    DestroyInWorldText(counterText1);
-    DestroyInWorldText(counterText2);
-    respawnBall();
-
     PlayEffect(AllPlayers(), PlayEffect.RingExplosionSound, Color.Team1, PositionOf(rootBall), 150);
 
     BigMessage(AllPlayers(OppositeTeamOf(onTeam)), <"<0> Your team scores! <0>", IconString(Icon.Fire)>);
@@ -198,4 +192,10 @@ if (detonationCounter == 0)
         PlayEffect(AllPlayers(), PlayEffect.RingExplosion, Color.Team2, PositionOf(rootBall), 150);
         redScore++;
     }
+
+    isCountingDown = false;
+    detonationTime = 10;
+    DestroyInWorldText(counterText1);
+    DestroyInWorldText(counterText2);
+    respawnBall();
 }

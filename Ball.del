@@ -39,25 +39,31 @@ if (ball)
 {
     // Blue's score text
     CreateHudText(
-        VisibleTo   :AllPlayers(Team.Team1),
-        Header      :<"<0> - <1>", blueScore, redScore>,
-        Location    :Location.Top,
-        SortOrder   :2,
-        HeaderColor :Color.White,
-        Reevaluation:StringRev.VisibleToAndString,
-        Spectators  :Spectators.VisibleAlways
+        VisibleTo      : AllPlayers(Team.Team1),
+        Header         : IconString(Icon.Dizzy),
+        HeaderColor    : Color.SkyBlue,
+        Subheader      : <"Enemy score: <0>", redScore>,
+        SubheaderColor : Color.Red,
+        Text           : <"Your team's score: <0>", blueScore>,
+        TextColor      : Color.SkyBlue,
+        Location       : Location.Top,
+        SortOrder      : 1,
+        Spectators     : Spectators.VisibleAlways
     );
     blueScoreText = LastTextID();
 
     // Red's score text
     CreateHudText(
-        VisibleTo   :AllPlayers(Team.Team2),
-        Header      :<"<0> - <1>", redScore, blueScore>,
-        Location    :Location.Top,
-        SortOrder   :2,
-        HeaderColor :Color.White,
-        Reevaluation:StringRev.VisibleToAndString,
-        Spectators  :Spectators.VisibleAlways
+        VisibleTo      : AllPlayers(Team.Team2),
+        Header         : IconString(Icon.Dizzy),
+        HeaderColor    : Color.SkyBlue,
+        Subheader      : <"Enemy score: <0>", blueScore>,
+        SubheaderColor : Color.Red,
+        Text           : <"Your team's score: <0>", redScore>,
+        TextColor      : Color.SkyBlue,
+        Location       : Location.Top,
+        SortOrder      : 1,
+        Spectators     : Spectators.VisibleAlways
     );
     redScoreText = LastTextID();
 
