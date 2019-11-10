@@ -54,30 +54,30 @@ rule: "Setup Arena"
     }
 
     // Pole flair
-    // CreateEffect(AllPlayers(), Effect.Orb, Color.Orange, TopPolePos(), 0.25, EffectRev.VisibleTo);
-    // CreateBeamEffect(
-    //     AllPlayers(),
-    //     BeamType.GoodBeam,
-    //     flairPos(),
-    //     TopPolePos(),
-    //     Color.Red
-    // );
-    // ChaseGlobalVariableAtRate(killzoneRot, 180, 25, RateChaseReevaluation.DestinationAndRate);
+    CreateEffect(AllPlayers(), Effect.Orb, Color.Orange, TopPolePos(), 0.25, EffectRev.VisibleTo);
+    CreateBeamEffect(
+        AllPlayers(),
+        BeamType.GoodBeam,
+        flairPos(),
+        TopPolePos(),
+        Color.Red
+    );
+    ChaseGlobalVariableAtRate(killzoneRot, 180, 25, RateChaseReevaluation.DestinationAndRate);
 }
 
-// macro flairPos(): Destination(xyPolePos(136.42), DirectionFromAngles(killzoneRot, 0), 11);
+macro flairPos(): Destination(xyPolePos(136.42), DirectionFromAngles(killzoneRot, 0), 11);
 
-// rule: "Reset killzone rot"
-// if (killzoneRot == 180)
-// {
-//     killzoneRot = -180;
-// }
+rule: "Reset killzone rot"
+if (killzoneRot == 180)
+{
+    killzoneRot = -180;
+}
 
-// rule: "Blip end"
-// if (AbsoluteValue(killzoneRot - 22.5) % 45 < 1)
-// {
-//     PlayEffect(AllPlayers(), PlayEffect.GoodExplosion, Color.Red, flairPos(), 1);
-// }
+rule: "Blip end"
+if (AbsoluteValue(killzoneRot - 22.5) % 45 < 1)
+{
+    PlayEffect(AllPlayers(), PlayEffect.GoodExplosion, Color.Red, flairPos(), 1);
+}
 
 define globalvar killzoneRot = -180;
 

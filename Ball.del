@@ -4,14 +4,14 @@ rule: "Debug Ball"
 Event.OngoingPlayer
 if (IsCommunicating(EventPlayer(), Communication.VoiceLineUp))
 {
-    if (!ballSpawned)
+    if (!ball)
     {
-        setupBallGame = true;
+        ball = true;
         goals = true;
     }
     else
     {
-        cleanupBallGame = true;
+        ball = false;
         goals = false;
     }
 }
@@ -31,15 +31,12 @@ define globalvar blueScoreText !;
 define globalvar redScoreText !;
 define globalvar ballEffect !;
 
-define globalvar ballSpawned ! = false;
-define globalvar setupBallGame;
-define globalvar cleanupBallGame !;
+define globalvar ball;
+define globalvar ballReady;
 
 rule: "Setup balls"
-if (setupBallGame)
+if (ball)
 {
-    ballSpawned = true;
-
     // Blue's score text
     CreateHudText(
         VisibleTo   :AllPlayers(Team.Team1),
@@ -81,12 +78,13 @@ if (setupBallGame)
     CreateEffect(AllPlayers(), Effect.Sphere, Color.Turquoise, ballLocation(), 1.25, EffectRev.VisibleToPositionAndRadius);
     ballEffect = LastCreatedEntity();
 
-    setupBallGame = false;
+    ballReady = true;
 }
 
 rule: "Clean up ball game"
-if (cleanupBallGame)
+if (!ball)
 {
+    ballReady = false;
     DestroyHudText(blueScoreText);
     DestroyHudText(redScoreText);
     DestroyEffect(ballEffect);
@@ -95,15 +93,13 @@ if (cleanupBallGame)
     tpFrom = null;
     tpTo = null;
     rootBall = null;
-    cleanupBallGame = false;
-    ballSpawned = false;
 }
 
 macro ballLocation(): tpTo != null ? tpTo + Vector(0, 1, 0) : Midpoint(ball1,ball2) + Vector(0, 0.5, 0);
 macro ballSpeed(): SpeedOf(rootBall);
 
 rule: "Link"
-if (ballSpawned)
+if (ball)
 {
     if (IsInAir(ball1) || IsInAir(ball2))
     {
@@ -150,24 +146,30 @@ if (ballSpawned)
 macro isStunned(define player): HasStatus(player, Status.Stunned);
 
 rule: "Respawn ball"
-if (ballSpawned)
-if (IsDead(ball1) || IsDead(ball2) || YOf(ballLocation()) < 140 || (!ballIsOnStand && isOnWall(rootBall) && ballSpeed() < 1 && !HasStatus(rootBall, Status.Stunned)))
+if (ball)
+if (IsDead(ball1) || IsDead(ball2) || YOf(ballLocation()) < 140 || ZOf(ballLocation()) > 217)
 {
     SmallMessage(AllPlayers(), "Respawning Ball");
+    respawnBall();   
+}
 
+rule: "Bounce back ball"
+if (ball)
+if (!ballIsOnStand)
+if (!HasStatus(rootBall, Status.Stunned))
+if (ballSpeed() < 1)
+if (isOnWall(rootBall))
+{
+    ApplyImpulse(rootBall, DirectionTowards(PositionOf(rootBall), TopPolePos() + Vector(0, 20, 0)), 15, Relative.ToWorld, ContraryMotion.Cancel);
+}
+
+method respawnBall()
+{
     Respawn(ball1);
     Respawn(ball2);
 
     MinWait();
 
-    respawnBall();   
-}
-
-method respawnBall()
-{
-    Teleport(ball1, TopPolePos());
-    Teleport(ball2, TopPolePos() + Vector(0, 1, 0));
-    MinWait();
     Teleport(ball1, TopPolePos());
     Teleport(ball2, TopPolePos() + Vector(0, 1, 0));
     ballIsOnStand = true;
@@ -240,14 +242,14 @@ if (HasStatus(EventPlayer(), Status.Stunned))
 }
 
 rule: "Effect when ball hits ground"
-if (ballSpawned)
+if (ball)
 if (IsOnGround(rootBall))
 {
     PlayEffect(AllPlayers(), PlayEffect.RingExplosion, Color.Turquoise, PositionOf(rootBall), 5);
 }
 
 rule: "Fast ball effect"
-if (ballSpawned)
+if (ball)
 if (!ballIsOnStand)
 if (ballSpeed() >= 10 || IsInAir(rootBall))
 {

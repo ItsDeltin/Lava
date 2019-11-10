@@ -42,7 +42,7 @@ if (!goals)
 }
 
 rule: "Blue score"
-if (ballSpawned)
+if (ballReady)
 if (goals)
 if (DistanceBetween(ballLocation(), redGoal()) <= 13)
 {
@@ -56,7 +56,7 @@ if (DistanceBetween(ballLocation(), redGoal()) <= 13)
 }
 
 rule: "Red score"
-if (ballSpawned)
+if (ballReady)
 if (goals)
 if (DistanceBetween(ballLocation(), blueGoal()) <= 13)
 {

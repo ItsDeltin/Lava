@@ -19,7 +19,7 @@ define globalvar counterText2 !;
 rule: "Setup volleyball"
 if (volleyball)
 {
-    setupBallGame = true;
+    ball = true;
 
     CreateBeamEffect(
         AllPlayers(),
@@ -58,7 +58,7 @@ if (volleyball)
 rule: "Cleanup volleyball"
 if (!volleyball)
 {
-    setupBallGame = false;
+    ball = false;
     DestroyEffect(laser1Effect);
     DestroyEffect(laser2Effect);
     DestroyEffect(laser3Effect);
@@ -69,6 +69,7 @@ if (!volleyball)
 rule: "Show counter"
 if (volleyball)
 if (!ballIsOnStand)
+if (ballReady)
 {
     CreateInWorldText(
         VisibleTo:AllPlayers(OppositeTeamOf(onTeam)),
@@ -98,7 +99,7 @@ Event.OngoingPlayer
 if (volleyball)
 if (!isBall)
 // The net is at x=0 of the map, so just test if the player has a low X coordinate.
-if (AbsoluteValue(XOf(PositionOf())) < 0.8)
+if (AbsoluteValue(XOf(PositionOf())) <= 1)
 // 158.38 is the base position plus the height of the tallest net beam effect.
 if (YOf(PositionOf()) < 158.38)
 {
@@ -107,6 +108,7 @@ if (YOf(PositionOf()) < 158.38)
 
 rule: "Start volleyball counter"
 if (volleyball)
+if (ballReady)
 if (IsOnGround(rootBall))
 if (!isCountingDown)
 if (!ballIsOnStand)
@@ -117,6 +119,7 @@ if (!ballIsOnStand)
 
 rule: "Ball on Team 1's side"
 if (volleyball)
+if (ballReady)
 if (XOf(PositionOf(rootBall)) > 0)
 {
     onTeam = Team.Team1;
@@ -125,6 +128,7 @@ if (XOf(PositionOf(rootBall)) > 0)
 
 rule: "Ball on Team 2's side"
 if (volleyball)
+if (ballReady)
 if (XOf(PositionOf(rootBall)) < 0)
 {
     onTeam = Team.Team2;
@@ -148,6 +152,7 @@ method sideSwitched()
 
 rule: "Volleyball detonates"
 if (volleyball)
+if (ballReady)
 if (IsOnGround(rootBall))
 if (isCountingDown)
 if (detonationCounter == 0)

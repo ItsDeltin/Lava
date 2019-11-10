@@ -137,3 +137,49 @@ if (IsButtonHeld(EventPlayer(), Button.Jump))
     MinWait();
     LoopIfConditionIsTrue();
 }
+
+// CreateHudText(AllPlayers(), <"<0><1><2><3>",
+    //     IconString(Icon.ArrowDown),
+    //     IconString(Icon.ArrowLeft),
+    //     IconString(Icon.ArrowRight),
+    //     IconString(Icon.ArrowUp)>);
+    // CreateHudText(AllPlayers(), <"<0><1><2><3>",
+    //     IconString(Icon.Asterisk),
+    //     IconString(Icon.Bolt),
+    //     IconString(Icon.Checkmark),
+    //     IconString(Icon.Circle)>);
+    // CreateHudText(AllPlayers(), <"<0><1><2><3>",
+    //     IconString(Icon.Club),
+    //     IconString(Icon.Diamond),
+    //     IconString(Icon.Dizzy),
+    //     IconString(Icon.ExclamationMark)>);
+    // CreateHudText(AllPlayers(), <"<0><1><2><3>",
+    //     IconString(Icon.Eye),
+    //     IconString(Icon.Fire),
+    //     IconString(Icon.Flag),
+    //     IconString(Icon.Halo)>);
+    // CreateHudText(AllPlayers(), <"<0><1><2><3>",
+    //     IconString(Icon.Happy),
+    //     IconString(Icon.Heart),
+    //     IconString(Icon.Moon),
+    //     IconString(Icon.No)>);
+    // CreateHudText(AllPlayers(), <"<0><1><2><3>",
+    //     IconString(Icon.Plus),
+    //     IconString(Icon.Poison),
+    //     IconString(Icon.Poison2),
+    //     IconString(Icon.QuestionMark)>);
+    // CreateHudText(AllPlayers(), <"<0><1><2><3>",
+    //     IconString(Icon.Radioactive),
+    //     IconString(Icon.Recycle),
+    //     IconString(Icon.RingThick),
+    //     IconString(Icon.RingThin)>);
+    // CreateHudText(AllPlayers(), <"<0><1><2><3>",
+    //     IconString(Icon.Sad),
+    //     IconString(Icon.Skull),
+    //     IconString(Icon.Spade),
+    //     IconString(Icon.Spiral)>);
+    // CreateHudText(AllPlayers(), <"<0><1><2><3>",
+    //     IconString(Icon.Stop),
+    //     IconString(Icon.Trashcan),
+    //     IconString(Icon.Warning),
+    //     IconString(Icon.X)>);
