@@ -1,0 +1,18 @@
+import "Lava.del";
+
+rule: "Drop"
+Event.OngoingPlayer
+Player.Reinhardt
+if (IsButtonHeld(EventPlayer(), Button.Ultimate))
+{
+    SmallMessage(EventPlayer(), "ACCELERATING");
+    StartAccelerating(EventPlayer(), Down(), 100, 70, Relative.ToWorld, AccelerateRev.None);
+}
+
+rule: "Drop Revert"
+Event.OngoingPlayer
+Player.Reinhardt
+if (IsOnGround())
+{
+    StopAccelerating(EventPlayer());
+}

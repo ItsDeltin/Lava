@@ -165,6 +165,8 @@ if (isOnWall(rootBall))
 
 method respawnBall()
 {
+    ballIsOnStand = true;
+
     Respawn(ball1);
     Respawn(ball2);
 
@@ -172,7 +174,6 @@ method respawnBall()
 
     Teleport(ball1, TopPolePos());
     Teleport(ball2, TopPolePos() + Vector(0, 1, 0));
-    ballIsOnStand = true;
 }
 
 rule: "On Ball Hit"

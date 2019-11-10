@@ -15,6 +15,7 @@ define globalvar isCountingDown;
 define globalvar onTeam;
 define globalvar counterText1 !;
 define globalvar counterText2 !;
+define globalvar tutorialText !;
 
 rule: "Setup volleyball"
 if (volleyball)
@@ -53,6 +54,20 @@ if (volleyball)
 
     netLength = 150;
     detonationTime = 10;
+
+    CreateHudText(
+        VisibleTo      : AllPlayers(),
+        Header         : IconString(Icon.Halo),
+        HeaderColor    : Color.Turquoise,
+        Text           : "Keep the ball on the enemy side!",
+        TextColor      : Color.White,
+        Subheader      : <"<0> seconds", detonationTime>,
+        SubheaderColor : Color.Red,
+        Location       : Location.Top,
+        SortOrder      : 2,
+        Spectators     : Spectators.VisibleAlways
+    );
+    tutorialText = LastTextID();
 }
 
 rule: "Cleanup volleyball"
@@ -64,6 +79,7 @@ if (!volleyball)
     DestroyEffect(laser3Effect);
     DestroyInWorldText(counterText1);
     DestroyInWorldText(counterText2);
+    DestroyHudText(tutorialText);
 }
 
 rule: "Show counter"
@@ -120,6 +136,7 @@ if (!ballIsOnStand)
 rule: "Ball on Team 1's side"
 if (volleyball)
 if (ballReady)
+if (!ballIsOnStand)
 if (XOf(PositionOf(rootBall)) > 0)
 {
     onTeam = Team.Team1;
@@ -129,6 +146,7 @@ if (XOf(PositionOf(rootBall)) > 0)
 rule: "Ball on Team 2's side"
 if (volleyball)
 if (ballReady)
+if (!ballIsOnStand)
 if (XOf(PositionOf(rootBall)) < 0)
 {
     onTeam = Team.Team2;
@@ -157,6 +175,12 @@ if (IsOnGround(rootBall))
 if (isCountingDown)
 if (detonationCounter == 0)
 {
+    isCountingDown = false;
+    detonationTime = 10;
+    DestroyInWorldText(counterText1);
+    DestroyInWorldText(counterText2);
+    respawnBall();
+
     PlayEffect(AllPlayers(), PlayEffect.RingExplosionSound, Color.Team1, PositionOf(rootBall), 150);
 
     BigMessage(AllPlayers(OppositeTeamOf(onTeam)), <"<0> Your team scores! <0>", IconString(Icon.Fire)>);
@@ -174,12 +198,4 @@ if (detonationCounter == 0)
         PlayEffect(AllPlayers(), PlayEffect.RingExplosion, Color.Team2, PositionOf(rootBall), 150);
         redScore++;
     }
-    
-    isCountingDown = false;
-    //volleyBallTimeReduction = 0;
-    detonationTime = 10;
-    DestroyInWorldText(counterText1);
-    DestroyInWorldText(counterText2);
-
-    respawnBall();
 }
