@@ -85,7 +85,7 @@ if (doingLasers)
                 rot(midpoint, fraction * i, boundaryLength),
                 rot(midpoint, fraction * (i + 1), boundaryLength),
                 Color.Blue,
-                EffectRev.None
+                EffectRev.VisibleTo
             );
 
             ringEffectArray = Append(ringEffectArray, LastCreatedEntity());

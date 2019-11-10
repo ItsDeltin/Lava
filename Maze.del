@@ -1,0 +1,220 @@
+import "Lava.del";
+
+define globalvar cellStates = [];
+define globalvar toVisitX = [];
+define globalvar toVisitY = [];
+define globalvar generateStep = 0;
+
+macro mazeWidth()  : 10;
+macro mazeHeight() : 10;
+// Flags, each must be double of the one before.
+macro TopWall()    : 1;
+macro RightWall()  : 2;
+macro BottomWall() : 4;
+macro LeftWall()   : 8;
+macro Visited()    : 16;
+// The current visiting cell
+macro curX(): FirstOf(toVisitX);
+macro curY(): FirstOf(toVisitY);
+
+rule: "Maze: Generate: Debug"
+{
+    CreateHudText(AllPlayers(), <"Number of nodes to be visited: <0>", CountOf(toVisitX)>);
+}
+
+rule: "Maze: Generate: Initial states"
+if (IsTrueForAny(AllPlayers(), HasSpawned(ArrayElement())))
+if (generateStep == 0)
+{
+    define column = [];
+    for (define y = 0; y < mazeHeight(); y++)
+        column[y] = 15;
+
+    for (define x = 0; x < mazeWidth(); x++)
+        cellStates[x] = column;
+    
+    generateStep = 1;
+}
+
+rule: "Maze: Generate: Visit Cells"
+if (generateStep == 1)
+{
+    define initialX = RandomInteger(0, mazeWidth());
+    define initialY = RandomInteger(0, mazeHeight());
+
+    ModifyGlobalVariable(toVisitX, Operation.AppendToArray, initialX);
+    ModifyGlobalVariable(toVisitY, Operation.AppendToArray, initialY);
+
+    cellStates[initialX][initialY] += Visited();
+
+    while (CountOf(toVisitX) > 0)
+    {
+        define xOffsets = [0,1,0,-1];
+        define yOffsets = [1,0,-1,0];
+        define order = RandomizedArray([0,1,2,3]);
+
+        foreach (define i in order)
+        {
+            define dirX = xOffsets[i];
+            define dirY = yOffsets[i];
+            define checkX = curX() + dirX;
+            define checkY = curY() + dirY;
+
+            if (checkX >= 0 && checkY >= 0 && checkX < mazeWidth() && checkY < mazeHeight() && cellStates[checkX][checkY] < Visited())
+            {
+                ModifyGlobalVariable(toVisitX, Operation.AppendToArray, checkX);
+                ModifyGlobalVariable(toVisitY, Operation.AppendToArray, checkY);
+
+                define thisWall = -1;
+                define neighborWall = -1;
+
+                // Neighbor is to the right
+                if (dirX == 1)
+                {
+                    thisWall = RightWall();
+                    neighborWall = LeftWall();
+                }
+                // Neighbor is to the left
+                else if (dirX == -1)
+                {
+                    thisWall = LeftWall();
+                    neighborWall = RightWall();
+                }
+                // Neighbor is above
+                else if (dirY == 1)
+                {
+                    thisWall = TopWall();
+                    neighborWall = BottomWall();
+                }
+                // Neighbor is below
+                else if (dirY == -1)
+                {
+                    thisWall = BottomWall();
+                    neighborWall = TopWall();
+                }
+
+                MinWait();
+
+                cellStates[curX()][curY()] -= thisWall;
+                cellStates[checkX][checkY] -= neighborWall;
+                cellStates[checkX][checkY] += Visited();
+            }
+        }
+
+        MinWait();
+
+        ModifyGlobalVariable(toVisitX, Operation.RemoveFromArrayByIndex, 0);
+        ModifyGlobalVariable(toVisitY, Operation.RemoveFromArrayByIndex, 0);
+    }
+
+    generateStep = 2;
+}
+
+define globalvar buildMazeAt = Vector(17, 154.88, 121.01);
+
+macro Scale(): 3;
+
+rule: "Maze: Generate: Create walls: Top"
+if (generateStep == 2)
+{
+    for (define y = 0; y < mazeHeight(); y++)
+    {
+        define topWallStart = 0;
+        define topWallEnd = 0;
+
+        for (define x = 0; x < mazeWidth(); x++)
+        {
+            define cellCheck = cellStates[x][y] - Visited();
+
+            define left;
+            define bottom;
+            define right;
+            define top;
+
+            if (cellCheck >= LeftWall())
+            {
+                left = true;
+                cellCheck -= LeftWall();
+            }
+            if (cellCheck >= BottomWall())
+            {
+                bottom = true;
+                cellCheck -= BottomWall();
+            }
+            if (cellCheck >= RightWall())
+            {
+                right = true;
+                cellCheck -= RightWall();
+            }
+            if (cellCheck >= TopWall())
+            {
+                top = true;
+                cellCheck -= TopWall();
+
+                if (topWallStart == -1) topWallStart = x;
+                topWallEnd = x;
+            }
+            else if (topWallStart != -1)
+            {
+                CreateBeamEffect(
+                    AllPlayers(),
+                    BeamType.BadBeam,
+                    buildMazeAt + Vector(topWallStart * Scale(), 0, y * Scale()),
+                    buildMazeAt + Vector((topWallEnd + 1) * Scale(), 0, y * Scale()),
+                    Color.Red,
+                    EffectRev.VisibleTo
+                );
+                topWallStart = -1;
+            }
+            if (cellCheck != 0) SmallMessage(AllPlayers(), <"cellCheck equals <0> instead of 0.", cellCheck>);
+        }
+    }
+
+    generateStep = 3;
+}
+
+rule: "Maze: Generate: Create walls: Left"
+if (generateStep == 3)
+{
+    for (define x = 0; x < mazeWidth(); x++)
+    {
+        define leftWallStart = 0;
+        define leftWallEnd = 0;
+
+        for (define y = 0; y < mazeHeight(); y++)
+        {
+            define cellCheck = cellStates[x][y] - Visited();
+
+            if (cellCheck >= LeftWall())
+            {
+                if (leftWallStart == -1) leftWallStart = y;
+                leftWallEnd = y;
+            }
+            else if (leftWallStart != -1)
+            {
+                CreateBeamEffect(
+                    AllPlayers(),
+                    BeamType.BadBeam,
+                    buildMazeAt + Vector(y * Scale(), 0, leftWallStart * Scale()),
+                    buildMazeAt + Vector(y * Scale(), 0, (leftWallEnd + 1) * Scale()),
+                    Color.Red,
+                    EffectRev.VisibleTo
+                );
+                leftWallStart = -1;
+            }
+        }
+    }
+
+    generateStep = 4;
+}
+
+define globalvar debug1 0;
+define globalvar debug2 1;
+define globalvar debug3 2;
+define globalvar debug4 3;
+define globalvar debug5 4;
+define globalvar debug6 5;
+define globalvar debug7 6;
+define globalvar debug8 7;
+define globalvar debug9 8;
+define globalvar debug10 9;
