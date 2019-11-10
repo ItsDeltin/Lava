@@ -159,13 +159,6 @@ method sideSwitched()
     detonationCounter = detonationTime;
     isCountingDown = false;
     detonationTime = Max(2, detonationTime - 1);
-
-    // volleyBallTimeReduction++;
-    // if (volleyBallTimeReduction == 2)
-    // {
-    //     detonationTime = Max(0, detonationTime - 1);
-    //     volleyBallTimeReduction = 0;
-    // }
 }
 
 rule: "Volleyball detonates"
