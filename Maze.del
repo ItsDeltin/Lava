@@ -97,15 +97,12 @@ if (generateStep == 1)
                     neighborWall = TopWall();
                 }
 
-                MinWait();
-
                 cellStates[x][y] -= thisWall;
                 cellStates[checkX][checkY] -= neighborWall;
                 cellStates[checkX][checkY] += Visited();
                 ModifyGlobalVariable(toVisitX, Operation.AppendToArray, checkX);
                 ModifyGlobalVariable(toVisitY, Operation.AppendToArray, checkY);
             }
-            MinWait();
         }
 
         MinWait();
@@ -138,27 +135,40 @@ if (generateStep == 2)
 {
     DestroyAllEffects();
 
-    for (define z = 0; z < mazeHeight(); z++)
+    for (define z = 0; z <= mazeHeight(); z++)
     {
         define topLineStart = -1;
         define bottomLineStart = -1;
 
         for (define x = 0; x < mazeWidth(); x++)
         {
+            // Teleport(AllPlayers(), buildMazeAt + Vector(x * Scale(), 0, z * Scale()));
+            // SmallMessage(AllPlayers(), <"<0>, <1>", x, z>);
+            // Wait(2);
+
             define cellCheck = cellStates[x][z] - Visited();
 
             // Left wall
             if (cellCheck >= LeftWall())
+            {
                 cellCheck -= LeftWall();
+                // SmallMessage(AllPlayers(), <"Has left wall", x, z>);
+                // Wait(2);
+            }
             
             // Bottom wall
             if (cellCheck >= BottomWall())
             {
                 cellCheck -= BottomWall();
                 if (bottomLineStart == -1 && z == 0) bottomLineStart = z;
+
+                // SmallMessage(AllPlayers(), <"Has bottom wall", x, z>);
+                // Wait(2);
             }
             else if (bottomLineStart != -1 && z == 0)
             {
+                SmallMessage(AllPlayers(), "Created bottom effect");
+
                 CreateBeamEffect(
                     AllPlayers(),
                     BeamType.GrappleBeam,
@@ -172,13 +182,20 @@ if (generateStep == 2)
 
             // Right wall
             if (cellCheck >= RightWall())
+            {
                 cellCheck -= RightWall();
+                // SmallMessage(AllPlayers(), <"Has right wall", x, z>);
+                // Wait(2);
+            }
             
             // Top wall
             if (cellCheck >= TopWall())
             {
                 cellCheck -= TopWall();
                 if (topLineStart == -1) topLineStart = x;
+
+                // SmallMessage(AllPlayers(), <"Has top wall", x, z>);
+                // Wait(2);
             }
             else if (topLineStart != -1)
             {
@@ -193,63 +210,86 @@ if (generateStep == 2)
                 topLineStart = -1;
             }
         }
-    }
-    for (define x = 0; x < mazeHeight(); x++)
-    {
-        define leftLineStart = -1;
-        define rightLineStart = -1;
 
-        for (define z = 0; z < mazeWidth(); z++)
+        if (topLineStart != -1)
         {
-            define cellCheck = cellStates[x][z] - Visited();
-
-            // Left wall
-            if (cellCheck >= LeftWall())
-            {
-                cellCheck -= LeftWall();
-                if (leftLineStart == -1 && x == 0) leftLineStart = z;
-            }
-            else if (leftLineStart != -1 && x == 0)
-            {
-                CreateBeamEffect(
-                    AllPlayers(),
-                    BeamType.GrappleBeam,
-                    buildMazeAt + Vector((x - 0.5) * Scale(), 15, (leftLineStart + 0.5) * Scale()),
-                    buildMazeAt + Vector((x - 0.5) * Scale(), 15, (z - 1 - 0.5) * Scale()),
-                    Color.Red,
-                    EffectRev.VisibleTo
-                );
-                leftLineStart = -1;
-            }
-            
-            // Bottom wall
-            if (cellCheck >= BottomWall())
-                cellCheck -= BottomWall();
-
-            // Right wall
-            if (cellCheck >= RightWall())
-            {
-                cellCheck -= RightWall();
-                if (rightLineStart == -1) rightLineStart = z;
-            }
-            else if (rightLineStart != -1)
-            {
-                CreateBeamEffect(
-                    AllPlayers(),
-                    BeamType.GrappleBeam,
-                    buildMazeAt + Vector((x + 0.5) * Scale(), 15, (rightLineStart + 0.5) * Scale()),
-                    buildMazeAt + Vector((x + 0.5) * Scale(), 15, (z - 1 - 0.5) * Scale()),
-                    Color.Red,
-                    EffectRev.VisibleTo
-                );
-                rightLineStart = -1;
-            }
-            
-            // Top wall
-            if (cellCheck >= TopWall())
-                cellCheck -= TopWall();
+            CreateBeamEffect(
+                AllPlayers(),
+                BeamType.GrappleBeam,
+                buildMazeAt + Vector((topLineStart - 0.5) * Scale(), 15, (z + 0.5) * Scale()),
+                buildMazeAt + Vector((mazeWidth() + 0.5) * Scale(), 15, (z + 0.5) * Scale()),
+                Color.Red,
+                EffectRev.VisibleTo
+            );
+        }
+        if (bottomLineStart != -1)
+        {
+            CreateBeamEffect(
+                AllPlayers(),
+                BeamType.GrappleBeam,
+                buildMazeAt + Vector((bottomLineStart - 0.5) * Scale(), 15, (z - 0.5) * Scale()),
+                buildMazeAt + Vector((mazeWidth() - 1 + 0.5) * Scale(), 15, (z - 0.5) * Scale()),
+                Color.Red,
+                EffectRev.VisibleTo
+            );
         }
     }
+    // for (define x = 0; x < mazeHeight(); x++)
+    // {
+    //     define leftLineStart = -1;
+    //     define rightLineStart = -1;
+
+    //     for (define z = 0; z < mazeWidth(); z++)
+    //     {
+    //         define cellCheck = cellStates[x][z] - Visited();
+
+    //         // Left wall
+    //         if (cellCheck >= LeftWall())
+    //         {
+    //             cellCheck -= LeftWall();
+    //             if (leftLineStart == -1 && x == 0) leftLineStart = z;
+    //         }
+    //         else if (leftLineStart != -1 && x == 0)
+    //         {
+    //             CreateBeamEffect(
+    //                 AllPlayers(),
+    //                 BeamType.GrappleBeam,
+    //                 buildMazeAt + Vector((x - 0.5) * Scale(), 15, (leftLineStart + 0.5) * Scale()),
+    //                 buildMazeAt + Vector((x - 0.5) * Scale(), 15, (z - 1 - 0.5) * Scale()),
+    //                 Color.Red,
+    //                 EffectRev.VisibleTo
+    //             );
+    //             leftLineStart = -1;
+    //         }
+            
+    //         // Bottom wall
+    //         if (cellCheck >= BottomWall())
+    //             cellCheck -= BottomWall();
+
+    //         // Right wall
+    //         if (cellCheck >= RightWall())
+    //         {
+    //             cellCheck -= RightWall();
+    //             if (rightLineStart == -1) rightLineStart = z;
+    //         }
+    //         else if (rightLineStart != -1)
+    //         {
+    //             CreateBeamEffect(
+    //                 AllPlayers(),
+    //                 BeamType.GrappleBeam,
+    //                 buildMazeAt + Vector((x + 0.5) * Scale(), 15, (rightLineStart + 0.5) * Scale()),
+    //                 buildMazeAt + Vector((x + 0.5) * Scale(), 15, (z - 1 - 0.5) * Scale()),
+    //                 Color.Red,
+    //                 EffectRev.VisibleTo
+    //             );
+    //             rightLineStart = -1;
+    //         }
+            
+    //         // Top wall
+    //         if (cellCheck >= TopWall())
+    //             cellCheck -= TopWall();
+    //     }
+    // }
     generateStep = 3;
 }
 
