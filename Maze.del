@@ -369,6 +369,9 @@ if (generateStep == 6)
 define globalvar navigator;
 define globalvar navigateTo;
 define globalvar walkPath = [];
+define globalvar isGettingPath ! = false;
+
+define globalvar chosenPathEffects;
 
 rule: "Maze: A*: Nav"
 if (generateStep >= 5)
@@ -376,6 +379,8 @@ if (IsButtonHeld(HostPlayer(), Button.Interact))
 {
     navigateTo = mazePos(PositionOf(HostPlayer()));
     SmallMessage(AllPlayers(), <"Navigating to <0>", navigateTo>);
+
+    isGettingPath = true;
 
     define navigateToX ! = RoundToInteger(XOf(navigateTo), Rounding.Nearest);
     define navigateToZ ! = RoundToInteger(ZOf(navigateTo), Rounding.Nearest);
@@ -396,12 +401,9 @@ if (IsButtonHeld(HostPlayer(), Button.Interact))
         define z ! = ZOf(aStarCheck[i]);
         define cellCheck ! = cellStates[x][z] - 16;
 
-        SmallMessage(AllPlayers(), <"Checking <0>,<1> (<2>,<3>)",x,z,navigateToX,navigateToZ>);
-
         if (x == navigateToX && z == navigateToZ)
         {
             found = i;
-            SmallMessage(AllPlayers(), "found");
         }
         else
         {
@@ -443,18 +445,25 @@ if (IsButtonHeld(HostPlayer(), Button.Interact))
         MinWait();
     }
 
-    SmallMessage(AllPlayers(), "Found end, backtracking...");
+    DestroyEffectArray(chosenPathEffects);
+    chosenPathEffects = [];
 
-    define finalPath = [];
+    walkPath = [];
     while (found != -1)
     {
-        finalPath = [aStarCheck[found], finalPath];
+        walkPath = [Vector(
+                XOf(buildMazeAt) + (XOf(aStarCheck[found]) * Scale()),
+                YOf(buildMazeAt),
+                ZOf(buildMazeAt) + (ZOf(aStarCheck[found]) * Scale())
+            ),
+            walkPath];
+        CreateEffect(AllPlayers(), Effect.Sphere, Color.Purple, FirstOf(walkPath), 0.25, EffectRev.VisibleTo);
+        chosenPathEffects = Append(chosenPathEffects, LastCreatedEntity());
         found = YOf(aStarCheck[found]);
     }
-    //walkPath = finalPath;
 
+    aStarCheck = [];
+
+    isGettingPath = false;
     SmallMessage(AllPlayers(), "Found path!");
 }
-
-macro curAStarX(): XOf(FirstOf(aStarCheck));
-macro curAStarZ(): ZOf(FirstOf(aStarCheck));
