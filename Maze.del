@@ -6,13 +6,14 @@ define globalvar xAxisWalls = [];
 define globalvar zAxisWalls = [];
 
 define globalvar cellStates = [];
-define globalvar toVisitX 0 = [];
-define globalvar toVisitY 1 = [];
-define globalvar generateStep = 0;
+define globalvar toVisitX   = [];
+define globalvar toVisitY   = [];
+define globalvar numberOfVisits = 0;
+define globalvar generateStep = 1;
 
 macro mazeWidth()  : 15;
 macro mazeHeight() : 10;
-define globalvar buildMazeAt = Vector(17, 154.88, 121.01);
+define globalvar buildMazeAt = Vector(-86.56, 154.88, 83.64);
 macro Scale(): 7;
 // Flags, each must be double of the one before.
 macro TopWall()    : 1;
@@ -27,7 +28,7 @@ rule: "Maze: Generate: Debug"
 }
 
 rule: "Maze: Generate: Initial states"
-if (generateStep == 0)
+if (generateStep == 1)
 {
     define column = [];
     for (define y = 0; y < mazeHeight(); y++)
@@ -36,14 +37,14 @@ if (generateStep == 0)
     for (define x = 0; x < mazeWidth(); x++)
         cellStates[x] = column;
     
-    generateStep = 1;
+    generateStep = 2;
 }
 
 define globalvar xOffsets = [0,1,0,-1];
 define globalvar yOffsets = [1,0,-1,0];
 
 rule: "Maze: Generate: Visit Cells"
-if (generateStep == 1)
+if (generateStep == 2)
 {
     define initialX = RandomInteger(0, mazeWidth() - 1);
     define initialY = RandomInteger(0, mazeHeight() - 1);
@@ -116,11 +117,11 @@ if (generateStep == 1)
         ModifyGlobalVariable(toVisitY, Operation.RemoveFromArrayByIndex, removeAt);
     }
 
-    generateStep = 2;
+    generateStep = 3;
 }
 
 rule: "Maze: Generate: Create Walls: X axis"
-if (generateStep == 2)
+if (generateStep == 3)
 {
     DestroyAllEffects();
 
@@ -202,21 +203,27 @@ if (generateStep == 2)
 
     foreach (define wallData in xAxisWalls)
     {
+        wallData = Vector(
+            XOf(buildMazeAt) + XOf(wallData),
+            XOf(buildMazeAt) + YOf(wallData),
+            ZOf(buildMazeAt) + ZOf(wallData)
+        );
+
         CreateBeamEffect(
             AllPlayers(),
             BeamType.GrappleBeam,
-            buildMazeAt + Vector(XOf(wallData), 0, ZOf(wallData)),
-            buildMazeAt + Vector(YOf(wallData), 0, ZOf(wallData)),
+            Vector(XOf(wallData), YOf(buildMazeAt), ZOf(wallData)),
+            Vector(YOf(wallData), YOf(buildMazeAt), ZOf(wallData)),
             Color.Red,
             EffectRev.VisibleTo
         );
     }
 
-    generateStep = 3;
+    generateStep = 4;
 }
 
 rule: "Maze: Generate: Create Walls: Z axis"
-if (generateStep == 3)
+if (generateStep == 4)
 {
     for (define x = 0; x < mazeWidth(); x++)
     {
@@ -294,15 +301,38 @@ if (generateStep == 3)
 
     foreach (define wallData in zAxisWalls)
     {
+        wallData = Vector(
+            ZOf(buildMazeAt) + XOf(wallData),
+            ZOf(buildMazeAt) + YOf(wallData),
+            XOf(buildMazeAt) + ZOf(wallData)
+        );
+
         CreateBeamEffect(
             AllPlayers(),
             BeamType.GrappleBeam,
-            buildMazeAt + Vector(ZOf(wallData), 0, XOf(wallData)),
-            buildMazeAt + Vector(ZOf(wallData), 0, YOf(wallData)),
+            Vector(ZOf(wallData), YOf(buildMazeAt), XOf(wallData)),
+            Vector(ZOf(wallData), YOf(buildMazeAt), YOf(wallData)),
             Color.Red,
             EffectRev.VisibleTo
         );
     }
 
-    generateStep = 4;
+    generateStep = 5;
+}
+
+rule: "Maze: Kill players on walls"
+if (generateStep == 6)
+{
+    foreach (define player in AllPlayers())
+    {
+        define px = XOf(PositionOf(player));
+        define pz = ZOf(PositionOf(player));
+        if (     IsTrueForAny(xAxisWalls, AbsoluteValue(pz - ZOf(ArrayElement())) < 1 && px > XOf(ArrayElement()) && YOf(ArrayElement()) > px))
+            Kill(player, null);
+        else if (IsTrueForAny(zAxisWalls, AbsoluteValue(px - ZOf(ArrayElement())) < 1 && pz > XOf(ArrayElement()) && YOf(ArrayElement()) > pz))
+        {
+            Kill(player, null);
+        }
+    }
+    LoopIfConditionIsTrue();
 }
