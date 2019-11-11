@@ -320,6 +320,21 @@ if (generateStep == 4)
     generateStep = 5;
 }
 
+rule: "TP players into maze"
+if (generateStep == 5)
+{
+    foreach (define player in AllPlayers())
+    {
+        Teleport(player, Vector(
+           XOf(buildMazeAt) + (RandomInteger(0, mazeWidth()) * Scale()),
+           YOf(buildMazeAt),
+           ZOf(buildMazeAt) + (RandomInteger(0, mazeHeight()) * Scale())
+        ));
+    }
+
+    generateStep = 6;
+}
+
 rule: "Maze: Kill players on walls"
 if (generateStep == 6)
 {
