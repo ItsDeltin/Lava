@@ -418,7 +418,7 @@ if (IsButtonHeld(HostPlayer(), Button.Interact))
             if (cellCheck >= BottomWall())
                 cellCheck -= BottomWall();
             // No bottom wall
-            else if (z < mazeHeight() - 1 && !IsTrueForAny(aStarCheck, XOf(ArrayElement()) == x && ZOf(ArrayElement()) == z - 1))
+            else if (z > 0 && !IsTrueForAny(aStarCheck, XOf(ArrayElement()) == x && ZOf(ArrayElement()) == z - 1))
                 ModifyGlobalVariable(aStarCheck, Operation.AppendToArray, Vector(x, i, z - 1));
             
             MinWait();
@@ -436,7 +436,7 @@ if (IsButtonHeld(HostPlayer(), Button.Interact))
             if (cellCheck >= TopWall())
                 cellCheck -= TopWall();
             // No top wall
-            else if (z > 0 && !IsTrueForAny(aStarCheck, XOf(ArrayElement()) == x && ZOf(ArrayElement()) == z + 1))
+            else if (z < mazeHeight() - 1 && !IsTrueForAny(aStarCheck, XOf(ArrayElement()) == x && ZOf(ArrayElement()) == z + 1))
                 ModifyGlobalVariable(aStarCheck, Operation.AppendToArray, Vector(x, i, z + 1));
         }
 
