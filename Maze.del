@@ -1,5 +1,10 @@
 import "Lava.del";
 
+// x/zAxisWalls are array of vectors determining the location of each wall.
+// The X in the vector for xAxisWalls determines where the wall starts on the X axis. The Y determines where it ends. The Z is where on the Z axis the wall is.
+define globalvar xAxisWalls = [];
+define globalvar zAxisWalls = [];
+
 define globalvar cellStates = [];
 define globalvar toVisitX 0 = [];
 define globalvar toVisitY 1 = [];
@@ -7,13 +12,14 @@ define globalvar generateStep = 0;
 
 macro mazeWidth()  : 15;
 macro mazeHeight() : 10;
+define globalvar buildMazeAt = Vector(17, 154.88, 121.01);
+macro Scale(): 7;
 // Flags, each must be double of the one before.
 macro TopWall()    : 1;
 macro RightWall()  : 2;
 macro BottomWall() : 4;
 macro LeftWall()   : 8;
 macro Visited()    : 16;
-// The current visiting cell
 
 rule: "Maze: Generate: Debug"
 {
@@ -113,12 +119,7 @@ if (generateStep == 1)
     generateStep = 2;
 }
 
-define globalvar buildMazeAt = Vector(17, 154.88, 121.01);
-
-macro Scale(): 7;
-
-rule: "Maze: Generate: Create walls X axis"
-if (IsButtonHeld(HostPlayer(), Button.Interact))
+rule: "Maze: Generate: Create Walls: X axis"
 if (generateStep == 2)
 {
     DestroyAllEffects();
@@ -157,13 +158,15 @@ if (generateStep == 2)
             }
             else if (topLineStart != -1)
             {
-                CreateBeamEffect(
-                    AllPlayers(),
-                    BeamType.GrappleBeam,
-                    buildMazeAt + Vector((topLineStart - 0.5) * Scale(), 0, (z + 0.5) * Scale()),
-                    buildMazeAt + Vector((x - 1 + 0.5) * Scale(), 0, (z + 0.5) * Scale()),
-                    Color.Red,
-                    EffectRev.VisibleTo
+                ModifyGlobalVariable(xAxisWalls, Operation.AppendToArray, 
+                    Vector(
+                        // Wall start
+                        (topLineStart - 0.5) * Scale(),
+                        // Wall end
+                        (x - 1 + 0.5) * Scale(),
+                        // Wall Z axis
+                        (z + 0.5) * Scale()
+                    )
                 );
                 topLineStart = -1;
             }
@@ -171,32 +174,48 @@ if (generateStep == 2)
 
         if (topLineStart != -1)
         {
-            CreateBeamEffect(
-                AllPlayers(),
-                BeamType.GrappleBeam,
-                buildMazeAt + Vector((topLineStart - 0.5) * Scale(), 0, (z + 0.5) * Scale()),
-                buildMazeAt + Vector((mazeWidth() - 1 + 0.5) * Scale(), 0, (z + 0.5) * Scale()),
-                Color.Red,
-                EffectRev.VisibleTo
+            ModifyGlobalVariable(xAxisWalls, Operation.AppendToArray, 
+                Vector(
+                    // Wall start
+                    (topLineStart - 0.5) * Scale(),
+                    // Wall end
+                    (mazeWidth() - 1 + 0.5) * Scale(),
+                    // Wall Z axis
+                    (z + 0.5) * Scale()
+                )
             );
         }
         if (bottomLineStart != -1)
         {
-            CreateBeamEffect(
-                AllPlayers(),
-                BeamType.GrappleBeam,
-                buildMazeAt + Vector((bottomLineStart - 0.5) * Scale(), 0, (z - 0.5) * Scale()),
-                buildMazeAt + Vector((mazeWidth() - 1 + 0.5) * Scale(), 0, (z - 0.5) * Scale()),
-                Color.Red,
-                EffectRev.VisibleTo
+            ModifyGlobalVariable(xAxisWalls, Operation.AppendToArray, 
+                Vector(
+                    // Wall start
+                    (bottomLineStart - 0.5) * Scale(),
+                    // Wall end
+                    (mazeWidth() - 1 + 0.5) * Scale(),
+                    // Wall Z axis
+                    (z - 0.5) * Scale()
+                )
             );
         }
+    }
+
+    foreach (define wallData in xAxisWalls)
+    {
+        CreateBeamEffect(
+            AllPlayers(),
+            BeamType.GrappleBeam,
+            buildMazeAt + Vector(XOf(wallData), 0, ZOf(wallData)),
+            buildMazeAt + Vector(YOf(wallData), 0, ZOf(wallData)),
+            Color.Red,
+            EffectRev.VisibleTo
+        );
     }
 
     generateStep = 3;
 }
 
-rule: "Maze: Generate: Create walls Z axis"
+rule: "Maze: Generate: Create Walls: Z axis"
 if (generateStep == 3)
 {
     for (define x = 0; x < mazeWidth(); x++)
@@ -227,13 +246,15 @@ if (generateStep == 3)
             }
             else if (rightLineStart != -1)
             {
-                CreateBeamEffect(
-                    AllPlayers(),
-                    BeamType.GrappleBeam,
-                    buildMazeAt + Vector((x + 0.5) * Scale(), 0, (rightLineStart - 0.5) * Scale()),
-                    buildMazeAt + Vector((x + 0.5) * Scale(), 0, (z - 1 + 0.5) * Scale()),
-                    Color.Red,
-                    EffectRev.VisibleTo
+                ModifyGlobalVariable(zAxisWalls, Operation.AppendToArray, 
+                    Vector(
+                        // Wall start
+                        (rightLineStart - 0.5) * Scale(),
+                        // Wall end
+                        (z - 1 + 0.5) * Scale(),
+                        // Wall x axis
+                        (x + 0.5) * Scale()
+                    )
                 );
                 rightLineStart = -1;
             }
@@ -245,26 +266,42 @@ if (generateStep == 3)
 
         if (rightLineStart != -1)
         {
-            CreateBeamEffect(
-                AllPlayers(),
-                BeamType.GrappleBeam,
-                buildMazeAt + Vector((x + 0.5) * Scale(), 0, (rightLineStart - 0.5) * Scale()),
-                buildMazeAt + Vector((x + 0.5) * Scale(), 0, (mazeHeight() - 1 + 0.5) * Scale()),
-                Color.Red,
-                EffectRev.VisibleTo
+            ModifyGlobalVariable(zAxisWalls, Operation.AppendToArray, 
+                Vector(
+                    // Wall start
+                    (rightLineStart - 0.5) * Scale(),
+                    // Wall end
+                    (mazeHeight() - 1 + 0.5) * Scale(),
+                    // Wall x axis
+                    (x + 0.5) * Scale()
+                )
             );
         }
         if (leftLineStart != -1)
         {
-            CreateBeamEffect(
-                AllPlayers(),
-                BeamType.GrappleBeam,
-                buildMazeAt + Vector((x - 0.5) * Scale(), 0, (leftLineStart - 0.5) * Scale()),
-                buildMazeAt + Vector((x - 0.5) * Scale(), 0, (mazeHeight() - 1 + 0.5) * Scale()),
-                Color.Red,
-                EffectRev.VisibleTo
+            ModifyGlobalVariable(zAxisWalls, Operation.AppendToArray, 
+                Vector(
+                    // Wall start
+                    (leftLineStart - 0.5) * Scale(),
+                    // Wall end
+                    (mazeHeight() - 1 + 0.5) * Scale(),
+                    // Wall x axis
+                    (x - 0.5) * Scale()
+                )
             );
         }
+    }
+
+    foreach (define wallData in zAxisWalls)
+    {
+        CreateBeamEffect(
+            AllPlayers(),
+            BeamType.GrappleBeam,
+            buildMazeAt + Vector(ZOf(wallData), 0, XOf(wallData)),
+            buildMazeAt + Vector(ZOf(wallData), 0, YOf(wallData)),
+            Color.Red,
+            EffectRev.VisibleTo
+        );
     }
 
     generateStep = 4;
