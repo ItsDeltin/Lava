@@ -5,7 +5,7 @@ define globalvar toVisitX 0 = [];
 define globalvar toVisitY 1 = [];
 define globalvar generateStep = 0;
 
-macro mazeWidth()  : 10;
+macro mazeWidth()  : 15;
 macro mazeHeight() : 10;
 // Flags, each must be double of the one before.
 macro TopWall()    : 1;
@@ -110,23 +110,12 @@ if (generateStep == 1)
         ModifyGlobalVariable(toVisitY, Operation.RemoveFromArrayByIndex, removeAt);
     }
 
-    debug1 = cellStates[0];
-    debug2 = cellStates[1];
-    debug3 = cellStates[2];
-    debug4 = cellStates[3];
-    debug5 = cellStates[4];
-    debug6 = cellStates[5];
-    debug7 = cellStates[6];
-    debug8 = cellStates[7];
-    debug9 = cellStates[8];
-    debug10 = cellStates[9];
-
     generateStep = 2;
 }
 
 define globalvar buildMazeAt = Vector(17, 154.88, 121.01);
 
-macro Scale(): 3;
+macro Scale(): 7;
 
 rule: "Maze: Generate: Create walls X axis"
 if (IsButtonHeld(HostPlayer(), Button.Interact))
@@ -186,7 +175,7 @@ if (generateStep == 2)
                 AllPlayers(),
                 BeamType.GrappleBeam,
                 buildMazeAt + Vector((topLineStart - 0.5) * Scale(), 0, (z + 0.5) * Scale()),
-                buildMazeAt + Vector((mazeWidth() + 0.5) * Scale(), 0, (z + 0.5) * Scale()),
+                buildMazeAt + Vector((mazeWidth() - 1 + 0.5) * Scale(), 0, (z + 0.5) * Scale()),
                 Color.Red,
                 EffectRev.VisibleTo
             );
@@ -197,7 +186,7 @@ if (generateStep == 2)
                 AllPlayers(),
                 BeamType.GrappleBeam,
                 buildMazeAt + Vector((bottomLineStart - 0.5) * Scale(), 0, (z - 0.5) * Scale()),
-                buildMazeAt + Vector((mazeWidth() + 0.5) * Scale(), 0, (z - 0.5) * Scale()),
+                buildMazeAt + Vector((mazeWidth() - 1 + 0.5) * Scale(), 0, (z - 0.5) * Scale()),
                 Color.Red,
                 EffectRev.VisibleTo
             );
@@ -260,7 +249,7 @@ if (generateStep == 3)
                 AllPlayers(),
                 BeamType.GrappleBeam,
                 buildMazeAt + Vector((x + 0.5) * Scale(), 0, (rightLineStart - 0.5) * Scale()),
-                buildMazeAt + Vector((x + 0.5) * Scale(), 0, (mazeHeight() + 0.5) * Scale()),
+                buildMazeAt + Vector((x + 0.5) * Scale(), 0, (mazeHeight() - 1 + 0.5) * Scale()),
                 Color.Red,
                 EffectRev.VisibleTo
             );
@@ -271,7 +260,7 @@ if (generateStep == 3)
                 AllPlayers(),
                 BeamType.GrappleBeam,
                 buildMazeAt + Vector((x - 0.5) * Scale(), 0, (leftLineStart - 0.5) * Scale()),
-                buildMazeAt + Vector((x - 0.5) * Scale(), 0, (mazeHeight() + 0.5) * Scale()),
+                buildMazeAt + Vector((x - 0.5) * Scale(), 0, (mazeHeight() - 1 + 0.5) * Scale()),
                 Color.Red,
                 EffectRev.VisibleTo
             );
@@ -280,80 +269,3 @@ if (generateStep == 3)
 
     generateStep = 4;
 }
-
-rule: "Maze: Generate: Create walls Style 2"
-if (IsButtonHeld(HostPlayer(), Button.Interact))
-if (generateStep == 4)
-{
-    DestroyAllEffects();
-
-    for (define y = 0; y < mazeHeight(); y++)
-    {
-        for (define x = 0; x < mazeWidth(); x++)
-        {
-            define cellCheck = cellStates[x][y] - Visited();
-
-            if (cellCheck >= LeftWall())
-            {
-                cellCheck -= LeftWall();
-                CreateBeamEffect(
-                    AllPlayers(),
-                    BeamType.GrappleBeam,
-                    buildMazeAt + Vector((x - 0.5) * Scale(), 15, (y + 0.5) * Scale()),
-                    buildMazeAt + Vector((x - 0.5) * Scale(), 15, (y - 0.5) * Scale()),
-                    Color.Red,
-                    EffectRev.VisibleTo
-                );
-            }
-            if (cellCheck >= BottomWall())
-            {
-                cellCheck -= BottomWall();
-                CreateBeamEffect(
-                    AllPlayers(),
-                    BeamType.GrappleBeam,
-                    buildMazeAt + Vector((x - 0.5) * Scale(), 15, (y - 0.5) * Scale()),
-                    buildMazeAt + Vector((x + 0.5) * Scale(), 15, (y - 0.5) * Scale()),
-                    Color.Red,
-                    EffectRev.VisibleTo
-                );
-            }
-            if (cellCheck >= RightWall())
-            {
-                cellCheck -= RightWall();
-                CreateBeamEffect(
-                    AllPlayers(),
-                    BeamType.GrappleBeam,
-                    buildMazeAt + Vector((x + 0.5) * Scale(), 15, (y + 0.5) * Scale()),
-                    buildMazeAt + Vector((x + 0.5) * Scale(), 15, (y - 0.5) * Scale()),
-                    Color.Red,
-                    EffectRev.VisibleTo
-                );
-            }
-            if (cellCheck >= TopWall())
-            {
-                cellCheck -= TopWall();
-                CreateBeamEffect(
-                    AllPlayers(),
-                    BeamType.GrappleBeam,
-                    buildMazeAt + Vector((x - 0.5) * Scale(), 15, (y + 0.5) * Scale()),
-                    buildMazeAt + Vector((x + 0.5) * Scale(), 15, (y + 0.5) * Scale()),
-                    Color.Red,
-                    EffectRev.VisibleTo
-                );
-            }
-        }
-    }
-
-    generateStep = 2;
-}
-
-define globalvar debug1 2;
-define globalvar debug2 3;
-define globalvar debug3 4;
-define globalvar debug4 5;
-define globalvar debug5 6;
-define globalvar debug6 7;
-define globalvar debug7 8;
-define globalvar debug8 9;
-define globalvar debug9 10;
-define globalvar debug10 11;
