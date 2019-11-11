@@ -22,9 +22,17 @@ macro BottomWall() : 4;
 macro LeftWall()   : 8;
 macro Visited()    : 16;
 
+macro mazePos(define pos): (pos - buildMazeAt) / Scale();
+macro randomMazeSpot(): Vector(
+        XOf(buildMazeAt) + (RandomInteger(0, mazeWidth() - 1) * Scale()),
+        YOf(buildMazeAt),
+        ZOf(buildMazeAt) + (RandomInteger(0, mazeHeight() - 1) * Scale())
+    );
+
 rule: "Maze: Generate: Debug"
 {
     CreateHudText(AllPlayers(), <"Number of nodes to be visited: <0>", CountOf(toVisitX)>);
+    CreateHudText(AllPlayers(), <"Host player pos: <0>", mazePos(PositionOf(HostPlayer()))>);
 }
 
 rule: "Maze: Generate: Initial states"
@@ -320,17 +328,20 @@ if (generateStep == 4)
     generateStep = 5;
 }
 
-rule: "TP players into maze"
+rule: "Maze: Setup players"
 if (generateStep == 5)
 {
     foreach (define player in AllPlayers())
     {
-        Teleport(player, Vector(
-           XOf(buildMazeAt) + (RandomInteger(0, mazeWidth()) * Scale()),
-           YOf(buildMazeAt),
-           ZOf(buildMazeAt) + (RandomInteger(0, mazeHeight()) * Scale())
-        ));
+        Teleport(player, randomMazeSpot());
     }
+
+    Wait(1);
+
+    CreateDummyBot(Hero.Roadhog, Team.Team1, -1, randomMazeSpot(), Vector());
+    navigator = LastCreatedEntity();
+    MinWait();
+    Teleport(navigator, randomMazeSpot());
 
     generateStep = 6;
 }
@@ -339,6 +350,7 @@ rule: "Maze: Kill players on walls"
 if (generateStep == 6)
 {
     foreach (define player in AllPlayers())
+    if (!IsButtonHeld(player, Button.Crouch) && navigator != player)
     {
         define px = XOf(PositionOf(player));
         define pz = ZOf(PositionOf(player));
@@ -348,6 +360,101 @@ if (generateStep == 6)
         {
             Kill(player, null);
         }
+
+        Wait(0.2);
     }
     LoopIfConditionIsTrue();
 }
+
+define globalvar navigator;
+define globalvar navigateTo;
+define globalvar walkPath = [];
+
+rule: "Maze: A*: Nav"
+if (generateStep >= 5)
+if (IsButtonHeld(HostPlayer(), Button.Interact))
+{
+    navigateTo = mazePos(PositionOf(HostPlayer()));
+    SmallMessage(AllPlayers(), <"Navigating to <0>", navigateTo>);
+
+    define navigateToX ! = RoundToInteger(XOf(navigateTo), Rounding.Nearest);
+    define navigateToZ ! = RoundToInteger(ZOf(navigateTo), Rounding.Nearest);
+
+    define originX ! = RoundToInteger(XOf(mazePos(PositionOf(navigator))), Rounding.Nearest);
+    define originZ ! = RoundToInteger(ZOf(mazePos(PositionOf(navigator))), Rounding.Nearest);
+
+    define aStarCheck = [];
+    ModifyGlobalVariable(aStarCheck, Operation.AppendToArray, Vector(originX, -1, originZ));
+
+    define found ! = -1;
+
+    MinWait();
+
+    for (define i ! = 0; i < CountOf(aStarCheck) && found == -1; i++)
+    {
+        define x ! = XOf(aStarCheck[i]);
+        define z ! = ZOf(aStarCheck[i]);
+        define cellCheck ! = cellStates[x][z] - 16;
+
+        SmallMessage(AllPlayers(), <"Checking <0>,<1> (<2>,<3>)",x,z,navigateToX,navigateToZ>);
+
+        if (x == navigateToX && z == navigateToZ)
+        {
+            found = i;
+            SmallMessage(AllPlayers(), "found");
+        }
+        else
+        {
+            // Left wall
+            if (cellCheck >= LeftWall())
+                cellCheck -= LeftWall();
+            // No left wall
+            else if (x > 0 && !IsTrueForAny(aStarCheck, XOf(ArrayElement()) == x - 1 && ZOf(ArrayElement()) == z))
+                ModifyGlobalVariable(aStarCheck, Operation.AppendToArray, Vector(x - 1, i, z));
+            
+            MinWait();
+            
+            // Bottom wall
+            if (cellCheck >= BottomWall())
+                cellCheck -= BottomWall();
+            // No bottom wall
+            else if (z < mazeHeight() - 1 && !IsTrueForAny(aStarCheck, XOf(ArrayElement()) == x && ZOf(ArrayElement()) == z - 1))
+                ModifyGlobalVariable(aStarCheck, Operation.AppendToArray, Vector(x, i, z - 1));
+            
+            MinWait();
+            
+            // Right wall
+            if (cellCheck >= RightWall())
+                cellCheck -= RightWall();
+            // No right wall
+            else if (x < mazeWidth() - 1 && !IsTrueForAny(aStarCheck, XOf(ArrayElement()) == x + 1 && ZOf(ArrayElement()) == z))
+                ModifyGlobalVariable(aStarCheck, Operation.AppendToArray, Vector(x + 1, i, z));
+            
+            MinWait();
+            
+            // Top wall
+            if (cellCheck >= TopWall())
+                cellCheck -= TopWall();
+            // No top wall
+            else if (z > 0 && !IsTrueForAny(aStarCheck, XOf(ArrayElement()) == x && ZOf(ArrayElement()) == z + 1))
+                ModifyGlobalVariable(aStarCheck, Operation.AppendToArray, Vector(x, i, z + 1));
+        }
+
+        MinWait();
+    }
+
+    SmallMessage(AllPlayers(), "Found end, backtracking...");
+
+    define finalPath = [];
+    while (found != -1)
+    {
+        finalPath = [aStarCheck[found], finalPath];
+        found = YOf(aStarCheck[found]);
+    }
+    //walkPath = finalPath;
+
+    SmallMessage(AllPlayers(), "Found path!");
+}
+
+macro curAStarX(): XOf(FirstOf(aStarCheck));
+macro curAStarZ(): ZOf(FirstOf(aStarCheck));
