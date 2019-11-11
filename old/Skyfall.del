@@ -1,5 +1,3 @@
-import "Lava.del";
-
 rule: "Drop"
 Event.OngoingPlayer
 Player.Reinhardt

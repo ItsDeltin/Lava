@@ -1,8 +1,8 @@
 import "Lava.del";
 
 define globalvar cellStates = [];
-define globalvar toVisitX = [];
-define globalvar toVisitY = [];
+define globalvar toVisitX 0 = [];
+define globalvar toVisitY 1 = [];
 define globalvar generateStep = 0;
 
 macro mazeWidth()  : 10;
@@ -14,8 +14,6 @@ macro BottomWall() : 4;
 macro LeftWall()   : 8;
 macro Visited()    : 16;
 // The current visiting cell
-macro curX(): FirstOf(toVisitX);
-macro curY(): FirstOf(toVisitY);
 
 rule: "Maze: Generate: Debug"
 {
@@ -36,11 +34,16 @@ if (generateStep == 0)
     generateStep = 1;
 }
 
+define globalvar xOffsets = [0,1,0,-1];
+define globalvar yOffsets = [1,0,-1,0];
+
 rule: "Maze: Generate: Visit Cells"
 if (generateStep == 1)
 {
-    define initialX = RandomInteger(0, mazeWidth());
-    define initialY = RandomInteger(0, mazeHeight());
+    define initialX = RandomInteger(0, mazeWidth() - 1);
+    define initialY = RandomInteger(0, mazeHeight() - 1);
+    // define initialX = 0;
+    // define initialY = 0;
 
     ModifyGlobalVariable(toVisitX, Operation.AppendToArray, initialX);
     ModifyGlobalVariable(toVisitY, Operation.AppendToArray, initialY);
@@ -49,22 +52,23 @@ if (generateStep == 1)
 
     while (CountOf(toVisitX) > 0)
     {
-        define xOffsets = [0,1,0,-1];
-        define yOffsets = [1,0,-1,0];
         define order = RandomizedArray([0,1,2,3]);
+        //define order = [0,1,2,3];
+
+        define x = LastOf(toVisitX);
+        define y = LastOf(toVisitY);
+
+        define removeAt = CountOf(toVisitX) - 1;
 
         foreach (define i in order)
         {
             define dirX = xOffsets[i];
             define dirY = yOffsets[i];
-            define checkX = curX() + dirX;
-            define checkY = curY() + dirY;
+            define checkX = x + dirX;
+            define checkY = y + dirY;
 
             if (checkX >= 0 && checkY >= 0 && checkX < mazeWidth() && checkY < mazeHeight() && cellStates[checkX][checkY] < Visited())
             {
-                ModifyGlobalVariable(toVisitX, Operation.AppendToArray, checkX);
-                ModifyGlobalVariable(toVisitY, Operation.AppendToArray, checkY);
-
                 define thisWall = -1;
                 define neighborWall = -1;
 
@@ -95,17 +99,30 @@ if (generateStep == 1)
 
                 MinWait();
 
-                cellStates[curX()][curY()] -= thisWall;
+                cellStates[x][y] -= thisWall;
                 cellStates[checkX][checkY] -= neighborWall;
                 cellStates[checkX][checkY] += Visited();
+                ModifyGlobalVariable(toVisitX, Operation.AppendToArray, checkX);
+                ModifyGlobalVariable(toVisitY, Operation.AppendToArray, checkY);
             }
         }
 
         MinWait();
 
-        ModifyGlobalVariable(toVisitX, Operation.RemoveFromArrayByIndex, 0);
-        ModifyGlobalVariable(toVisitY, Operation.RemoveFromArrayByIndex, 0);
+        ModifyGlobalVariable(toVisitX, Operation.RemoveFromArrayByIndex, removeAt);
+        ModifyGlobalVariable(toVisitY, Operation.RemoveFromArrayByIndex, removeAt);
     }
+
+    debug1 = cellStates[0];
+    debug2 = cellStates[1];
+    debug3 = cellStates[2];
+    debug4 = cellStates[3];
+    debug5 = cellStates[4];
+    debug6 = cellStates[5];
+    debug7 = cellStates[6];
+    debug8 = cellStates[7];
+    debug9 = cellStates[8];
+    debug10 = cellStates[9];
 
     generateStep = 2;
 }
@@ -208,13 +225,13 @@ if (generateStep == 3)
     generateStep = 4;
 }
 
-define globalvar debug1 0;
-define globalvar debug2 1;
-define globalvar debug3 2;
-define globalvar debug4 3;
-define globalvar debug5 4;
-define globalvar debug6 5;
-define globalvar debug7 6;
-define globalvar debug8 7;
-define globalvar debug9 8;
-define globalvar debug10 9;
+define globalvar debug1 2;
+define globalvar debug2 3;
+define globalvar debug3 4;
+define globalvar debug4 5;
+define globalvar debug5 6;
+define globalvar debug6 7;
+define globalvar debug7 8;
+define globalvar debug8 9;
+define globalvar debug9 10;
+define globalvar debug10 11;
