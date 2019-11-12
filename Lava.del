@@ -4,6 +4,7 @@ import "Ball.del";
 import "Score.del";
 import "Lasers.del";
 import "Volleyball.del";
+import "Maze.del";
 
 define globalvar origin = Vector(-0.18, 154.88, 60);
 

@@ -5,7 +5,7 @@ define playervar chargeStart = null;
 
 macro defaultMoveSpeed(): 150;
 
-rule: "Setup"
+rule: "Setup Reinhardt"
 Event.OngoingPlayer
 Player.Reinhardt
 {
@@ -72,7 +72,59 @@ if (IsTrueForAny(
     ApplyImpulse(EventPlayer(), Up(), 15, Relative.ToWorld, ContraryMotion.Incorporate);
 }
 
-rule: "Start breaking"
+define playervar shieldLookUpTextID !;
+define playervar shieldRampTextID !;
+
+rule: "Shield Ramp HUD: Look up"
+Event.OngoingPlayer
+Player.Reinhardt
+if (IsButtonHeld(EventPlayer(), Button.SecondaryFire))
+if (VerticalFacingAngleOf() > -40)
+{
+    DestroyHudText(shieldLookUpTextID);
+    DestroyHudText(shieldRampTextID);
+    CreateHudText(
+        VisibleTo  :EventPlayer(),
+        Header     :IconString(Icon.ArrowUp),
+        HeaderColor:Color.Orange,
+        Text       :"Look up to become a ramp!",
+        TextColor  :Color.Yellow,
+        Location   :Location.Top,
+        SortOrder  :3,
+        Spectators :Spectators.VisibleNever
+    );
+    shieldLookUpTextID = LastTextID();
+}
+rule: "Shield Ramp HUD: Look up"
+Event.OngoingPlayer
+Player.Reinhardt
+if (IsButtonHeld(EventPlayer(), Button.SecondaryFire))
+if (VerticalFacingAngleOf() <= -40)
+{
+    DestroyHudText(shieldLookUpTextID);
+    DestroyHudText(shieldRampTextID);
+    CreateHudText(
+        VisibleTo  :EventPlayer(),
+        Header     :IconString(Icon.Moon),
+        HeaderColor:Color.Aqua,
+        Text       :"You are now a ramp.",
+        TextColor  :Color.Yellow,
+        Location   :Location.Top,
+        SortOrder  :3,
+        Spectators :Spectators.VisibleNever
+    );
+    shieldRampTextID = LastTextID();
+}
+rule: "Shield Ramp HUD: Reset"
+Event.OngoingPlayer
+Player.Reinhardt
+if (!IsButtonHeld(EventPlayer(), Button.SecondaryFire))
+{
+    DestroyHudText(shieldLookUpTextID);
+    DestroyHudText(shieldRampTextID);
+}
+
+rule: "Start braking"
 Event.OngoingPlayer
 Player.Reinhardt
 if (IsUsingAbility1())
@@ -106,20 +158,4 @@ if (!isBall)
 {
     ApplyImpulse(EventPlayer(), DirectionTowards(knockedFrom, PositionOf() + Vector(0, heightOffset, 0)), force, Relative.ToWorld, ContraryMotion.Incorporate);
     knockedFrom = null;
-}
-
-rule: "debug spawn"
-Event.OngoingPlayer
-if (IsButtonHeld(EventPlayer(), Button.Interact))
-{
-    CreateDummyBot(Hero.Reinhardt, NumberOfPlayers(Team.Team1) < 6 ? Team.Team1 : Team.Team2, -1, PositionOf(EventPlayer()), Vector());
-    if (IsButtonHeld(EventPlayer(), Button.Crouch))
-    {
-        define dummy = LastCreatedEntity();
-        Wait(1);
-        Teleport(dummy, EventPlayer());
-
-        StartHoldingButton(dummy, Button.SecondaryFire);
-        SetFacing(dummy, DirectionFromAngles(HorizontalFacingAngleOf(), -45));
-    }
 }
