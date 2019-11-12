@@ -22,6 +22,8 @@ macro BottomWall() : 4;
 macro LeftWall()   : 8;
 macro Visited()    : 16;
 
+macro indexFromCoord(define x, define z): (x * mazeHeight()) + z;
+
 macro mazePos(define pos): (pos - buildMazeAt) / Scale();
 macro randomMazeSpot(): Vector(
         XOf(buildMazeAt) + (RandomInteger(0, mazeWidth() - 1) * Scale()),
@@ -29,21 +31,17 @@ macro randomMazeSpot(): Vector(
         ZOf(buildMazeAt) + (RandomInteger(0, mazeHeight() - 1) * Scale())
     );
 
-disabled rule: "Maze: Generate: Debug"
+rule: "Maze: Generate: Debug"
 {
     CreateHudText(AllPlayers(), <"Number of nodes to be visited: <0>", CountOf(toVisitX)>);
     CreateHudText(AllPlayers(), <"Host player pos: <0>", mazePos(PositionOf(HostPlayer()))>);
 }
 
-disabled rule: "Maze: Generate: Initial states"
+rule: "Maze: Generate: Initial states"
 if (generateStep == 1)
 {
-    define column = [];
-    for (define y = 0; y < mazeHeight(); y++)
-        column[y] = 15;
-
-    for (define x = 0; x < mazeWidth(); x++)
-        cellStates[x] = column;
+    for (define i = 0; i <= mazeWidth() * mazeHeight(); i++)
+        cellStates[i] = 15;
     
     generateStep = 2;
 }
@@ -51,7 +49,7 @@ if (generateStep == 1)
 define globalvar xOffsets = [0,1,0,-1];
 define globalvar yOffsets = [1,0,-1,0];
 
-disabled rule: "Maze: Generate: Visit Cells"
+rule: "Maze: Generate: Visit Cells"
 if (generateStep == 2)
 {
     define initialX = RandomInteger(0, mazeWidth() - 1);
@@ -62,7 +60,7 @@ if (generateStep == 2)
     ModifyGlobalVariable(toVisitX, Operation.AppendToArray, initialX);
     ModifyGlobalVariable(toVisitY, Operation.AppendToArray, initialY);
 
-    cellStates[initialX][initialY] += Visited();
+    cellStates[indexFromCoord(initialX, initialY)] += Visited();
 
     while (CountOf(toVisitX) > 0)
     {
@@ -76,12 +74,12 @@ if (generateStep == 2)
 
         foreach (define i in order)
         {
-            define dirX = xOffsets[i];
-            define dirY = yOffsets[i];
-            define checkX = x + dirX;
-            define checkY = y + dirY;
+            define dirX ! = xOffsets[i];
+            define dirY ! = yOffsets[i];
+            define checkX ! = x + dirX;
+            define checkY ! = y + dirY;
 
-            if (checkX >= 0 && checkY >= 0 && checkX < mazeWidth() && checkY < mazeHeight() && cellStates[checkX][checkY] < Visited())
+            if (checkX >= 0 && checkY >= 0 && checkX < mazeWidth() && checkY < mazeHeight() && cellStates[indexFromCoord(checkX, checkY)] < Visited())
             {
                 define thisWall = -1;
                 define neighborWall = -1;
@@ -111,9 +109,9 @@ if (generateStep == 2)
                     neighborWall = TopWall();
                 }
 
-                cellStates[x][y] -= thisWall;
-                cellStates[checkX][checkY] -= neighborWall;
-                cellStates[checkX][checkY] += Visited();
+                cellStates[indexFromCoord(x, y)] -= thisWall;
+                cellStates[indexFromCoord(checkX, checkY)] -= neighborWall;
+                cellStates[indexFromCoord(checkX, checkY)] += Visited();
                 ModifyGlobalVariable(toVisitX, Operation.AppendToArray, checkX);
                 ModifyGlobalVariable(toVisitY, Operation.AppendToArray, checkY);
             }
@@ -128,25 +126,23 @@ if (generateStep == 2)
     generateStep = 3;
 }
 
-disabled rule: "Maze: Generate: Create Walls: X axis"
+rule: "Maze: Generate: Create Walls: X axis"
 if (generateStep == 3)
 {
     DestroyAllEffects();
 
-    for (define z ! = 0; z <= mazeHeight(); z++)
+    for (define z ! = 0; z < mazeHeight(); z++)
     {
         define topLineStart ! = -1;
         define bottomLineStart ! = -1;
 
         for (define x ! = 0; x < mazeWidth(); x++)
         {
-            define cellCheck = cellStates[x][z] - Visited();
+            define cellCheck = cellStates[indexFromCoord(x,z)] - Visited();
 
             // Left wall
             if (cellCheck >= LeftWall())
-            {
                 cellCheck -= LeftWall();
-            }
             
             // Bottom wall
             if (cellCheck >= BottomWall())
@@ -219,18 +215,18 @@ if (generateStep == 3)
 
         CreateBeamEffect(
             AllPlayers(),
-            BeamType.BadBeam,
+            BeamType.GrappleBeam,
             Vector(XOf(wallData), YOf(buildMazeAt), ZOf(wallData)),
             Vector(YOf(wallData), YOf(buildMazeAt), ZOf(wallData)),
             Color.Red,
-            EffectRev.VisibleTo
+            EffectRev.None
         );
     }
 
     generateStep = 4;
 }
 
-disabled rule: "Maze: Generate: Create Walls: Z axis"
+rule: "Maze: Generate: Create Walls: Z axis"
 if (generateStep == 4)
 {
     for (define x ! = 0; x < mazeWidth(); x++)
@@ -240,7 +236,7 @@ if (generateStep == 4)
 
         for (define z ! = 0; z < mazeHeight(); z++)
         {
-            define cellCheck = cellStates[x][z] - Visited();
+            define cellCheck = cellStates[indexFromCoord(x,z)] - Visited();
 
             // Left wall
             if (cellCheck >= LeftWall())
@@ -317,18 +313,18 @@ if (generateStep == 4)
 
         CreateBeamEffect(
             AllPlayers(),
-            BeamType.BadBeam,
+            BeamType.GrappleBeam,
             Vector(ZOf(wallData), YOf(buildMazeAt), XOf(wallData)),
             Vector(ZOf(wallData), YOf(buildMazeAt), YOf(wallData)),
             Color.Red,
-            EffectRev.VisibleTo
+            EffectRev.None
         );
     }
 
     generateStep = 5;
 }
 
-disabled rule: "Maze: Setup players"
+rule: "Maze: Setup players"
 if (generateStep == 5)
 {
     foreach (define player in AllPlayers())
@@ -373,7 +369,7 @@ define globalvar isGettingPath ! = false;
 
 define globalvar chosenPathEffects;
 
-disabled rule: "Maze: A*: Nav"
+rule: "Maze: A*: Nav"
 if (generateStep >= 5)
 if (IsButtonHeld(HostPlayer(), Button.Interact))
 {
@@ -399,9 +395,9 @@ if (IsButtonHeld(HostPlayer(), Button.Interact))
     {
         define x ! = XOf(aStarCheck[i]);
         define z ! = ZOf(aStarCheck[i]);
-        define cellCheck ! = cellStates[x][z] - 16;
-        visited[x][z] = true;
-        Wait(0.2);
+        define cellCheck ! = cellStates[indexFromCoord(x,z)] - 16;
+        visited[indexFromCoord(x,z)] = true;
+        //Wait(0.2);
 
         if (x == navigateToX && z == navigateToZ)
         {
@@ -413,14 +409,14 @@ if (IsButtonHeld(HostPlayer(), Button.Interact))
             if (cellCheck >= LeftWall())
                 cellCheck -= LeftWall();
             // No left wall
-            else if (x > 0 && !visited[x - 1][z] /*!IsTrueForAny(aStarCheck, XOf(ArrayElement()) == x - 1 && ZOf(ArrayElement()) == z)*/)
+            else if (x > 0 && !visited[indexFromCoord(x - 1,z)] /*!IsTrueForAny(aStarCheck, XOf(ArrayElement()) == x - 1 && ZOf(ArrayElement()) == z)*/)
                 ModifyGlobalVariable(aStarCheck, Operation.AppendToArray, Vector(x - 1, i, z));
             
             // Bottom wall
             if (cellCheck >= BottomWall())
                 cellCheck -= BottomWall();
             // No bottom wall
-            else if (z > 0 && !visited[x][z - 1] /*!IsTrueForAny(aStarCheck, XOf(ArrayElement()) == x && ZOf(ArrayElement()) == z - 1)*/)
+            else if (z > 0 && !visited[indexFromCoord(x,z - 1)] /*!IsTrueForAny(aStarCheck, XOf(ArrayElement()) == x && ZOf(ArrayElement()) == z - 1)*/)
                 ModifyGlobalVariable(aStarCheck, Operation.AppendToArray, Vector(x, i, z - 1));
             
             MinWait();
@@ -429,14 +425,14 @@ if (IsButtonHeld(HostPlayer(), Button.Interact))
             if (cellCheck >= RightWall())
                 cellCheck -= RightWall();
             // No right wall
-            else if (x < mazeWidth() - 1 && !visited[x + 1][z] /*!IsTrueForAny(aStarCheck, XOf(ArrayElement()) == x + 1 && ZOf(ArrayElement()) == z)*/)
+            else if (x < mazeWidth() - 1 && !visited[indexFromCoord(x + 1,z)] /*!IsTrueForAny(aStarCheck, XOf(ArrayElement()) == x + 1 && ZOf(ArrayElement()) == z)*/)
                 ModifyGlobalVariable(aStarCheck, Operation.AppendToArray, Vector(x + 1, i, z));
             
             // Top wall
             if (cellCheck >= TopWall())
                 cellCheck -= TopWall();
             // No top wall
-            else if (z < mazeHeight() - 1 && !visited[x][z + 1] /*!IsTrueForAny(aStarCheck, XOf(ArrayElement()) == x && ZOf(ArrayElement()) == z + 1)*/)
+            else if (z < mazeHeight() - 1 && !visited[indexFromCoord(x,z + 1)] /*!IsTrueForAny(aStarCheck, XOf(ArrayElement()) == x && ZOf(ArrayElement()) == z + 1)*/)
                 ModifyGlobalVariable(aStarCheck, Operation.AppendToArray, Vector(x, i, z + 1));
         }
     }
@@ -446,18 +442,26 @@ if (IsButtonHeld(HostPlayer(), Button.Interact))
     DestroyEffectArray(chosenPathEffects);
     chosenPathEffects = [];
 
-    walkPath = [];
+    // walkPath = [];
     while (found != -1)
     {
-        walkPath = [Vector(
-                XOf(buildMazeAt) + (XOf(aStarCheck[found]) * Scale()),
-                YOf(buildMazeAt),
-                ZOf(buildMazeAt) + (ZOf(aStarCheck[found]) * Scale())
-            ),
-            walkPath];
-        CreateEffect(AllPlayers(), Effect.Sphere, Color.Purple, FirstOf(walkPath), 0.25, EffectRev.VisibleTo);
+        // walkPath = [Vector(
+        //         XOf(buildMazeAt) + (XOf(aStarCheck[found]) * Scale()),
+        //         YOf(buildMazeAt),
+        //         ZOf(buildMazeAt) + (ZOf(aStarCheck[found]) * Scale())
+        //     ),
+        //     walkPath];
+        // CreateEffect(AllPlayers(), Effect.Sphere, Color.Purple, FirstOf(walkPath), 0.25, EffectRev.None);
+        PlayEffect(AllPlayers(), PlayEffect.BadExplosion, Color.Purple, Vector(
+            XOf(buildMazeAt) + (XOf(aStarCheck[found]) * Scale()),
+            YOf(buildMazeAt),
+            ZOf(buildMazeAt) + (ZOf(aStarCheck[found]) * Scale())
+        ), 0.25);
+
         chosenPathEffects = Append(chosenPathEffects, LastCreatedEntity());
         found = YOf(aStarCheck[found]);
+
+        Wait(1);
     }
 
     aStarCheck = [];
