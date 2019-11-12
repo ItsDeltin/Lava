@@ -66,11 +66,11 @@ if (generateStep == 2)
 
     while (CountOf(toVisitX) > 0)
     {
-        define order = RandomizedArray([0,1,2,3]);
+        define order ! = RandomizedArray([0,1,2,3]);
         //define order = [0,1,2,3];
 
-        define x = LastOf(toVisitX);
-        define y = LastOf(toVisitY);
+        define x ! = LastOf(toVisitX);
+        define y ! = LastOf(toVisitY);
 
         define removeAt = CountOf(toVisitX) - 1;
 
@@ -133,12 +133,12 @@ if (generateStep == 3)
 {
     DestroyAllEffects();
 
-    for (define z = 0; z <= mazeHeight(); z++)
+    for (define z ! = 0; z <= mazeHeight(); z++)
     {
-        define topLineStart = -1;
-        define bottomLineStart = -1;
+        define topLineStart ! = -1;
+        define bottomLineStart ! = -1;
 
-        for (define x = 0; x < mazeWidth(); x++)
+        for (define x ! = 0; x < mazeWidth(); x++)
         {
             define cellCheck = cellStates[x][z] - Visited();
 
@@ -233,12 +233,12 @@ if (generateStep == 3)
 disabled rule: "Maze: Generate: Create Walls: Z axis"
 if (generateStep == 4)
 {
-    for (define x = 0; x < mazeWidth(); x++)
+    for (define x ! = 0; x < mazeWidth(); x++)
     {
-        define rightLineStart = -1;
-        define leftLineStart = -1;
+        define rightLineStart ! = -1;
+        define leftLineStart ! = -1;
 
-        for (define z = 0; z < mazeHeight(); z++)
+        for (define z ! = 0; z < mazeHeight(); z++)
         {
             define cellCheck = cellStates[x][z] - Visited();
 
@@ -414,7 +414,6 @@ if (IsButtonHeld(HostPlayer(), Button.Interact))
                 cellCheck -= LeftWall();
             // No left wall
             else if (x > 0 && !visited[x - 1][z] /*!IsTrueForAny(aStarCheck, XOf(ArrayElement()) == x - 1 && ZOf(ArrayElement()) == z)*/)
-                // aStarCheck = Append(aStarCheck, Vector(x - 1, i, z));
                 ModifyGlobalVariable(aStarCheck, Operation.AppendToArray, Vector(x - 1, i, z));
             
             // Bottom wall
@@ -422,7 +421,6 @@ if (IsButtonHeld(HostPlayer(), Button.Interact))
                 cellCheck -= BottomWall();
             // No bottom wall
             else if (z > 0 && !visited[x][z - 1] /*!IsTrueForAny(aStarCheck, XOf(ArrayElement()) == x && ZOf(ArrayElement()) == z - 1)*/)
-                // aStarCheck = Append(aStarCheck, Vector(x, i, z - 1));
                 ModifyGlobalVariable(aStarCheck, Operation.AppendToArray, Vector(x, i, z - 1));
             
             MinWait();
@@ -432,7 +430,6 @@ if (IsButtonHeld(HostPlayer(), Button.Interact))
                 cellCheck -= RightWall();
             // No right wall
             else if (x < mazeWidth() - 1 && !visited[x + 1][z] /*!IsTrueForAny(aStarCheck, XOf(ArrayElement()) == x + 1 && ZOf(ArrayElement()) == z)*/)
-                // aStarCheck = Append(aStarCheck, Vector(x + 1, i, z));
                 ModifyGlobalVariable(aStarCheck, Operation.AppendToArray, Vector(x + 1, i, z));
             
             // Top wall
@@ -440,7 +437,6 @@ if (IsButtonHeld(HostPlayer(), Button.Interact))
                 cellCheck -= TopWall();
             // No top wall
             else if (z < mazeHeight() - 1 && !visited[x][z + 1] /*!IsTrueForAny(aStarCheck, XOf(ArrayElement()) == x && ZOf(ArrayElement()) == z + 1)*/)
-                // aStarCheck = Append(aStarCheck, Vector(x, i, z + 1));
                 ModifyGlobalVariable(aStarCheck, Operation.AppendToArray, Vector(x, i, z + 1));
         }
     }
