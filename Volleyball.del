@@ -2,7 +2,7 @@ import "Ball.del";
 
 rule: "Debug Volleyball"
 Event.OngoingPlayer
-if (IsCommunicating(EventPlayer(), Communication.VoiceLineRight))
+if (IsCommunicating(EventPlayer(), Communication.EmoteRight))
 {
     volleyball = !volleyball;
 }

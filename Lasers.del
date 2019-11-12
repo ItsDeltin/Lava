@@ -2,7 +2,7 @@ import "Lava.del";
 
 rule: "Debug Laser Dodge"
 Event.OngoingPlayer
-if (IsCommunicating(EventPlayer(), Communication.Thanks))
+if (IsCommunicating(EventPlayer(), Communication.EmoteLeft))
 {
     doingLasers = !doingLasers;
     rotateLasers = true;

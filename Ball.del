@@ -2,7 +2,7 @@ import "Lava.del";
 
 rule: "Debug Ball"
 Event.OngoingPlayer
-if (IsCommunicating(EventPlayer(), Communication.VoiceLineUp))
+if (IsCommunicating(EventPlayer(), Communication.EmoteUp))
 {
     if (!ball)
     {

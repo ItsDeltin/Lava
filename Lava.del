@@ -20,7 +20,7 @@ if (!isBall)
 macro rowCount(): 50;
 macro columnCount(): 35;
 
-rule: "Setup Arena"
+disabled rule: "Setup Arena"
 {
     OuterWalls();
 
@@ -68,13 +68,13 @@ rule: "Setup Arena"
 
 macro flairPos(): Destination(xyPolePos(136.42), DirectionFromAngles(killzoneRot, 0), 11);
 
-rule: "Reset killzone rot"
+disabled rule: "Reset killzone rot"
 if (killzoneRot == 180)
 {
     killzoneRot = -180;
 }
 
-rule: "Blip end"
+disabled rule: "Blip end"
 if (AbsoluteValue(killzoneRot - 22.5) % 45 < 1)
 {
     PlayEffect(AllPlayers(), PlayEffect.GoodExplosion, Color.Red, flairPos(), 1);
@@ -148,3 +148,9 @@ macro BaseOffset(): Vector(0, 0.5, 0);
 macro xyPolePos(define y): Vector(0, y, 150);
 
 macro isOnWall(define player): IsOnGround(player) && YOf(PositionOf(player)) > 158.4;
+
+rule: "I want to die"
+if (IsButtonHeld(HostPlayer(), Button.Interact))
+{
+    CreateDummyBot(Hero.Reinhardt, NumberOfPlayers(Team.Team1) < 6 ? Team.Team1 : Team.Team2, -1, PositionOf(HostPlayer()), Vector());
+}

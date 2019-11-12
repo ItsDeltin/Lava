@@ -324,40 +324,41 @@ if (generateStep == 4)
     generateStep = 5;
 }
 
-rule: "Maze: Setup players"
+rule: "Maze: Setup Hunter"
 if (generateStep == 5)
 {
-    foreach (define player in AllPlayers())
-    {
-        Teleport(player, randomMazeSpot());
-    }
-
-    Wait(1);
-
     CreateDummyBot(Hero.Roadhog, Team.Team1, -1, randomMazeSpot(), Vector());
     navigator = LastCreatedEntity();
     MinWait();
     Teleport(navigator, randomMazeSpot());
+}
 
-    generateStep = 6;
+rule: "Maze: Setup players"
+Event.OngoingPlayer
+if (generateStep == 5)
+if (HasSpawned())
+if (IsAlive())
+{
+    SetMoveSpeed(EventPlayer(), 75);
+    Teleport(EventPlayer(), randomMazeSpot());
 }
 
 disabled rule: "Maze: Kill players on walls"
-if (generateStep == 6)
+if (generateStep == 5)
 {
-    foreach (define player in AllPlayers())
-    if (!IsButtonHeld(player, Button.Crouch) && navigator != player)
+    foreach (define player in FilteredArray(AllPlayers(), ArrayElement() != navigator))
+    if (!IsButtonHeld(player, Button.Crouch))
     {
         define px = XOf(PositionOf(player));
         define pz = ZOf(PositionOf(player));
-        if (     IsTrueForAny(xAxisWalls, AbsoluteValue(pz - ZOf(ArrayElement())) < 1 && px > XOf(ArrayElement()) && YOf(ArrayElement()) > px))
+        if (     IsTrueForAny(xAxisWalls, AbsoluteValue(pz - ZOf(ArrayElement())) < 1.5 && px > XOf(ArrayElement()) && YOf(ArrayElement()) > px))
             Kill(player, null);
-        else if (IsTrueForAny(zAxisWalls, AbsoluteValue(px - ZOf(ArrayElement())) < 1 && pz > XOf(ArrayElement()) && YOf(ArrayElement()) > pz))
+        else if (IsTrueForAny(zAxisWalls, AbsoluteValue(px - ZOf(ArrayElement())) < 1.5 && pz > XOf(ArrayElement()) && YOf(ArrayElement()) > pz))
         {
             Kill(player, null);
         }
 
-        Wait(0.2);
+        Wait(0.025);
     }
     LoopIfConditionIsTrue();
 }
@@ -370,8 +371,8 @@ define globalvar isGettingPath ! = false;
 define globalvar chosenPathEffects;
 
 rule: "Maze: A*: Nav"
-if (generateStep >= 5)
-if (IsButtonHeld(HostPlayer(), Button.Interact))
+if (generateStep == 5)
+if (IsCommunicating(HostPlayer(), Communication.UltimateStatus))
 {
     navigateTo = mazePos(PositionOf(HostPlayer()));
     SmallMessage(AllPlayers(), <"Navigating to <0>", navigateTo>);
