@@ -343,7 +343,7 @@ if (IsAlive())
     Teleport(EventPlayer(), randomMazeSpot());
 }
 
-disabled rule: "Maze: Kill players on walls"
+rule: "Maze: Kill players on walls"
 if (generateStep == 5)
 {
     foreach (define player in FilteredArray(AllPlayers(), ArrayElement() != navigator))
@@ -375,8 +375,6 @@ if (generateStep == 5)
 if (IsCommunicating(HostPlayer(), Communication.UltimateStatus))
 {
     navigateTo = mazePos(PositionOf(HostPlayer()));
-    SmallMessage(AllPlayers(), <"Navigating to <0>", navigateTo>);
-
     isGettingPath = true;
 
     define navigateToX ! = RoundToInteger(XOf(navigateTo), Rounding.Nearest);
@@ -386,7 +384,7 @@ if (IsCommunicating(HostPlayer(), Communication.UltimateStatus))
     define originZ ! = RoundToInteger(ZOf(mazePos(PositionOf(navigator))), Rounding.Nearest);
 
     define aStarCheck = [];
-    ModifyGlobalVariable(aStarCheck, Operation.AppendToArray, Vector(originX, -1, originZ));
+    ModifyGlobalVariable(aStarCheck, Operation.AppendToArray, Vector(navigateToX, -1, navigateToZ));
 
     define found ! = -1;
 
@@ -398,9 +396,8 @@ if (IsCommunicating(HostPlayer(), Communication.UltimateStatus))
         define z ! = ZOf(aStarCheck[i]);
         define cellCheck ! = cellStates[indexFromCoord(x,z)] - 16;
         visited[indexFromCoord(x,z)] = true;
-        //Wait(0.2);
 
-        if (x == navigateToX && z == navigateToZ)
+        if (x == originX && z == originZ)
         {
             found = i;
         }
@@ -438,35 +435,62 @@ if (IsCommunicating(HostPlayer(), Communication.UltimateStatus))
         }
     }
 
-    SmallMessage(AllPlayers(), "found ya");
-
     DestroyEffectArray(chosenPathEffects);
     chosenPathEffects = [];
 
-    // walkPath = [];
+    walkPath = [];
     while (found != -1)
     {
-        // walkPath = [Vector(
-        //         XOf(buildMazeAt) + (XOf(aStarCheck[found]) * Scale()),
-        //         YOf(buildMazeAt),
-        //         ZOf(buildMazeAt) + (ZOf(aStarCheck[found]) * Scale())
-        //     ),
-        //     walkPath];
-        // CreateEffect(AllPlayers(), Effect.Sphere, Color.Purple, FirstOf(walkPath), 0.25, EffectRev.None);
-        PlayEffect(AllPlayers(), PlayEffect.BadExplosion, Color.Purple, Vector(
+        ModifyGlobalVariable(walkPath, Operation.AppendToArray, Vector(
             XOf(buildMazeAt) + (XOf(aStarCheck[found]) * Scale()),
             YOf(buildMazeAt),
             ZOf(buildMazeAt) + (ZOf(aStarCheck[found]) * Scale())
-        ), 0.25);
+        ));
 
         chosenPathEffects = Append(chosenPathEffects, LastCreatedEntity());
         found = YOf(aStarCheck[found]);
-
-        Wait(1);
     }
 
     aStarCheck = [];
-
     isGettingPath = false;
-    SmallMessage(AllPlayers(), "Found path!");
+}
+
+rule: "Maze: Hunter: Nav: Start moving"
+if (generateStep == 5)
+if (!isGettingPath)
+if (CountOf(walkPath) > 0)
+{
+    StartThrottleInDirection(
+        navigator,
+        DirectionTowards(PositionOf(navigator), FirstOf(walkPath)),
+        1,
+        Relative.ToWorld,
+        ThrottleBehavior.ReplaceExistingThrottle,
+        ThrottleRev.DirectionAndMagnitude
+    );
+    StartFacing(
+        navigator,
+        DirectionTowards(PositionOf(navigator), FirstOf(walkPath)),
+        100,
+        Relative.ToWorld,
+        FacingRev.DirectionAndTurnRate
+    );
+}
+
+rule: "Maze: Hunter: Nav: Next node"
+if (generateStep == 5)
+if (!isGettingPath)
+if (CountOf(walkPath) > 0)
+if (DistanceBetween(navigator, FirstOf(walkPath)) < 1)
+{
+    ModifyGlobalVariable(walkPath, Operation.RemoveFromArrayByIndex, 0);
+}
+
+rule: "Maze: Hunter: Nav: Stop"
+if (generateStep == 5)
+if (!isGettingPath)
+if (CountOf(walkPath) == 0)
+{
+    StopThrottleInDirection(navigator);
+    StopFacing(navigator);
 }
