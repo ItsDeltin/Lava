@@ -375,8 +375,6 @@ define globalvar navigateTo;
 define globalvar walkPath = [];
 define globalvar isGettingPath ! = false;
 
-define globalvar chosenPathEffects;
-
 rule: "Maze: Hunter Nav: Get path"
 if (generateStep == 5)
 if (IsCommunicating(HostPlayer(), Communication.UltimateStatus))
@@ -442,9 +440,6 @@ if (IsCommunicating(HostPlayer(), Communication.UltimateStatus))
         }
     }
 
-    DestroyEffectArray(chosenPathEffects);
-    chosenPathEffects = [];
-
     walkPath = [];
     while (found != -1)
     {
@@ -453,8 +448,6 @@ if (IsCommunicating(HostPlayer(), Communication.UltimateStatus))
             YOf(buildMazeAt),
             ZOf(buildMazeAt) + (ZOf(aStarCheck[found]) * Scale())
         ));
-
-        chosenPathEffects = Append(chosenPathEffects, LastCreatedEntity());
         found = YOf(aStarCheck[found]);
     }
 
