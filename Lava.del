@@ -1,10 +1,10 @@
-import "Debug Tools.del";
 import "Reinhardt.del";
 import "Ball.del";
 import "Score.del";
 import "Lasers.del";
 import "Volleyball.del";
 import "Maze.del";
+import "Debug Tools.del";
 
 define globalvar origin = Vector(-0.18, 154.88, 60);
 

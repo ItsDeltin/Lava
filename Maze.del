@@ -24,12 +24,17 @@ macro Visited()    : 16;
 
 macro indexFromCoord(define x, define z): (x * mazeHeight()) + z;
 
+macro mazeWallHeight(): 1.6;
+
 macro mazePos(define pos): (pos - buildMazeAt) / Scale();
 macro randomMazeSpot(): Vector(
         XOf(buildMazeAt) + (RandomInteger(0, mazeWidth() - 1) * Scale()),
         YOf(buildMazeAt),
         ZOf(buildMazeAt) + (RandomInteger(0, mazeHeight() - 1) * Scale())
     );
+
+macro mazeCenter(): buildMazeAt + Vector(mazeWidth() * Scale() / 2, 0, mazeHeight() * Scale() / 2);
+
 
 rule: "Maze: Generate: Debug"
 {
@@ -216,8 +221,8 @@ if (generateStep == 3)
         CreateBeamEffect(
             AllPlayers(),
             BeamType.GrappleBeam,
-            Vector(XOf(wallData), YOf(buildMazeAt), ZOf(wallData)),
-            Vector(YOf(wallData), YOf(buildMazeAt), ZOf(wallData)),
+            Vector(XOf(wallData), YOf(buildMazeAt) + mazeWallHeight(), ZOf(wallData)),
+            Vector(YOf(wallData), YOf(buildMazeAt) + mazeWallHeight(), ZOf(wallData)),
             Color.Red,
             EffectRev.None
         );
@@ -314,8 +319,8 @@ if (generateStep == 4)
         CreateBeamEffect(
             AllPlayers(),
             BeamType.GrappleBeam,
-            Vector(ZOf(wallData), YOf(buildMazeAt), XOf(wallData)),
-            Vector(ZOf(wallData), YOf(buildMazeAt), YOf(wallData)),
+            Vector(ZOf(wallData), YOf(buildMazeAt) + mazeWallHeight(), XOf(wallData)),
+            Vector(ZOf(wallData), YOf(buildMazeAt) + mazeWallHeight(), YOf(wallData)),
             Color.Red,
             EffectRev.None
         );
@@ -330,6 +335,7 @@ if (generateStep == 5)
     CreateDummyBot(Hero.Roadhog, Team.Team1, -1, randomMazeSpot(), Vector());
     navigator = LastCreatedEntity();
     MinWait();
+    SetMoveSpeed(navigator, 125);
     Teleport(navigator, randomMazeSpot());
 }
 
@@ -338,8 +344,9 @@ Event.OngoingPlayer
 if (generateStep == 5)
 if (HasSpawned())
 if (IsAlive())
+if (navigator != EventPlayer())
 {
-    SetMoveSpeed(EventPlayer(), 75);
+    SetMoveSpeed(EventPlayer(), 85);
     Teleport(EventPlayer(), randomMazeSpot());
 }
 
@@ -370,7 +377,7 @@ define globalvar isGettingPath ! = false;
 
 define globalvar chosenPathEffects;
 
-rule: "Maze: A*: Nav"
+rule: "Maze: Hunter Nav: Get path"
 if (generateStep == 5)
 if (IsCommunicating(HostPlayer(), Communication.UltimateStatus))
 {
@@ -455,7 +462,7 @@ if (IsCommunicating(HostPlayer(), Communication.UltimateStatus))
     isGettingPath = false;
 }
 
-rule: "Maze: Hunter: Nav: Start moving"
+rule: "Maze: Hunter Nav: Start moving"
 if (generateStep == 5)
 if (!isGettingPath)
 if (CountOf(walkPath) > 0)
@@ -477,7 +484,7 @@ if (CountOf(walkPath) > 0)
     );
 }
 
-rule: "Maze: Hunter: Nav: Next node"
+rule: "Maze: Hunter Nav: Next node"
 if (generateStep == 5)
 if (!isGettingPath)
 if (CountOf(walkPath) > 0)
@@ -486,7 +493,7 @@ if (DistanceBetween(navigator, FirstOf(walkPath)) < 1)
     ModifyGlobalVariable(walkPath, Operation.RemoveFromArrayByIndex, 0);
 }
 
-rule: "Maze: Hunter: Nav: Stop"
+rule: "Maze: Hunter Nav: Stop"
 if (generateStep == 5)
 if (!isGettingPath)
 if (CountOf(walkPath) == 0)
