@@ -8,13 +8,16 @@ import "Debug Tools.del";
 
 define globalvar origin = Vector(-0.18, 154.88, 60);
 
-rule: "TP to arena"
+rule: "Respawn"
 Event.OngoingPlayer
 if (HasSpawned())
 if (IsAlive())
 if (!isBall)
 {
-    Teleport(EventPlayer(), origin + Vector(20, 0, 20));
+    if (generateStep >= 5)
+        Teleport(EventPlayer(), randomMazeSpot());
+    else
+        Teleport(EventPlayer(), origin + Vector(20, 0, 20));
 }
 
 macro rowCount(): 50;

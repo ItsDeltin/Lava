@@ -8,13 +8,14 @@ define globalvar zAxisWalls = [];
 define globalvar cellStates = [];
 define globalvar toVisitX   = [];
 define globalvar toVisitY   = [];
-define globalvar numberOfVisits = 0;
 define globalvar generateStep = 1;
+define globalvar numberOfVisits ! = 0;
+define globalvar loadingHudText !;
 
 macro mazeWidth()  : 15;
 macro mazeHeight() : 10;
-define globalvar buildMazeAt = Vector(-86.56, 154.88, 83.64);
-macro Scale(): 7;
+macro buildMazeAt(): Vector(-86.56, 154.88, 83.64);
+macro Scale(): 8;
 // Flags, each must be double of the one before.
 macro TopWall()    : 1;
 macro RightWall()  : 2;
@@ -24,23 +25,16 @@ macro Visited()    : 16;
 
 macro indexFromCoord(define x, define z): (x * mazeHeight()) + z;
 
-macro mazeWallHeight(): 1.6;
+macro mazeWallHeight(): 1.2;
 
-macro mazePos(define pos): (pos - buildMazeAt) / Scale();
+macro mazePos(define pos): (pos - buildMazeAt()) / Scale();
 macro randomMazeSpot(): Vector(
-        XOf(buildMazeAt) + (RandomInteger(0, mazeWidth() - 1) * Scale()),
-        YOf(buildMazeAt),
-        ZOf(buildMazeAt) + (RandomInteger(0, mazeHeight() - 1) * Scale())
+        XOf(buildMazeAt()) + (RandomInteger(0, mazeWidth() - 1) * Scale()),
+        YOf(buildMazeAt()),
+        ZOf(buildMazeAt()) + (RandomInteger(0, mazeHeight() - 1) * Scale())
     );
 
-macro mazeCenter(): buildMazeAt + Vector(mazeWidth() * Scale() / 2, 0, mazeHeight() * Scale() / 2);
-
-
-rule: "Maze: Generate: Debug"
-{
-    CreateHudText(AllPlayers(), <"Number of nodes to be visited: <0>", CountOf(toVisitX)>);
-    CreateHudText(AllPlayers(), <"Host player pos: <0>", mazePos(PositionOf(HostPlayer()))>);
-}
+macro mazeCenter(): buildMazeAt() + Vector(mazeWidth() * Scale() / 2, 0, mazeHeight() * Scale() / 2);
 
 rule: "Maze: Generate: Initial states"
 if (generateStep == 1)
@@ -49,6 +43,20 @@ if (generateStep == 1)
         cellStates[i] = 15;
     
     generateStep = 2;
+
+    CreateHudText(
+        VisibleTo     : AllPlayers(),
+        Header        : IconString(Icon.Spiral),
+        HeaderColor   : Color.Orange,
+        Subheader     : "Generating maze...",
+        SubheaderColor: Color.Turquoise,
+        Text          : <"<0>%", RoundToInteger((numberOfVisits / mazeWidth() * mazeHeight()) * 100, Rounding.Up)>,
+        TextColor     : Color.Green,
+        Location      : Location.Top,
+        SortOrder     : 0,
+        Spectators    : Spectators.VisibleAlways
+    );
+    loadingHudText = LastTextID();
 }
 
 define globalvar xOffsets = [0,1,0,-1];
@@ -69,6 +77,7 @@ if (generateStep == 2)
 
     while (CountOf(toVisitX) > 0)
     {
+        numberOfVisits++;
         define order ! = RandomizedArray([0,1,2,3]);
         //define order = [0,1,2,3];
 
@@ -130,6 +139,100 @@ if (generateStep == 2)
 
     generateStep = 3;
 }
+
+// rule: "Maze: Generate: Make loop"
+// if (generateStep == 2.5)
+// {
+//     navigateTo = mazePos(PositionOf(HostPlayer()));
+
+//     define aStarCheck = [];
+//     ModifyGlobalVariable(aStarCheck, Operation.AppendToArray, Vector(0, 1, 0));
+
+//     define visited = [];
+
+//     for (define i ! = 0; i < CountOf(aStarCheck); i++)
+//     {
+//         define x ! = XOf(aStarCheck[i]);
+//         define z ! = ZOf(aStarCheck[i]);
+//         define cellCheck ! = cellStates[indexFromCoord(x,z)] - 16;
+//         visited[indexFromCoord(x,z)] = YOf(aStarCheck[i]);
+
+//         // Left wall
+//         if (cellCheck >= LeftWall())
+//             cellCheck -= LeftWall();
+//         // No left wall
+//         else if (x > 0 && visited[indexFromCoord(x - 1,z)] == 0 /*!IsTrueForAny(aStarCheck, XOf(ArrayElement()) == x - 1 && ZOf(ArrayElement()) == z)*/)
+//             ModifyGlobalVariable(aStarCheck, Operation.AppendToArray, Vector(x - 1, i + 2, z));
+        
+//         // Bottom wall
+//         if (cellCheck >= BottomWall())
+//             cellCheck -= BottomWall();
+//         // No bottom wall
+//         else if (z > 0 && visited[indexFromCoord(x,z - 1)] == 0 /*!IsTrueForAny(aStarCheck, XOf(ArrayElement()) == x && ZOf(ArrayElement()) == z - 1)*/)
+//             ModifyGlobalVariable(aStarCheck, Operation.AppendToArray, Vector(x, i + 2, z - 1));
+        
+//         MinWait();
+
+//         // Right wall
+//         if (cellCheck >= RightWall())
+//             cellCheck -= RightWall();
+//         // No right wall
+//         else if (x < mazeWidth() - 1 && visited[indexFromCoord(x + 1,z)] == 0 /*!IsTrueForAny(aStarCheck, XOf(ArrayElement()) == x + 1 && ZOf(ArrayElement()) == z)*/)
+//             ModifyGlobalVariable(aStarCheck, Operation.AppendToArray, Vector(x + 1, i + 2, z));
+        
+//         // Top wall
+//         if (cellCheck >= TopWall())
+//             cellCheck -= TopWall();
+//         // No top wall
+//         else if (z < mazeHeight() - 1 && visited[indexFromCoord(x,z + 1)] == 0 /*!IsTrueForAny(aStarCheck, XOf(ArrayElement()) == x && ZOf(ArrayElement()) == z + 1)*/)
+//             ModifyGlobalVariable(aStarCheck, Operation.AppendToArray, Vector(x, i + 2, z + 1));
+//     }
+
+//     define chosen   ! = -1;
+//     define breakDir !;
+//     define distance ! = -1;
+
+//     for (define x ! = 0; x < mazeWidth(); x++)
+//     for (define z ! = 0; z < mazeHeight(); z++)
+//     {
+//         define topDist ! = loopMakerDist(visited,x,z,x,z+1);
+//         if (topDist > distance && z < mazeHeight() - 1)
+//         {
+//             distance = topDist;
+//             breakDir = 0;
+//             chosen = indexFromCoord(x,z);
+//         }
+
+//         define rightDist ! = loopMakerDist(visited,x,z,x+1,z);
+//         if (rightDist > distance && x < mazeWidth() - 1)
+//         {
+//             distance = rightDist;
+//             breakDir = 1;
+//             chosen = indexFromCoord(x,z);
+//         }
+
+//         define bottomDist ! = loopMakerDist(visited,x,z-1,x,z);
+//         if (bottomDist > distance && z > 0)
+//         {
+//             distance = bottomDist;
+//             breakDir = 2;
+//             chosen = indexFromCoord(x,z);
+//         }
+
+//         define leftDist ! = loopMakerDist(visited,x-1,z,x,z);
+//         if (leftDist > distance && x > 0)
+//         {
+//             distance = leftDist;
+//             breakDir = 3;
+//             chosen = indexFromCoord(x,z);
+//         }
+//     }
+
+//     cellStates[chosen] -= [TopWall(), RightWall(), BottomWall(), LeftWall()][breakDir];
+//     aStarCheck = [];
+//     generateStep = 3;
+// }
+// macro loopMakerDist(define visited, define x1, define z1, define x2, define z2): AbsoluteValue(visited[indexFromCoord(x1,z1)] - visited[indexFromCoord(x2,z2)]);
 
 rule: "Maze: Generate: Create Walls: X axis"
 if (generateStep == 3)
@@ -213,16 +316,16 @@ if (generateStep == 3)
     foreach (define wallData in xAxisWalls)
     {
         wallData = Vector(
-            XOf(buildMazeAt) + XOf(wallData),
-            XOf(buildMazeAt) + YOf(wallData),
-            ZOf(buildMazeAt) + ZOf(wallData)
+            XOf(buildMazeAt()) + XOf(wallData),
+            XOf(buildMazeAt()) + YOf(wallData),
+            ZOf(buildMazeAt()) + ZOf(wallData)
         );
 
         CreateBeamEffect(
             AllPlayers(),
             BeamType.GrappleBeam,
-            Vector(XOf(wallData), YOf(buildMazeAt) + mazeWallHeight(), ZOf(wallData)),
-            Vector(YOf(wallData), YOf(buildMazeAt) + mazeWallHeight(), ZOf(wallData)),
+            Vector(XOf(wallData), YOf(buildMazeAt()) + mazeWallHeight(), ZOf(wallData)),
+            Vector(YOf(wallData), YOf(buildMazeAt()) + mazeWallHeight(), ZOf(wallData)),
             Color.Red,
             EffectRev.None
         );
@@ -311,16 +414,16 @@ if (generateStep == 4)
     foreach (define wallData in zAxisWalls)
     {
         wallData = Vector(
-            ZOf(buildMazeAt) + XOf(wallData),
-            ZOf(buildMazeAt) + YOf(wallData),
-            XOf(buildMazeAt) + ZOf(wallData)
+            ZOf(buildMazeAt()) + XOf(wallData),
+            ZOf(buildMazeAt()) + YOf(wallData),
+            XOf(buildMazeAt()) + ZOf(wallData)
         );
 
         CreateBeamEffect(
             AllPlayers(),
             BeamType.GrappleBeam,
-            Vector(ZOf(wallData), YOf(buildMazeAt) + mazeWallHeight(), XOf(wallData)),
-            Vector(ZOf(wallData), YOf(buildMazeAt) + mazeWallHeight(), YOf(wallData)),
+            Vector(ZOf(wallData), YOf(buildMazeAt()) + mazeWallHeight(), XOf(wallData)),
+            Vector(ZOf(wallData), YOf(buildMazeAt()) + mazeWallHeight(), YOf(wallData)),
             Color.Red,
             EffectRev.None
         );
@@ -329,14 +432,19 @@ if (generateStep == 4)
     generateStep = 5;
 }
 
-rule: "Maze: Setup Hunter"
+rule: "Maze: Hunter and Misc Setup"
 if (generateStep == 5)
 {
+    DestroyHudText(loadingHudText);
+    CreateEffect(AllPlayers(), Effect.Cloud, Color.White, mazeCenter(), mazeWidth() * Scale(), EffectRev.None);
+
     CreateDummyBot(Hero.Roadhog, Team.Team1, -1, randomMazeSpot(), Vector());
     navigator = LastCreatedEntity();
     MinWait();
     SetMoveSpeed(navigator, 125);
     Teleport(navigator, randomMazeSpot());
+
+    generateStep = 6;
 }
 
 rule: "Maze: Setup players"
@@ -346,12 +454,13 @@ if (HasSpawned())
 if (IsAlive())
 if (navigator != EventPlayer())
 {
-    SetMoveSpeed(EventPlayer(), 85);
-    Teleport(EventPlayer(), randomMazeSpot());
+    defaultMoveSpeed = 100;
+    SetMoveSpeed(EventPlayer(), 100);
+    Teleport(EventPlayer(), mazeCenter());
 }
 
 rule: "Maze: Kill players on walls"
-if (generateStep == 5)
+if (generateStep == 6)
 {
     foreach (define player in FilteredArray(AllPlayers(), ArrayElement() != navigator))
     if (!IsButtonHeld(player, Button.Crouch))
@@ -376,7 +485,7 @@ define globalvar walkPath = [];
 define globalvar isGettingPath ! = false;
 
 rule: "Maze: Hunter Nav: Get path"
-if (generateStep == 5)
+if (generateStep == 6)
 if (IsCommunicating(HostPlayer(), Communication.UltimateStatus))
 {
     navigateTo = mazePos(PositionOf(HostPlayer()));
@@ -444,9 +553,9 @@ if (IsCommunicating(HostPlayer(), Communication.UltimateStatus))
     while (found != -1)
     {
         ModifyGlobalVariable(walkPath, Operation.AppendToArray, Vector(
-            XOf(buildMazeAt) + (XOf(aStarCheck[found]) * Scale()),
-            YOf(buildMazeAt),
-            ZOf(buildMazeAt) + (ZOf(aStarCheck[found]) * Scale())
+            XOf(buildMazeAt()) + (XOf(aStarCheck[found]) * Scale()),
+            YOf(buildMazeAt()),
+            ZOf(buildMazeAt()) + (ZOf(aStarCheck[found]) * Scale())
         ));
         found = YOf(aStarCheck[found]);
     }
@@ -456,7 +565,7 @@ if (IsCommunicating(HostPlayer(), Communication.UltimateStatus))
 }
 
 rule: "Maze: Hunter Nav: Start moving"
-if (generateStep == 5)
+if (generateStep == 6)
 if (!isGettingPath)
 if (CountOf(walkPath) > 0)
 {
@@ -478,7 +587,7 @@ if (CountOf(walkPath) > 0)
 }
 
 rule: "Maze: Hunter Nav: Next node"
-if (generateStep == 5)
+if (generateStep == 6)
 if (!isGettingPath)
 if (CountOf(walkPath) > 0)
 if (DistanceBetween(navigator, FirstOf(walkPath)) < 1)
@@ -487,7 +596,7 @@ if (DistanceBetween(navigator, FirstOf(walkPath)) < 1)
 }
 
 rule: "Maze: Hunter Nav: Stop"
-if (generateStep == 5)
+if (generateStep == 6)
 if (!isGettingPath)
 if (CountOf(walkPath) == 0)
 {
