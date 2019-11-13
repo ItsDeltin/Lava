@@ -67,8 +67,6 @@ if (generateStep == 2)
 {
     define initialX = RandomInteger(0, mazeWidth() - 1);
     define initialY = RandomInteger(0, mazeHeight() - 1);
-    // define initialX = 0;
-    // define initialY = 0;
 
     ModifyGlobalVariable(toVisitX, Operation.AppendToArray, initialX);
     ModifyGlobalVariable(toVisitY, Operation.AppendToArray, initialY);
@@ -79,7 +77,6 @@ if (generateStep == 2)
     {
         numberOfVisits++;
         define order ! = RandomizedArray([0,1,2,3]);
-        //define order = [0,1,2,3];
 
         define x ! = LastOf(toVisitX);
         define y ! = LastOf(toVisitY);
@@ -131,8 +128,6 @@ if (generateStep == 2)
             }
         }
 
-        MinWait();
-
         ModifyGlobalVariable(toVisitX, Operation.RemoveFromArrayByIndex, removeAt);
         ModifyGlobalVariable(toVisitY, Operation.RemoveFromArrayByIndex, removeAt);
     }
@@ -161,14 +156,14 @@ if (generateStep == 2)
 //         if (cellCheck >= LeftWall())
 //             cellCheck -= LeftWall();
 //         // No left wall
-//         else if (x > 0 && visited[indexFromCoord(x - 1,z)] == 0 /*!IsTrueForAny(aStarCheck, XOf(ArrayElement()) == x - 1 && ZOf(ArrayElement()) == z)*/)
+//         else if (x > 0 && visited[indexFromCoord(x - 1,z)] == 0)
 //             ModifyGlobalVariable(aStarCheck, Operation.AppendToArray, Vector(x - 1, i + 2, z));
         
 //         // Bottom wall
 //         if (cellCheck >= BottomWall())
 //             cellCheck -= BottomWall();
 //         // No bottom wall
-//         else if (z > 0 && visited[indexFromCoord(x,z - 1)] == 0 /*!IsTrueForAny(aStarCheck, XOf(ArrayElement()) == x && ZOf(ArrayElement()) == z - 1)*/)
+//         else if (z > 0 && visited[indexFromCoord(x,z - 1)] == 0)
 //             ModifyGlobalVariable(aStarCheck, Operation.AppendToArray, Vector(x, i + 2, z - 1));
         
 //         MinWait();
@@ -177,14 +172,14 @@ if (generateStep == 2)
 //         if (cellCheck >= RightWall())
 //             cellCheck -= RightWall();
 //         // No right wall
-//         else if (x < mazeWidth() - 1 && visited[indexFromCoord(x + 1,z)] == 0 /*!IsTrueForAny(aStarCheck, XOf(ArrayElement()) == x + 1 && ZOf(ArrayElement()) == z)*/)
+//         else if (x < mazeWidth() - 1 && visited[indexFromCoord(x + 1,z)] == 0)
 //             ModifyGlobalVariable(aStarCheck, Operation.AppendToArray, Vector(x + 1, i + 2, z));
         
 //         // Top wall
 //         if (cellCheck >= TopWall())
 //             cellCheck -= TopWall();
 //         // No top wall
-//         else if (z < mazeHeight() - 1 && visited[indexFromCoord(x,z + 1)] == 0 /*!IsTrueForAny(aStarCheck, XOf(ArrayElement()) == x && ZOf(ArrayElement()) == z + 1)*/)
+//         else if (z < mazeHeight() - 1 && visited[indexFromCoord(x,z + 1)] == 0)
 //             ModifyGlobalVariable(aStarCheck, Operation.AppendToArray, Vector(x, i + 2, z + 1));
 //     }
 
@@ -230,6 +225,7 @@ if (generateStep == 2)
 
 //     cellStates[chosen] -= [TopWall(), RightWall(), BottomWall(), LeftWall()][breakDir];
 //     aStarCheck = [];
+//     visited = [];
 //     generateStep = 3;
 // }
 // macro loopMakerDist(define visited, define x1, define z1, define x2, define z2): AbsoluteValue(visited[indexFromCoord(x1,z1)] - visited[indexFromCoord(x2,z2)]);
@@ -548,6 +544,7 @@ if (IsCommunicating(HostPlayer(), Communication.UltimateStatus))
                 ModifyGlobalVariable(aStarCheck, Operation.AppendToArray, Vector(x, i, z + 1));
         }
     }
+    visited = [];
 
     walkPath = [];
     while (found != -1)
