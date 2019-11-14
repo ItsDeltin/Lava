@@ -79,6 +79,7 @@ if (!volleyball)
     DestroyInWorldText(counterText1);
     DestroyInWorldText(counterText2);
     DestroyHudText(tutorialText);
+    StopChasingGlobalVariable(detonationCounter);
 }
 
 rule: "Show counter"
@@ -187,6 +188,7 @@ if (detonationCounter == 0)
 
     isCountingDown = false;
     detonationTime = 10;
+    StopChasingGlobalVariable(detonationCounter);
     DestroyInWorldText(counterText1);
     DestroyInWorldText(counterText2);
     respawnBall();

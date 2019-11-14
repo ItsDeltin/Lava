@@ -214,6 +214,8 @@ if (EventDamage() == 95)
     Wait(3, WaitBehavior.IgnoreCondition);
     DestroyEffect(fuseEffect);
 
+    StopChasingPlayerVariable(EventPlayer(), fuse);
+
     PlayEffect(AllPlayers(), PlayEffect.GoodExplosion, Color.Orange, ballLocation(), ExplosionRange());
     PlayEffect(AllPlayers(), PlayEffect.ExplosionSound, Color.Orange, ballLocation(), 100);
 

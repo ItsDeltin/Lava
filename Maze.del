@@ -134,6 +134,8 @@ if (generateStep == 2)
             }
         }
 
+        MinWait();
+
         ModifyGlobalVariable(toVisitX, Operation.RemoveFromArrayByIndex, removeAt);
         ModifyGlobalVariable(toVisitY, Operation.RemoveFromArrayByIndex, removeAt);
     }
@@ -458,7 +460,7 @@ if (navigator != EventPlayer())
 {
     defaultMoveSpeed = 100;
     SetMoveSpeed(EventPlayer(), 100);
-    Teleport(EventPlayer(), mazeCenter());
+    Teleport(EventPlayer(), randomMazeSpot());
 }
 
 rule: "Maze: Kill players on walls"
