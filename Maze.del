@@ -1,5 +1,11 @@
 import "Lava.del";
 
+rule: "Debug toggle"
+if (IsCommunicating(HostPlayer(), Communication.EmoteDown))
+{
+    generateStep = 1;
+}
+
 // x/zAxisWalls are array of vectors determining the location of each wall.
 // The X in the vector for xAxisWalls determines where the wall starts on the X axis. The Y determines where it ends. The Z is where on the Z axis the wall is.
 define globalvar xAxisWalls = [];
@@ -8,7 +14,7 @@ define globalvar zAxisWalls = [];
 define globalvar cellStates = [];
 define globalvar toVisitX   = [];
 define globalvar toVisitY   = [];
-define globalvar generateStep = 1;
+define globalvar generateStep = 0;
 define globalvar numberOfVisits ! = 0;
 define globalvar loadingHudText !;
 
@@ -53,7 +59,7 @@ if (generateStep == 1)
         Text          : <"<0>%", RoundToInteger((numberOfVisits / mazeWidth() * mazeHeight()) * 100, Rounding.Up)>,
         TextColor     : Color.Green,
         Location      : Location.Top,
-        SortOrder     : 0,
+        SortOrder     : 1,
         Spectators    : Spectators.VisibleAlways
     );
     loadingHudText = LastTextID();

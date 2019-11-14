@@ -1,8 +1,7 @@
 import "Ball.del";
 
 rule: "Debug Volleyball"
-Event.OngoingPlayer
-if (IsCommunicating(EventPlayer(), Communication.EmoteRight))
+if (IsCommunicating(HostPlayer(), Communication.EmoteRight))
 {
     volleyball = !volleyball;
 }

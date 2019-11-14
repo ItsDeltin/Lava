@@ -1,8 +1,7 @@
 import "Lava.del";
 
 rule: "Debug Laser Dodge"
-Event.OngoingPlayer
-if (IsCommunicating(EventPlayer(), Communication.EmoteLeft))
+if (IsCommunicating(HostPlayer(), Communication.EmoteLeft))
 {
     doingLasers = !doingLasers;
     rotateLasers = true;
@@ -95,12 +94,13 @@ if (doingLasers)
         outOfRange = AllPlayers();
         CreateHudText(
             VisibleTo:outOfRange,
-            Header:IconString(Icon.Warning),
-            Text:"Get inside the ring!",
-            HeaderColor:Color.Red,
-            TextColor:Color.Yellow,
-            Location:Location.Top,
-            Spectators:Spectators.VisibleNever
+            Header     : IconString(Icon.Warning),
+            Text       : "Get inside the ring!",
+            HeaderColor: Color.Red,
+            TextColor  : Color.Yellow,
+            Location   : Location.Top,
+            Spectators : Spectators.VisibleNever,
+            SortOrder  : 1
         );
         outOfRangeHUD = LastTextID();
     }
