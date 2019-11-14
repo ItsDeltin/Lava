@@ -1,9 +1,16 @@
-disabled rule: "Debug"
+rule: "Debug"
 {
-    CreateHudText(HostPlayer(), null, "Eye Position:", EyePosition(HostPlayer()), Location.Left, 0, Color.White, Color.White, Color.Blue);
-    CreateHudText(HostPlayer(), null, "Position:", PositionOf(HostPlayer()), Location.Left, 1, Color.White, Color.White, Color.Blue);
-    CreateHudText(HostPlayer(), null, "Throttle:", ThrottleOf(HostPlayer()), Location.Left, 2, Color.White, Color.White, Color.Blue);
-    CreateHudText(HostPlayer(), null, "Facing:", <"<0> (<1>, <2>)", FacingDirectionOf(HostPlayer()), HorizontalFacingAngleOf(HostPlayer()), VerticalFacingAngleOf(HostPlayer())>, Location.Left, 3, Color.White, Color.White, Color.Blue);
+    CreateHudText(HostPlayer(), null, "Server Load:", ServerLoad(), Location.Left, 0, Color.White, Color.White, Color.Blue);
+    CreateHudText(HostPlayer(), null, "Server Load Average:", ServerLoadAverage(), Location.Left, 1, Color.White, Color.White, Color.Blue);
+    CreateHudText(HostPlayer(), null, "Server Load Peak:", ServerLoadPeak(), Location.Left, 2, Color.White, Color.White, Color.Blue);
+}
+
+disabled rule: "Debug extended"
+{
+    CreateHudText(HostPlayer(), null, "Eye Position:", EyePosition(HostPlayer()), Location.Left, 3, Color.White, Color.White, Color.Blue);
+    CreateHudText(HostPlayer(), null, "Position:", PositionOf(HostPlayer()), Location.Left, 4, Color.White, Color.White, Color.Blue);
+    CreateHudText(HostPlayer(), null, "Throttle:", ThrottleOf(HostPlayer()), Location.Left, 5, Color.White, Color.White, Color.Blue);
+    CreateHudText(HostPlayer(), null, "Facing:", <"<0> (<1>, <2>)", FacingDirectionOf(HostPlayer()), HorizontalFacingAngleOf(HostPlayer()), VerticalFacingAngleOf(HostPlayer())>, Location.Left, 6, Color.White, Color.White, Color.Blue);
     CreateHudText(HostPlayer(), null, "Ray Cast Hit Position:",
         RayCastHitPosition(
             EyePosition(HostPlayer()),
@@ -11,7 +18,7 @@ disabled rule: "Debug"
             AllPlayers(),
             HostPlayer(),
             true
-        ), Location.Left, 4, Color.White, Color.White, Color.Blue
+        ), Location.Left, 7, Color.White, Color.White, Color.Blue
     );
     CreateHudText(HostPlayer(), null, "Ray Cast Hit Normal:",
         RayCastHitNormal(
@@ -20,7 +27,7 @@ disabled rule: "Debug"
             AllPlayers(),
             HostPlayer(),
             true
-        ), Location.Left, 5, Color.White, Color.White, Color.Blue
+        ), Location.Left, 8, Color.White, Color.White, Color.Blue
     );
     CreateHudText(HostPlayer(), null, "Ray Cast Hit Player:",
         RayCastHitPlayer(
@@ -29,72 +36,55 @@ disabled rule: "Debug"
             AllPlayers(),
             HostPlayer(),
             true
-        ), Location.Left, 6, Color.White, Color.White, Color.Blue
+        ), Location.Left, 9, Color.White, Color.White, Color.Blue
     );
 
-    // CreateHudText(HostPlayer(), null, "Camera Pos:", <"<0> (<1>)", cameraPos, Destination(cameraPos, FacingDirectionOf(), 1)>, Location.Left, 3, Color.White, Color.White, Color.Blue);
-
-    CreateHudText(HostPlayer(), null, "Server Load:", ServerLoad(), Location.Left, 7, Color.White, Color.White, Color.Blue);
-    CreateHudText(HostPlayer(), null, "Server Load Average:", ServerLoadAverage(), Location.Left, 8, Color.White, Color.White, Color.Blue);
-    CreateHudText(HostPlayer(), null, "Server Load Peak:", ServerLoadPeak(), Location.Left, 9, Color.White, Color.White, Color.Blue);
-
-    CreateHudText(HostPlayer(), null, "Class Memory:", ClassMemory(), Location.Left, 10, Color.White, Color.White, Color.Blue);
-    CreateHudText(HostPlayer(), null, "Class Memory Used:", ClassMemoryUsed(), Location.Left, 11, Color.White, Color.White, Color.Blue);
-    CreateHudText(HostPlayer(), null, "Class Memory Created:", ClassMemoryRemaining(), Location.Left, 12, Color.White, Color.White, Color.Blue);
+    CreateHudText(HostPlayer(), null, "Camera Pos:", <"<0> (<1>)", cameraPos, Destination(cameraPos, FacingDirectionOf(HostPlayer()), 1)>, Location.Left, 10, Color.White, Color.White, Color.Blue);
+    CreateHudText(HostPlayer(), null, "Class Memory:", ClassMemory(), Location.Left, 11, Color.White, Color.White, Color.Blue);
+    CreateHudText(HostPlayer(), null, "Class Memory Used:", ClassMemoryUsed(), Location.Left, 12, Color.White, Color.White, Color.Blue);
+    CreateHudText(HostPlayer(), null, "Class Memory Created:", ClassMemoryRemaining(), Location.Left, 13, Color.White, Color.White, Color.Blue);
 }
 
-define playervar cam = false;
-define playervar cameraPos;
+define globalvar cam ! = false;
+define globalvar cameraPos;
 
 disabled rule: "Free cam"
-Event.OngoingPlayer
-if (HostPlayer() == EventPlayer())
-if (IsCommunicating(EventPlayer(), Communication.VoiceLineDown))
+if (IsCommunicating(HostPlayer(), Communication.VoiceLineDown))
 {
     cam = !cam;
 }
 
 disabled rule: "Start Camera"
-Event.OngoingPlayer
-if (HostPlayer() == EventPlayer())
 if (cam)
 {
-    cameraPos = EyePosition();
-    StartCamera(EventPlayer(), cameraPos, cameraPos + FacingDirectionOf(), 25);
-    SetMoveSpeed(EventPlayer(), 0);
+    cameraPos = EyePosition(HostPlayer());
+    StartCamera(HostPlayer(), cameraPos, cameraPos + FacingDirectionOf(HostPlayer()), 25);
 }
 
 disabled rule: "Stop Camera"
-Event.OngoingPlayer
-if (HostPlayer() == EventPlayer())
 if (!cam)
 {
-    StopCamera(EventPlayer());
-    SetMoveSpeed(EventPlayer(), 100);
+    StopCamera(HostPlayer());
 }
 
 disabled rule: "TP to camera"
-Event.OngoingPlayer
-if (HostPlayer() == EventPlayer())
 if (cam)
-if (IsCommunicating(EventPlayer(), Communication.VoiceLineLeft))
+if (IsCommunicating(HostPlayer(), Communication.VoiceLineLeft))
 {
     cam = false;
-    define storeFacing = FacingDirectionOf();
-    Teleport(EventPlayer(), cameraPos);
-    SetFacing(EventPlayer(), storeFacing, Relative.ToWorld);
+    define storeFacing = FacingDirectionOf(HostPlayer());
+    Teleport(HostPlayer(), cameraPos);
+    SetFacing(HostPlayer(), storeFacing, Relative.ToWorld);
 }
 
 disabled rule: "Move camera"
-Event.OngoingPlayer
-if (HostPlayer() == EventPlayer())
 if (cam)
-if (DistanceBetween(Vector(), ThrottleOf(EventPlayer())) > 0)
+if (DistanceBetween(Vector(), ThrottleOf(HostPlayer())) > 0)
 {
-    define x = XOf(ThrottleOf());
-    define z = ZOf(ThrottleOf());
+    define x = XOf(ThrottleOf(HostPlayer()));
+    define z = ZOf(ThrottleOf(HostPlayer()));
 
-    define right = CrossProduct(FacingDirectionOf(), Up());
+    define right = CrossProduct(FacingDirectionOf(HostPlayer()), Up());
 
     if (x < 0)
         cameraPos += right / 2;
@@ -102,19 +92,17 @@ if (DistanceBetween(Vector(), ThrottleOf(EventPlayer())) > 0)
         cameraPos += -right / 2;
     
     if (z > 0)
-        cameraPos += FacingDirectionOf() / 2;
+        cameraPos += FacingDirectionOf(HostPlayer()) / 2;
     else if (z < 0)
-        cameraPos -= FacingDirectionOf() / 2;
+        cameraPos -= FacingDirectionOf(HostPlayer()) / 2;
 
     MinWait();
     LoopIfConditionIsTrue();
 }
 
 disabled rule: "Move camera down"
-Event.OngoingPlayer
-if (HostPlayer() == EventPlayer())
 if (cam)
-if (IsButtonHeld(EventPlayer(), Button.Crouch))
+if (IsButtonHeld(HostPlayer(), Button.Crouch))
 {
     cameraPos += Down() / 2;
     MinWait();
@@ -122,10 +110,8 @@ if (IsButtonHeld(EventPlayer(), Button.Crouch))
 }
 
 disabled rule: "Move camera up"
-Event.OngoingPlayer
-if (HostPlayer() == EventPlayer())
 if (cam)
-if (IsButtonHeld(EventPlayer(), Button.Jump))
+if (IsButtonHeld(HostPlayer(), Button.Jump))
 {
     cameraPos += Up() / 2;
     MinWait();

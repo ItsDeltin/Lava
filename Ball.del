@@ -106,7 +106,17 @@ macro ballSpeed(): SpeedOf(rootBall);
 rule: "Link"
 if (ball)
 {
-    if (IsInAir(ball1) || IsInAir(ball2))
+    if (isStunned(ball1))
+    {
+        tpFrom = ball2;
+        tpTo = ball1;
+    }
+    else if (isStunned(ball2))
+    {
+        tpFrom = ball1;
+        tpTo = ball2;
+    }
+    else if (IsInAir(ball1) || IsInAir(ball2))
     {
         if (tpTo == null)
         {
@@ -124,21 +134,8 @@ if (ball)
     }
     else
     {
-        if (isStunned(ball1))
-        {
-            tpFrom = ball2;
-            tpTo = ball1;
-        }
-        else if (isStunned(ball2))
-        {
-            tpFrom = ball1;
-            tpTo = ball2;
-        }
-        else
-        {
-            tpFrom = null;
-            tpTo = null;
-        }
+        tpFrom = null;
+        tpTo = null;
     }
 
     if (tpTo != null) rootBall = tpTo;
@@ -190,14 +187,14 @@ if (!IsInSpawnRoom(ball1) && !IsInSpawnRoom(ball2))
     Heal(EventPlayer(), null, EventDamage());
 
     // Hammer hit
-    if (EventDamage() == 72)
+    if (EventDamage() == 70)
     {
         ApplyImpulse(EventPlayer(), Vector(0, 1, 0), 20, Relative.ToWorld, ContraryMotion.Incorporate);
         thrower = Attacker();
         throwType = 0;
     }
     // Charge bump
-    else if (EventDamage() == 47)
+    else if (EventDamage() == 45)
     {
         thrower = Attacker();
         throwType = 1;
@@ -207,7 +204,7 @@ if (!IsInSpawnRoom(ball1) && !IsInSpawnRoom(ball2))
 rule: "On Fire Strike"
 Event.OnDamageTaken
 if (isBall)
-if (EventDamage() == 97)
+if (EventDamage() == 95)
 {
     define fuse = 0;
     ChasePlayerVariableOverTime(EventPlayer(), fuse, 2, 3);
@@ -220,7 +217,7 @@ if (EventDamage() == 97)
     PlayEffect(AllPlayers(), PlayEffect.GoodExplosion, Color.Orange, ballLocation(), ExplosionRange());
     PlayEffect(AllPlayers(), PlayEffect.ExplosionSound, Color.Orange, ballLocation(), 100);
 
-    define inExplosionRange = FilteredArray(AllPlayers(), DistanceBetween(ArrayElement(), ballLocation()) < ExplosionRange());
+    define inExplosionRange = FilteredArray(AllPlayers(), DistanceBetween(ArrayElement(), ballLocation()) < ExplosionRange() && !ArrayElement().isBall);
 
     Damage(inExplosionRange, Attacker(), 200);
     inExplosionRange.knockedFrom = ballLocation();
