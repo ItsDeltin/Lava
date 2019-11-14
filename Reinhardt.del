@@ -63,6 +63,7 @@ if (IsTrueForAny(
         IsButtonHeld(ArrayElement(), Button.SecondaryFire)
         && HeroOf(ArrayElement()) == Hero.Reinhardt
         && VerticalFacingAngleOf(ArrayElement()) < -40
+        && ArrayElement() != EventPlayer()
         && DistanceBetween(EventPlayer(), ArrayElement()) <= 5
         && IsInViewAngle(ArrayElement(), PositionOf(EventPlayer()), 100)
     ))
