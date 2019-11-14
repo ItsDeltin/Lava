@@ -7,7 +7,6 @@ if (IsCommunicating(HostPlayer(), Communication.EmoteRight))
 }
 
 define globalvar volleyball;
-define globalvar netLength !;
 define globalvar detonationCounter;
 define globalvar detonationTime;
 define globalvar isCountingDown;
@@ -24,8 +23,8 @@ if (volleyball)
     CreateBeamEffect(
         AllPlayers(),
         BeamType.BadBeam,
-        PolePos() + Vector(0, 0.5, netLength),
-        PolePos() + Vector(0, 0.5, -netLength),
+        PolePos() + Vector(0, 0.5, 150),
+        PolePos() + Vector(0, 0.5, -150),
         Color.Red,
         EffectRev.VisibleToPositionAndRadius
     );
@@ -34,8 +33,8 @@ if (volleyball)
     CreateBeamEffect(
         AllPlayers(),
         BeamType.BadBeam,
-        PolePos() + Vector(0, 2, netLength),
-        PolePos() + Vector(0, 2, -netLength),
+        PolePos() + Vector(0, 2, 150),
+        PolePos() + Vector(0, 2, -150),
         Color.Red,
         EffectRev.VisibleToPositionAndRadius
     );
@@ -44,14 +43,13 @@ if (volleyball)
     CreateBeamEffect(
         AllPlayers(),
         BeamType.BadBeam,
-        PolePos() + Vector(0, 3.5, netLength),
-        PolePos() + Vector(0, 3.5, -netLength),
+        PolePos() + Vector(0, 3.5, 150),
+        PolePos() + Vector(0, 3.5, -150),
         Color.Red,
         EffectRev.VisibleToPositionAndRadius
     );
     laser3Effect = LastCreatedEntity();
 
-    netLength = 150;
     detonationTime = 10;
 
     CreateHudText(
