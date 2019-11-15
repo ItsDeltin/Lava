@@ -23,7 +23,9 @@ if (!isBall)
 macro rowCount(): 50;
 macro columnCount(): 35;
 
-disabled rule: "Setup Arena"
+define globalvar arenaEffects = [];
+
+rule: "Setup Arena"
 {
     OuterWalls();
 
@@ -44,6 +46,7 @@ disabled rule: "Setup Arena"
             Color.Red,
             EffectRev.VisibleTo
         );
+        ModifyGlobalVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
     }
     for (define z ! = 0; z <= columnCount(); z++)
     {
@@ -55,10 +58,12 @@ disabled rule: "Setup Arena"
             Color.Red,
             EffectRev.VisibleTo
         );
+        ModifyGlobalVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
     }
 
     // Pole flair
     CreateEffect(AllPlayers(), Effect.Orb, Color.Orange, TopPolePos(), 0.25, EffectRev.VisibleTo);
+    // ModifyGlobalVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
     CreateBeamEffect(
         AllPlayers(),
         BeamType.GoodBeam,
@@ -66,18 +71,19 @@ disabled rule: "Setup Arena"
         TopPolePos(),
         Color.Red
     );
+    // ModifyGlobalVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
     ChaseGlobalVariableAtRate(killzoneRot, 180, 25, RateChaseReevaluation.DestinationAndRate);
 }
 
 macro flairPos(): Destination(xyPolePos(136.42), DirectionFromAngles(killzoneRot, 0), 11);
 
-disabled rule: "Reset killzone rot"
+rule: "Reset killzone rot"
 if (killzoneRot == 180)
 {
     killzoneRot = -180;
 }
 
-disabled rule: "Blip end"
+rule: "Blip end"
 if (AbsoluteValue(killzoneRot - 22.5) % 45 < 1)
 {
     PlayEffect(AllPlayers(), PlayEffect.GoodExplosion, Color.Red, flairPos(), 1);
@@ -96,6 +102,7 @@ method OuterWalls()
         Color.Orange,
         EffectRev.VisibleTo
     );
+    ModifyGlobalVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
     // Tower side
     CreateBeamEffect(
         AllPlayers(),
@@ -105,6 +112,7 @@ method OuterWalls()
         Color.Orange,
         EffectRev.VisibleTo
     );
+    ModifyGlobalVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
     // Team 1 side
     // inner
     CreateBeamEffect(
@@ -115,6 +123,7 @@ method OuterWalls()
         Color.Team1,
         EffectRev.VisibleTo
     );
+    ModifyGlobalVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
     // Outer
     CreateBeamEffect(
         AllPlayers(),
@@ -124,6 +133,7 @@ method OuterWalls()
         Color.Team1,
         EffectRev.VisibleTo
     );
+    ModifyGlobalVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
     // Team 2 side
     // Inner
     CreateBeamEffect(
@@ -134,6 +144,7 @@ method OuterWalls()
         Color.Team2,
         EffectRev.VisibleTo
     );
+    ModifyGlobalVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
     //Outer
     CreateBeamEffect(
         AllPlayers(),
@@ -143,6 +154,7 @@ method OuterWalls()
         Color.Team2,
         EffectRev.VisibleTo
     );
+    ModifyGlobalVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
 }
 
 macro PolePos()   : Vector(0, 154.88, 150);

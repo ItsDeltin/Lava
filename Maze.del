@@ -65,8 +65,10 @@ if (generateStep == 1)
     loadingHudText = LastTextID();
 }
 
-define globalvar xOffsets = [0,1,0,-1];
-define globalvar yOffsets = [1,0,-1,0];
+// define globalvar dirIndex ! =[1,mazeHeight(),-1,-mazeHeight()];
+define globalvar dirFlag  ! =[TopWall(), RightWall(), BottomWall(), LeftWall()];
+define globalvar offsetX  ! =[0,1,0,-1];
+define globalvar offsetY  ! =[1,0,-1,0];
 
 rule: "Maze: Generate: Visit Cells"
 if (generateStep == 2)
@@ -82,53 +84,24 @@ if (generateStep == 2)
     while (CountOf(toVisitX) > 0)
     {
         numberOfVisits++;
-        define order ! = RandomizedArray([0,1,2,3]);
 
         define x ! = LastOf(toVisitX);
         define y ! = LastOf(toVisitY);
 
         define removeAt = CountOf(toVisitX) - 1;
 
+        define order ! = RandomizedArray([0,1,2,3]);
         foreach (define i in order)
         {
-            define dirX ! = xOffsets[i];
-            define dirY ! = yOffsets[i];
-            define checkX ! = x + dirX;
-            define checkY ! = y + dirY;
+            define checkX ! = x + offsetX[i];
+            define checkY ! = y + offsetY[i];
+            define checkIndex ! = indexFromCoord(checkX, checkY);
 
-            if (checkX >= 0 && checkY >= 0 && checkX < mazeWidth() && checkY < mazeHeight() && cellStates[indexFromCoord(checkX, checkY)] < Visited())
+            if (checkX >= 0 && checkY >= 0 && checkX < mazeWidth() && checkY < mazeHeight() && cellStates[checkIndex] < Visited())
             {
-                define thisWall = -1;
-                define neighborWall = -1;
-
-                // Neighbor is to the right
-                if (dirX == 1)
-                {
-                    thisWall = RightWall();
-                    neighborWall = LeftWall();
-                }
-                // Neighbor is to the left
-                else if (dirX == -1)
-                {
-                    thisWall = LeftWall();
-                    neighborWall = RightWall();
-                }
-                // Neighbor is above
-                else if (dirY == 1)
-                {
-                    thisWall = TopWall();
-                    neighborWall = BottomWall();
-                }
-                // Neighbor is below
-                else if (dirY == -1)
-                {
-                    thisWall = BottomWall();
-                    neighborWall = TopWall();
-                }
-
-                cellStates[indexFromCoord(x, y)] -= thisWall;
-                cellStates[indexFromCoord(checkX, checkY)] -= neighborWall;
-                cellStates[indexFromCoord(checkX, checkY)] += Visited();
+                cellStates[indexFromCoord(x, y)] -= dirFlag[i];
+                cellStates[checkIndex] -= dirFlag[i + (i < 2 ? 2 : -2)];
+                cellStates[checkIndex] += Visited();
                 ModifyGlobalVariable(toVisitX, Operation.AppendToArray, checkX);
                 ModifyGlobalVariable(toVisitY, Operation.AppendToArray, checkY);
             }
@@ -241,8 +214,6 @@ if (generateStep == 2)
 rule: "Maze: Generate: Create Walls: X axis"
 if (generateStep == 3)
 {
-    DestroyAllEffects();
-
     for (define z ! = 0; z < mazeHeight(); z++)
     {
         define topLineStart ! = -1;
@@ -252,25 +223,11 @@ if (generateStep == 3)
         {
             define cellCheck = cellStates[indexFromCoord(x,z)] - Visited();
 
-            // Left wall
-            if (cellCheck >= LeftWall())
-                cellCheck -= LeftWall();
-            
-            // Bottom wall
-            if (cellCheck >= BottomWall())
-            {
-                cellCheck -= BottomWall();
-                if (bottomLineStart == -1 && z == 0) bottomLineStart = x; // = z should be = x?
-            }
-
-            // Right wall
-            if (cellCheck >= RightWall())
-                cellCheck -= RightWall();
+            if (hasBottomWall(cellCheck) && bottomLineStart == -1 && z == 0) bottomLineStart = x;
             
             // Top wall
-            if (cellCheck >= TopWall())
+            if (hasTopWall(cellCheck))
             {
-                cellCheck -= TopWall();
                 if (topLineStart == -1) topLineStart = x;
             }
             else if (topLineStart != -1)
@@ -351,20 +308,11 @@ if (generateStep == 4)
             define cellCheck = cellStates[indexFromCoord(x,z)] - Visited();
 
             // Left wall
-            if (cellCheck >= LeftWall())
-            {
-                cellCheck -= LeftWall();
-                if (leftLineStart == -1 && x == 0) leftLineStart = z; // z to x? opposite of whats above
-            }
-            
-            // Bottom wall
-            if (cellCheck >= BottomWall())
-                cellCheck -= BottomWall();
-            
+            if (hasLeftWall(cellCheck) && leftLineStart == -1 && x == 0) leftLineStart = z; // z to x? opposite of whats above
+
             // Right wall
-            if (cellCheck >= RightWall())
+            if (hasRightWall(cellCheck))
             {
-                cellCheck -= RightWall();
                 if (rightLineStart == -1) rightLineStart = z;
             }
             else if (rightLineStart != -1)
@@ -381,10 +329,6 @@ if (generateStep == 4)
                 );
                 rightLineStart = -1;
             }
-            
-            // Top wall
-            if (cellCheck >= TopWall())
-                cellCheck -= TopWall();
         }
 
         if (rightLineStart != -1)
@@ -522,34 +466,33 @@ if (IsCommunicating(HostPlayer(), Communication.UltimateStatus))
         else
         {
             // Left wall
-            if (cellCheck >= LeftWall())
-                cellCheck -= LeftWall();
-            // No left wall
-            else if (x > 0 && !visited[indexFromCoord(x - 1,z)] /*!IsTrueForAny(aStarCheck, XOf(ArrayElement()) == x - 1 && ZOf(ArrayElement()) == z)*/)
+            if (x > 0 && !hasLeftWall(cellCheck) && !visited[indexFromCoord(x - 1,z)])
+            {
                 ModifyGlobalVariable(aStarCheck, Operation.AppendToArray, Vector(x - 1, i, z));
+                visited[indexFromCoord(x-1,z)] = true;
+            }
             
             // Bottom wall
-            if (cellCheck >= BottomWall())
-                cellCheck -= BottomWall();
-            // No bottom wall
-            else if (z > 0 && !visited[indexFromCoord(x,z - 1)] /*!IsTrueForAny(aStarCheck, XOf(ArrayElement()) == x && ZOf(ArrayElement()) == z - 1)*/)
+            if (z > 0 && !hasBottomWall(cellCheck) && !visited[indexFromCoord(x,z - 1)])
+            {
                 ModifyGlobalVariable(aStarCheck, Operation.AppendToArray, Vector(x, i, z - 1));
+                visited[indexFromCoord(x,z-1)] = true;
+            }
             
-            MinWait();
-
-            // Right wall
-            if (cellCheck >= RightWall())
-                cellCheck -= RightWall();
-            // No right wall
-            else if (x < mazeWidth() - 1 && !visited[indexFromCoord(x + 1,z)] /*!IsTrueForAny(aStarCheck, XOf(ArrayElement()) == x + 1 && ZOf(ArrayElement()) == z)*/)
+            if (x < mazeWidth() - 1 && !hasRightWall(cellCheck) && !visited[indexFromCoord(x + 1,z)])
+            {
                 ModifyGlobalVariable(aStarCheck, Operation.AppendToArray, Vector(x + 1, i, z));
+                visited[indexFromCoord(x+1,z)] = true;
+            }
             
             // Top wall
-            if (cellCheck >= TopWall())
-                cellCheck -= TopWall();
-            // No top wall
-            else if (z < mazeHeight() - 1 && !visited[indexFromCoord(x,z + 1)] /*!IsTrueForAny(aStarCheck, XOf(ArrayElement()) == x && ZOf(ArrayElement()) == z + 1)*/)
+            if (z < mazeHeight() - 1 && !hasTopWall(cellCheck) && !visited[indexFromCoord(x,z + 1)])
+            {
                 ModifyGlobalVariable(aStarCheck, Operation.AppendToArray, Vector(x, i, z + 1));
+                visited[indexFromCoord(x,z+1)] = true;
+            }
+
+            MinWait();
         }
     }
     visited = [];
@@ -568,6 +511,10 @@ if (IsCommunicating(HostPlayer(), Communication.UltimateStatus))
     aStarCheck = [];
     isGettingPath = false;
 }
+macro hasTopWall(define cell): cell % 2 > 0;
+macro hasRightWall(define cell): cell >= 2 && (cell - 2) % 4 <= 1;
+macro hasBottomWall(define cell): cell >= 4 && (cell - 4) % 8 <= 3;
+macro hasLeftWall(define cell): cell >= 8;
 
 rule: "Maze: Hunter Nav: Start moving"
 if (generateStep == 6)
@@ -585,7 +532,7 @@ if (CountOf(walkPath) > 0)
     StartFacing(
         navigator,
         DirectionTowards(PositionOf(navigator), FirstOf(walkPath)),
-        100,
+        150,
         Relative.ToWorld,
         FacingRev.DirectionAndTurnRate
     );
