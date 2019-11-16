@@ -8,7 +8,7 @@ if (IsCommunicating(HostPlayer(), Communication.EmoteLeft))
 }
 
 define globalvar doingLasers = false;
-define globalvar lasersReady ! = false;
+define globalvar lasersReady = false;
 
 define globalvar rotateLasers = false;
 define globalvar rotationSpeed = 0; // Number of degrees per second

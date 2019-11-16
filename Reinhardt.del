@@ -10,6 +10,7 @@ Event.OngoingPlayer
 Player.Reinhardt
 {
     SetMoveSpeed(EventPlayer(), defaultMoveSpeed);
+    DisallowButton(EventPlayer(), Button.Ultimate);
 }
 
 rule: "Charge Speed Boost"
@@ -155,8 +156,79 @@ define playervar heightOffset;
 rule: "Knocked"
 Event.OngoingPlayer
 if (knockedFrom != null)
-if (!isBall)
+if (!isWorkingDummy)
 {
     ApplyImpulse(EventPlayer(), DirectionTowards(knockedFrom, PositionOf() + Vector(0, heightOffset, 0)), force, Relative.ToWorld, ContraryMotion.Incorporate);
     knockedFrom = null;
 }
+
+define globalvar FloorPoint = Vector(0, 154.88, 0);
+define globalvar FloorNormal = Vector(0, 1, 0);
+
+define playervar usingWallAbility = false;
+define playervar wallMarker ! = false;
+
+// Wall Powerup
+rule: "Ability: Wall Marker"
+Event.OngoingPlayer
+Player.Reinhardt
+if (IsButtonHeld(EventPlayer(), Button.Ultimate))
+if (UltimateChargePercent() == 100)
+if (!usingWallAbility)
+{
+    // DestroyEffect(wallMarker);
+    CreateEffect(
+        EventPlayer(),
+        Effect.Sphere,
+        Color.SkyBlue,
+        LineIntersectingPlane(EyePosition(), FacingDirectionOf(), FloorNormal, FloorPoint),
+        1
+    );
+    wallMarker = LastCreatedEntity();
+    usingWallAbility = true;
+}
+
+rule: "Ability: Wall Input"
+Event.OngoingPlayer
+Player.Reinhardt
+if (!IsButtonHeld(EventPlayer(), Button.Ultimate))
+if (UltimateChargePercent() == 100)
+if (usingWallAbility)
+{
+    AllowButton(EventPlayer(), Button.Ultimate);
+    PressButton(EventPlayer(), Button.Ultimate);
+    Wait(0.05);
+    DisallowButton(EventPlayer(), Button.Ultimate);
+}
+
+rule: "Ability: Wall"
+Event.OngoingPlayer
+Player.Reinhardt
+if (IsUsingUltimate())
+{
+    // Create the Mei dummy bot
+    CreateDummyBot(
+        Hero.Mei,
+        TeamWithAvailableSlots(TeamOf()),
+        -1,
+        LineIntersectingPlane(EyePosition(), FacingDirectionOf(), FloorNormal, FloorPoint),
+        Vector()
+    );
+    define wallBuilder = LastCreatedEntity(); // Store the dummy bot as a variable.
+    wallBuilder.isWorkingDummy = true; // Make the dummy bot as a working dummy so other systems don't interact with it.
+    SetInvisible(wallBuilder, InvisibleTo.All); // Make the dummy invisible.
+    MinWait(); // Wait for the game to process.
+    SetFacing(wallBuilder, DirectionFromAngles(HorizontalFacingAngleOf(), 89), Relative.ToWorld); // Force the mei to face the ground in the same direction as the event player.
+    PressButton(wallBuilder, Button.Ability2); // Use wall.
+    PressButton(wallBuilder, Button.PrimaryFire); // Place wall.
+    DestroyEffect(wallMarker);
+    Wait(0.05); // Wait for the game to process.
+    Teleport(wallBuilder, ObjectivePosition(0)); // Teleport the mei away.
+    Wait(5); // Wait for the wall.
+    DestroyDummyBot(TeamOf(wallBuilder), SlotOf(wallBuilder)); // Destroy the mei.
+    usingWallAbility = false;
+}
+
+macro LineIntersectingPlane(define pos, define dir, define planeNormal, define planePos):
+    pos + Normalize(dir) * ((DotProduct(planeNormal, planePos) - DotProduct(planeNormal, pos)) / DotProduct(planeNormal, Normalize(dir)));
+macro TeamWithAvailableSlots(define preferTeam): NumberOfPlayers(preferTeam) < 6 ? preferTeam : OppositeTeamOf(preferTeam);

@@ -69,11 +69,13 @@ if (ball)
     CreateDummyBot(Hero.Torbjorn, Team.Team1, 5, TopPolePos());
     ball1 = LastCreatedEntity();
     ball1.isBall = true;
+    ball1.isWorkingDummy = true;
     rootBall = ball1;
 
     CreateDummyBot(Hero.Torbjorn, Team.Team2, 5, TopPolePos() + Vector(0, 1, 0));
     ball2 = LastCreatedEntity();
     ball2.isBall = true;
+    ball2.isWorkingDummy = true;
 
     SetStatus(ball1, null, Status.Unkillable, 9999);
     SetStatus(ball2, null, Status.Unkillable, 9999);

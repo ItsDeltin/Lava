@@ -111,7 +111,7 @@ if (ballReady)
 rule: "Kill players touching net"
 Event.OngoingPlayer
 if (volleyball)
-if (!isBall)
+if (!isWorkingDummy)
 // The net is at x=0 of the map, so just test if the player has a low X coordinate.
 if (AbsoluteValue(XOf(PositionOf())) <= 1)
 // 158.38 is the base position plus the height of the tallest net beam effect.

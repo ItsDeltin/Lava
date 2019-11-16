@@ -7,12 +7,13 @@ import "Maze.del";
 import "Debug Tools.del";
 
 define globalvar origin = Vector(-0.18, 154.88, 60);
+define playervar isWorkingDummy;
 
 rule: "Respawn"
 Event.OngoingPlayer
 if (HasSpawned())
 if (IsAlive())
-if (!isBall)
+if (!isWorkingDummy)
 {
     if (generateStep >= 5)
         Teleport(EventPlayer(), randomMazeSpot());
@@ -162,7 +163,7 @@ macro TopPolePos(): Vector(0, 161.5,  150);
 macro BaseOffset(): Vector(0, 0.5, 0);
 macro xyPolePos(define y): Vector(0, y, 150);
 
-macro isOnWall(define player): IsOnGround(player) && YOf(PositionOf(player)) > 158.4;
+macro isOnWall(define player): IsOnGround(player) && AbsoluteValue(YOf(PositionOf(player)) - 158.44) < 0.2;
 
 rule: "I want to die"
 if (IsButtonHeld(HostPlayer(), Button.Interact))

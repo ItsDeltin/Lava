@@ -388,6 +388,7 @@ if (generateStep == 5)
 
     CreateDummyBot(Hero.Roadhog, Team.Team1, -1, randomMazeSpot(), Vector());
     navigator = LastCreatedEntity();
+    navigator.isWorkingDummy = true;
     MinWait();
     SetMoveSpeed(navigator, 125);
     Teleport(navigator, randomMazeSpot());
@@ -400,7 +401,7 @@ Event.OngoingPlayer
 if (generateStep == 5)
 if (HasSpawned())
 if (IsAlive())
-if (navigator != EventPlayer())
+if (!isWorkingDummy)
 {
     defaultMoveSpeed = 100;
     SetMoveSpeed(EventPlayer(), 100);
@@ -410,7 +411,7 @@ if (navigator != EventPlayer())
 rule: "Maze: Kill players on walls"
 if (generateStep == 6)
 {
-    foreach (define player in FilteredArray(AllPlayers(), ArrayElement() != navigator))
+    foreach (define player in FilteredArray(AllPlayers(), !ArrayElement().isWorkingDummy))
     if (!IsButtonHeld(player, Button.Crouch))
     {
         define px = XOf(PositionOf(player));
@@ -491,8 +492,6 @@ if (IsCommunicating(HostPlayer(), Communication.UltimateStatus))
                 ModifyGlobalVariable(aStarCheck, Operation.AppendToArray, Vector(x, i, z + 1));
                 visited[indexFromCoord(x,z+1)] = true;
             }
-
-            MinWait();
         }
     }
     visited = [];
