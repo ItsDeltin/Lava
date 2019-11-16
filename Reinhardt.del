@@ -74,57 +74,50 @@ if (IsTrueForAny(
     ApplyImpulse(EventPlayer(), Up(), 15, Relative.ToWorld, ContraryMotion.Incorporate);
 }
 
-define playervar shieldLookUpTextID !;
-define playervar shieldRampTextID !;
+rule: "Shield HUD"
+{
+    CreateHudText(
+        VisibleTo  : FilteredArray(PlayersOnHero(Hero.Reinhardt), IsButtonHeld(ArrayElement(), Button.SecondaryFire) && VerticalFacingAngleOf(ArrayElement()) > -40),
+        Header     : IconString(Icon.ArrowUp),
+        HeaderColor: Color.Orange,
+        Text       : "Look up to become a ramp!",
+        TextColor  : Color.Yellow,
+        Location   : Location.Top,
+        SortOrder  : 3,
+        Spectators : Spectators.VisibleNever
+    );
+    CreateHudText(
+        VisibleTo  : FilteredArray(PlayersOnHero(Hero.Reinhardt), IsButtonHeld(ArrayElement(), Button.SecondaryFire) && VerticalFacingAngleOf(ArrayElement()) <= -40),
+        Header     : IconString(Icon.Moon),
+        HeaderColor: Color.Aqua,
+        Text       : "You are now a ramp.",
+        TextColor  : Color.Yellow,
+        Location   : Location.Top,
+        SortOrder  : 3,
+        Spectators : Spectators.VisibleNever
+    );
+}
 
-rule: "Shield Ramp HUD: Look up"
-Event.OngoingPlayer
-Player.Reinhardt
-if (IsButtonHeld(EventPlayer(), Button.SecondaryFire))
-if (VerticalFacingAngleOf() > -40)
-{
-    DestroyHudText(shieldLookUpTextID);
-    DestroyHudText(shieldRampTextID);
-    CreateHudText(
-        VisibleTo  :EventPlayer(),
-        Header     :IconString(Icon.ArrowUp),
-        HeaderColor:Color.Orange,
-        Text       :"Look up to become a ramp!",
-        TextColor  :Color.Yellow,
-        Location   :Location.Top,
-        SortOrder  :3,
-        Spectators :Spectators.VisibleNever
-    );
-    shieldLookUpTextID = LastTextID();
-}
-rule: "Shield Ramp HUD: Look up"
-Event.OngoingPlayer
-Player.Reinhardt
-if (IsButtonHeld(EventPlayer(), Button.SecondaryFire))
-if (VerticalFacingAngleOf() <= -40)
-{
-    DestroyHudText(shieldLookUpTextID);
-    DestroyHudText(shieldRampTextID);
-    CreateHudText(
-        VisibleTo  :EventPlayer(),
-        Header     :IconString(Icon.Moon),
-        HeaderColor:Color.Aqua,
-        Text       :"You are now a ramp.",
-        TextColor  :Color.Yellow,
-        Location   :Location.Top,
-        SortOrder  :3,
-        Spectators :Spectators.VisibleNever
-    );
-    shieldRampTextID = LastTextID();
-}
-rule: "Shield Ramp HUD: Reset"
-Event.OngoingPlayer
-Player.Reinhardt
-if (!IsButtonHeld(EventPlayer(), Button.SecondaryFire))
-{
-    DestroyHudText(shieldLookUpTextID);
-    DestroyHudText(shieldRampTextID);
-}
+// rule: "Shield cam"
+// Event.OngoingPlayer
+// Player.Reinhardt
+// if (IsButtonHeld(EventPlayer(), Button.SecondaryFire))
+// {
+//     StartCamera(
+//         EventPlayer(),
+//         WorldVectorOf(Vector(0, 4, -6), EventPlayer(), LocalVector.RotationAndTranslation),
+//         WorldVectorOf(Vector(0, 3, 4), EventPlayer(), LocalVector.RotationAndTranslation),
+//         100
+//     );
+// }
+
+// rule: "Shield Ramp HUD: Reset"
+// Event.OngoingPlayer
+// Player.Reinhardt
+// if (!IsButtonHeld(EventPlayer(), Button.SecondaryFire))
+// {
+//     StopCamera(EventPlayer());
+// }
 
 rule: "Start braking"
 Event.OngoingPlayer
@@ -172,17 +165,17 @@ define playervar wallMarker ! = false;
 rule: "Ability: Wall Marker"
 Event.OngoingPlayer
 Player.Reinhardt
-if (IsButtonHeld(EventPlayer(), Button.Ultimate))
+if (IsButtonHeld(EventPlayer(), Button.Interact))
 if (UltimateChargePercent() == 100)
 if (!usingWallAbility)
 {
     // DestroyEffect(wallMarker);
     CreateEffect(
         EventPlayer(),
-        Effect.Sphere,
+        Effect.LightShaft,
         Color.SkyBlue,
         LineIntersectingPlane(EyePosition(), FacingDirectionOf(), FloorNormal, FloorPoint),
-        1
+        0.75
     );
     wallMarker = LastCreatedEntity();
     usingWallAbility = true;
@@ -191,7 +184,7 @@ if (!usingWallAbility)
 rule: "Ability: Wall Input"
 Event.OngoingPlayer
 Player.Reinhardt
-if (!IsButtonHeld(EventPlayer(), Button.Ultimate))
+if (!IsButtonHeld(EventPlayer(), Button.Interact))
 if (UltimateChargePercent() == 100)
 if (usingWallAbility)
 {
@@ -211,7 +204,7 @@ if (IsUsingUltimate())
         Hero.Mei,
         TeamWithAvailableSlots(TeamOf()),
         -1,
-        LineIntersectingPlane(EyePosition(), FacingDirectionOf(), FloorNormal, FloorPoint),
+        LineIntersectingPlane(EyePosition(), FacingDirectionOf(), FloorNormal, FloorPoint) + Vector(0, 10, 0),
         Vector()
     );
     define wallBuilder = LastCreatedEntity(); // Store the dummy bot as a variable.
@@ -232,3 +225,27 @@ if (IsUsingUltimate())
 macro LineIntersectingPlane(define pos, define dir, define planeNormal, define planePos):
     pos + Normalize(dir) * ((DotProduct(planeNormal, planePos) - DotProduct(planeNormal, pos)) / DotProduct(planeNormal, Normalize(dir)));
 macro TeamWithAvailableSlots(define preferTeam): NumberOfPlayers(preferTeam) < 6 ? preferTeam : OppositeTeamOf(preferTeam);
+
+// rule: "Ability: Ball Shield"
+// Event.OngoingPlayer
+// Player.Reinhardt
+// if (ball)
+// if (IsButtonHeld(EventPlayer(), Button.SecondaryFire))
+// if (IsInAir(rootBall))
+// if (DistanceBetween(EyePosition(), rootBall) < 3)
+// if (IsInViewAngle(EventPlayer(), PositionOf(rootBall), 50))
+// {
+//     define a ! = [ball1,ball2];
+//     ApplyImpulse(a, FacingDirectionOf(), 20, Relative.ToWorld, ContraryMotion.Cancel);
+// }
+
+rule: "Ability: Throw ball"
+Event.OngoingPlayer
+Player.Reinhardt
+if (ball)
+if (IsButtonHeld(EventPlayer(), Button.Jump))
+if (DistanceBetween(EventPlayer(), rootBall) < 3)
+{
+    define a ! = [ball1,ball2];
+    ApplyImpulse(a, Up(), 15, Relative.ToWorld, ContraryMotion.Cancel);
+}

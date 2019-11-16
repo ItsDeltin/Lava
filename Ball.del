@@ -120,7 +120,7 @@ if (ball)
     }
     else if (IsInAir(ball1) || IsInAir(ball2))
     {
-        if (tpTo == null)
+        if (tpTo == null || AbsoluteValue(SpeedOf(ball1) - SpeedOf(ball2)) > 2)
         {
             if (SpeedOf(ball1) >= SpeedOf(ball2))
             {
@@ -142,7 +142,7 @@ if (ball)
 
     if (tpTo != null) rootBall = tpTo;
 
-    Teleport(tpFrom, PositionOf(tpTo) + Vector(0, 1, 0));
+    Teleport(tpFrom, PositionOf(tpTo) + Vector(0, 1 + Max(YOf(VelocityOf(tpTo)) * 0.025, 0), 0));
 
     Wait(0.1);
     LoopIfConditionIsTrue();
@@ -265,37 +265,41 @@ if (ballSpeed() >= 10 || IsInAir(rootBall))
     LoopIfConditionIsTrue();
 }
 
-// rule: "Shoot At Team"
-// if (IsTrueForAny(AllPlayers(), IsCommunicating(ArrayElement(), Communication.Hello)))
-// {
-//     define ball = team == Team.Team1 ? ball1 : ball2;
+define globalvar lastCrutchAction ! = 0;
 
-//     // Start the ultimate
-//     SetUltimateCharge(ball, 100);
-//     PressButton(ball, Button.Ultimate);
-//     SetDamageDealt(ball, 300);
-//     SetProjectileGravity(ball, 0);
+disabled rule: "Shoot At Team"
+if (goals)
+if (AbsoluteValue(blueScore - redScore) >= 2)
+if (!HasStatus(ball1, Status.Stunned))
+if (!HasStatus(ball2, Status.Stunned))
+if (!IsInAir(rootBall))
+if (TotalTimeElapsed() - lastCrutchAction > 10)
+{
+    define shootingAtTeam ! = blueScore > redScore ? Team.Team1 : Team.Team2;
+    define shootingBall ! = shootingAtTeam == Team.Team1 ? ball2 : ball1;
 
-//     define fireAt = FirstOf(SortedArray(
-//         FilteredArray(AllPlayers(), !ArrayElement().isBall && TeamOf(ArrayElement()) != team),
-//         DistanceBetween(ArrayElement(), ball)
-//     ));
+    // Start the ultimate
+    SetUltimateCharge(shootingBall, 100);
+    PressButton(shootingBall, Button.Ultimate);
+    SetDamageDealt(shootingBall, 300);
 
-//     // Fire at closest enemy player for 3 seconds
-//     StartFacing(
-//         ball,
-//         DirectionTowards(EyePosition(ball), EyePosition(fireAt)) + Vector(0, (DistanceBetween(ball, fireAt) * 0), 0),
-//         750,
-//         Relative.ToWorld,
-//         FacingRev.DirectionAndTurnRate
-//     );
-//     StartHoldingButton(ball, Button.PrimaryFire);
-//     Wait(3);
+    // Fire at closest enemy player for 3 seconds
+    StartFacing(
+        shootingBall,
+        DirectionTowards(EyePosition(shootingBall), EyePosition(FirstOf(SortedArray(
+            FilteredArray(AllPlayers(), !ArrayElement().isWorkingDummy && TeamOf(ArrayElement()) == shootingAtTeam),
+            DistanceBetween(ArrayElement(), shootingBall)
+        )))),
+        750,
+        Relative.ToWorld,
+        FacingRev.DirectionAndTurnRate
+    );
+    StartHoldingButton(shootingBall, Button.PrimaryFire);
+    Wait(3);
 
-//     StopHoldingButton(ball);
-//     SetDamageDealt(ball, 100);
-//     StopFacing(ball);
-//     SetProjectileGravity(ball, 100);
+    StopHoldingButton(shootingBall);
+    SetDamageDealt(shootingBall, 100);
+    StopFacing(shootingBall);
 
-//     Loop();
-// }
+    lastCrutchAction = TotalTimeElapsed();
+}
