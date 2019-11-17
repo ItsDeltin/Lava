@@ -30,7 +30,7 @@ define globalvar blueScoreText !;
 define globalvar redScoreText !;
 define globalvar ballEffect !;
 
-define globalvar ball;
+define globalvar ball = true;
 define globalvar ballReady;
 
 rule: "Setup balls"

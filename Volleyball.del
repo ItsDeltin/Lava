@@ -70,7 +70,6 @@ if (volleyball)
 rule: "Cleanup volleyball"
 if (!volleyball)
 {
-    ball = false;
     DestroyEffect(laser1Effect);
     DestroyEffect(laser2Effect);
     DestroyEffect(laser3Effect);

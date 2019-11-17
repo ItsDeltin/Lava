@@ -55,14 +55,19 @@ if (DistanceBetween(EventPlayer(), PolePos()) < 3)
     }
 }
 
+macro shieldIsOut(define player): IsButtonHeld(player, Button.SecondaryFire)
+    && !HasStatus(player, Status.Stunned)
+    && !IsUsingAbility1(player)
+    && !IsUsingAbility2(player)
+    && HeroOf(player) == Hero.Reinhardt;
+
 rule: "Shield Surf"
 Event.OngoingPlayer
 Player.Reinhardt
 if (IsUsingAbility1())
 if (IsTrueForAny(
         AllPlayers(),
-        IsButtonHeld(ArrayElement(), Button.SecondaryFire)
-        && HeroOf(ArrayElement()) == Hero.Reinhardt
+        shieldIsOut(ArrayElement())
         && VerticalFacingAngleOf(ArrayElement()) < -40
         && ArrayElement() != EventPlayer()
         && DistanceBetween(EventPlayer(), ArrayElement()) <= 5
@@ -77,7 +82,7 @@ if (IsTrueForAny(
 rule: "Shield HUD"
 {
     CreateHudText(
-        VisibleTo  : FilteredArray(PlayersOnHero(Hero.Reinhardt), IsButtonHeld(ArrayElement(), Button.SecondaryFire) && VerticalFacingAngleOf(ArrayElement()) > -40),
+        VisibleTo  : FilteredArray(PlayersOnHero(Hero.Reinhardt), shieldIsOut(ArrayElement()) && VerticalFacingAngleOf(ArrayElement()) > -40),
         Header     : IconString(Icon.ArrowUp),
         HeaderColor: Color.Orange,
         Text       : "Look up to become a ramp!",
@@ -87,7 +92,7 @@ rule: "Shield HUD"
         Spectators : Spectators.VisibleNever
     );
     CreateHudText(
-        VisibleTo  : FilteredArray(PlayersOnHero(Hero.Reinhardt), IsButtonHeld(ArrayElement(), Button.SecondaryFire) && VerticalFacingAngleOf(ArrayElement()) <= -40),
+        VisibleTo  : FilteredArray(PlayersOnHero(Hero.Reinhardt), shieldIsOut(ArrayElement()) && VerticalFacingAngleOf(ArrayElement()) <= -40),
         Header     : IconString(Icon.Moon),
         HeaderColor: Color.Aqua,
         Text       : "You are now a ramp.",
@@ -97,27 +102,6 @@ rule: "Shield HUD"
         Spectators : Spectators.VisibleNever
     );
 }
-
-// rule: "Shield cam"
-// Event.OngoingPlayer
-// Player.Reinhardt
-// if (IsButtonHeld(EventPlayer(), Button.SecondaryFire))
-// {
-//     StartCamera(
-//         EventPlayer(),
-//         WorldVectorOf(Vector(0, 4, -6), EventPlayer(), LocalVector.RotationAndTranslation),
-//         WorldVectorOf(Vector(0, 3, 4), EventPlayer(), LocalVector.RotationAndTranslation),
-//         100
-//     );
-// }
-
-// rule: "Shield Ramp HUD: Reset"
-// Event.OngoingPlayer
-// Player.Reinhardt
-// if (!IsButtonHeld(EventPlayer(), Button.SecondaryFire))
-// {
-//     StopCamera(EventPlayer());
-// }
 
 rule: "Start braking"
 Event.OngoingPlayer
@@ -158,15 +142,16 @@ if (!isWorkingDummy)
 define globalvar FloorPoint = Vector(0, 154.88, 0);
 define globalvar FloorNormal = Vector(0, 1, 0);
 
-define playervar usingWallAbility = false;
+define playervar usingWallAbility ! = false;
 define playervar wallMarker ! = false;
+define playervar wallBuilder ! = null;
 
 // Wall Powerup
 rule: "Ability: Wall Marker"
 Event.OngoingPlayer
 Player.Reinhardt
 if (IsButtonHeld(EventPlayer(), Button.Interact))
-if (UltimateChargePercent() == 100)
+// if (UltimateChargePercent() == 100)
 if (!usingWallAbility)
 {
     // DestroyEffect(wallMarker);
@@ -185,19 +170,7 @@ rule: "Ability: Wall Input"
 Event.OngoingPlayer
 Player.Reinhardt
 if (!IsButtonHeld(EventPlayer(), Button.Interact))
-if (UltimateChargePercent() == 100)
 if (usingWallAbility)
-{
-    AllowButton(EventPlayer(), Button.Ultimate);
-    PressButton(EventPlayer(), Button.Ultimate);
-    Wait(0.05);
-    DisallowButton(EventPlayer(), Button.Ultimate);
-}
-
-rule: "Ability: Wall"
-Event.OngoingPlayer
-Player.Reinhardt
-if (IsUsingUltimate())
 {
     // Create the Mei dummy bot
     CreateDummyBot(
@@ -207,7 +180,7 @@ if (IsUsingUltimate())
         LineIntersectingPlane(EyePosition(), FacingDirectionOf(), FloorNormal, FloorPoint) + Vector(0, 10, 0),
         Vector()
     );
-    define wallBuilder = LastCreatedEntity(); // Store the dummy bot as a variable.
+    wallBuilder = LastCreatedEntity(); // Store the dummy bot as a variable.
     wallBuilder.isWorkingDummy = true; // Make the dummy bot as a working dummy so other systems don't interact with it.
     SetInvisible(wallBuilder, InvisibleTo.All); // Make the dummy invisible.
     MinWait(); // Wait for the game to process.
@@ -217,8 +190,21 @@ if (IsUsingUltimate())
     DestroyEffect(wallMarker);
     Wait(0.05); // Wait for the game to process.
     Teleport(wallBuilder, ObjectivePosition(0)); // Teleport the mei away.
-    Wait(5); // Wait for the wall.
+    Wait(5, WaitBehavior.AbortWhenFalse); // Wait for the wall.
     DestroyDummyBot(TeamOf(wallBuilder), SlotOf(wallBuilder)); // Destroy the mei.
+    wallBuilder = null;
+    usingWallAbility = false;
+}
+
+rule: "Ability: Wall Destroy"
+Event.OngoingPlayer
+Player.Reinhardt
+if (IsButtonHeld(EventPlayer(), Button.Interact))
+if (usingWallAbility)
+if (wallBuilder != null)
+{
+    DestroyDummyBot(TeamOf(wallBuilder), SlotOf(wallBuilder)); // Destroy the mei.
+    wallBuilder = null;
     usingWallAbility = false;
 }
 
@@ -248,4 +234,38 @@ if (DistanceBetween(EventPlayer(), rootBall) < 3)
 {
     define a ! = [ball1,ball2];
     ApplyImpulse(a, Up(), 15, Relative.ToWorld, ContraryMotion.Cancel);
+}
+
+define playervar inputEnabled ! = true;
+
+rule: "Disable Input"
+Event.OngoingPlayer
+if (!inputEnabled)
+if (!isWorkingDummy)
+{
+    StartThrottleInDirection(EventPlayer(), Vector(), 0, Relative.ToWorld, ThrottleBehavior.ReplaceExistingThrottle)
+    DisallowButton(EventPlayer(), Button.Ability1);
+    DisallowButton(EventPlayer(), Button.Ability2);
+    DisallowButton(EventPlayer(), Button.Crouch);
+    DisallowButton(EventPlayer(), Button.Interact);
+    DisallowButton(EventPlayer(), Button.Jump);
+    DisallowButton(EventPlayer(), Button.PrimaryFire);
+    DisallowButton(EventPlayer(), Button.SecondaryFire);
+    DisallowButton(EventPlayer(), Button.Ultimate);
+}
+
+rule: "Enable Input"
+Event.OngoingPlayer
+if (inputEnabled)
+if (!isWorkingDummy)
+{
+    StopThrottleInDirection(EventPlayer());
+    AllowButton(EventPlayer(), Button.Ability1);
+    AllowButton(EventPlayer(), Button.Ability2);
+    AllowButton(EventPlayer(), Button.Crouch);
+    AllowButton(EventPlayer(), Button.Interact);
+    AllowButton(EventPlayer(), Button.Jump);
+    AllowButton(EventPlayer(), Button.PrimaryFire);
+    AllowButton(EventPlayer(), Button.SecondaryFire);
+    AllowButton(EventPlayer(), Button.Ultimate);
 }

@@ -8,18 +8,91 @@ import "Debug Tools.del";
 
 define globalvar origin = Vector(-0.18, 154.88, 60);
 define playervar isWorkingDummy;
+define playervar doRespawn !;
+define globalvar gamemode = 0;
+// 0 = Waiting
+// 1 = Soccer countdown
+// 2 = Soccer
+// 3 = Volleyball
+// 4 = Lasers
+// 5 = Maze
 
-rule: "Respawn"
+rule: "Respawn when alive"
 Event.OngoingPlayer
 if (HasSpawned())
 if (IsAlive())
 if (!isWorkingDummy)
 {
-    if (generateStep >= 5)
+    doRespawn = true;
+}
+
+rule: "Respawn"
+Event.OngoingPlayer
+if (doRespawn)
+if (!isWorkingDummy)
+{
+    Respawn();
+    MinWait();
+    // Volleyball and initial soccer
+    if (gamemode >= 0 && gamemode <= 3)
+    {
+        define useSpawnArray;
+        if (gamemode == 1)
+        {
+            if (TeamOf(EventPlayer()) == Team.Team1)
+                useSpawnArray = availableBlueSpawns;
+            else
+                useSpawnArray = availableRedSpawns;
+        }
+        else useSpawnArray = [1,2,3,4,5];
+        define spawnAt ! = RandomValueInArray(useSpawnArray);
+
+        Teleport(EventPlayer(), Vector(TeamOf(EventPlayer()) == Team.Team1 ? 60 : -60, 154.88, (150 - 30) + (((150 + 30) - (150 - 30))/5)*spawnAt));
+
+        if (gamemode == 1)
+        {
+            if (TeamOf(EventPlayer()) == Team.Team1)
+                ModifyGlobalVariable(availableBlueSpawns, Operation.RemoveFromArrayByValue, spawnAt);
+            else
+                ModifyGlobalVariable(availableRedSpawns, Operation.RemoveFromArrayByValue, spawnAt);
+            
+            inputEnabled = false;
+        }
+    } 
+    // Maze
+    else if (gamemode == 5)
         Teleport(EventPlayer(), randomMazeSpot());
+    // No gamemode
     else
         Teleport(EventPlayer(), origin + Vector(20, 0, 20));
+
+    SetFacing(EventPlayer(), DirectionTowards(EyePosition(), TopPolePos()));
+
+    doRespawn = false;
 }
+
+define globalvar availableBlueSpawns = [1,2,3,4,5];
+define globalvar availableRedSpawns = [1,2,3,4,5];
+
+rule: "Start"
+if (gamemode == 0)
+{
+    Wait(10);
+    AllPlayers().inputEnabled = false;
+    gamemode = 1;
+    AllPlayers().doRespawn = true;
+    respawnBall();
+    goals = true;
+    for (define i = 5; i > 0; i--)
+    {
+        SmallMessage(AllPlayers(), i);
+        Wait(1);
+    }
+    BigMessage(AllPlayers(), "Start!");
+    AllPlayers().inputEnabled = true;
+}
+
+macro notWorkingDummy(): FilteredArray(AllPlayers(), !ArrayElement().isWorkingDummy);
 
 macro rowCount(): 50;
 macro columnCount(): 35;
@@ -166,7 +239,7 @@ macro xyPolePos(define y): Vector(0, y, 150);
 macro isOnWall(define player): IsOnGround(player) && AbsoluteValue(YOf(PositionOf(player)) - 158.44) < 0.2;
 
 rule: "I want to die"
-if (IsButtonHeld(HostPlayer(), Button.Interact))
+if (IsButtonHeld(HostPlayer(), Button.Ultimate))
 {
     CreateDummyBot(Hero.Reinhardt, NumberOfPlayers(Team.Team1) < 6 ? Team.Team1 : Team.Team2, -1, PositionOf(HostPlayer()), Vector());
 }
