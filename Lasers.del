@@ -3,6 +3,7 @@ import "Lava.del";
 rule: "Debug Laser Dodge"
 if (IsCommunicating(HostPlayer(), Communication.EmoteLeft))
 {
+    gamemode = 4;
     doingLasers = !doingLasers;
     rotateLasers = true;
 }
@@ -37,7 +38,7 @@ macro dyl(define line)                 : ZOf(midpoint) - ZOf(line);
 rule: "Setup laser game"
 if (doingLasers)
 {
-    SetGravity(AllPlayers(), 90);
+    LaserDangerLevel = 1;
 
     midpoint = PolePos();
 
@@ -94,7 +95,7 @@ if (doingLasers)
         outOfRange = AllPlayers();
         CreateHudText(
             VisibleTo:outOfRange,
-            Header     : IconString(Icon.Warning),
+            Header     : <"<0><1>", IconString(Icon.Warning), IconString(Icon.Halo)>,
             Text       : "Get inside the ring!",
             HeaderColor: Color.Red,
             TextColor  : Color.Yellow,
@@ -227,4 +228,59 @@ if (rotateLasers)
 
     Wait(5);
     LoopIfConditionIsTrue();
+}
+
+define globalvar LaserDangerLevel ! = 0;
+define globalvar updateLaserDangerLevel ! = 0;
+define globalvar laserDangerLevelHud !;
+
+rule: "Laser Danger Level"
+if (updateLaserDangerLevel != LaserDangerLevel)
+{
+    DestroyHudText(laserDangerLevelHud);
+    updateLaserDangerLevel = LaserDangerLevel;
+
+    if (LaserDangerLevel == 1)
+    {
+        CreateHudText(
+            VisibleTo     : AllPlayers(),
+            Header        : IconString(Icon.Bolt),
+            HeaderColor   : Color.Red,
+            Subheader     : "Laser danger level:",
+            SubheaderColor: Color.Orange,
+            Text          : "Mildly bone-breaking",
+            TextColor     : Color.Yellow,
+            Location      : Location.Left,
+            SortOrder     : 0
+        );
+    }
+    else if (LaserDangerLevel == 2)
+    {
+        CreateHudText(
+            VisibleTo     : AllPlayers(),
+            Header        : IconString(Icon.Bolt),
+            HeaderColor   : Color.Red,
+            Subheader     : "Laser danger level:",
+            SubheaderColor: Color.Orange,
+            Text          : "Spine-snapping",
+            TextColor     : Color.Orange,
+            Location      : Location.Left,
+            SortOrder     : 0
+        );
+    }
+    else if (LaserDangerLevel == 3)
+    {
+        CreateHudText(
+            VisibleTo     : AllPlayers(),
+            Header        : IconString(Icon.Bolt),
+            HeaderColor   : Color.Red,
+            Subheader     : "Laser danger level:",
+            SubheaderColor: Color.Orange,
+            Text          : "Instant annihilation",
+            TextColor     : Color.Red,
+            Location      : Location.Left,
+            SortOrder     : 0
+        );
+    }
+    laserDangerLevelHud = LastTextID();
 }

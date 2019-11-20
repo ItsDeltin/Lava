@@ -19,6 +19,7 @@ rule: "Setup volleyball"
 if (volleyball)
 {
     ball = true;
+    LaserDangerLevel = 3;
 
     CreateBeamEffect(
         AllPlayers(),

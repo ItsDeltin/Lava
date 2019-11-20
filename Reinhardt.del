@@ -243,7 +243,7 @@ Event.OngoingPlayer
 if (!inputEnabled)
 if (!isWorkingDummy)
 {
-    StartThrottleInDirection(EventPlayer(), Vector(), 0, Relative.ToWorld, ThrottleBehavior.ReplaceExistingThrottle)
+    StartThrottleInDirection(EventPlayer(), Vector(), 0, Relative.ToWorld, ThrottleBehavior.ReplaceExistingThrottle);
     DisallowButton(EventPlayer(), Button.Ability1);
     DisallowButton(EventPlayer(), Button.Ability2);
     DisallowButton(EventPlayer(), Button.Crouch);
