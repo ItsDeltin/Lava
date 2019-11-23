@@ -1,9 +1,11 @@
 import "Ball.del";
 
-rule: "Debug Volleyball"
-if (IsCommunicating(HostPlayer(), Communication.EmoteRight))
+rule: "Volleyball: Start/Stop"
+if (IsCommunicating(HostPlayer(), Communication.VoiceLineRight))
 {
-    volleyball = !volleyball;
+    if (gamemode != 3)
+        gamemode = 3;
+    else gamemode = 0;
 }
 
 define globalvar volleyball;
@@ -15,10 +17,10 @@ define globalvar counterText1 !;
 define globalvar counterText2 !;
 define globalvar tutorialText !;
 
-rule: "Setup volleyball"
-if (volleyball)
+rule: "Volleyball: Setup"
+if (gamemode == 3)
 {
-    ball = true;
+    volleyball = true;
     LaserDangerLevel = 3;
 
     CreateBeamEffect(
@@ -68,9 +70,11 @@ if (volleyball)
     tutorialText = LastTextID();
 }
 
-rule: "Cleanup volleyball"
-if (!volleyball)
+rule: "Volleyball: Cleanup"
+if (gamemode != 3)
 {
+    volleyball = false;
+    LaserDangerLevel = 0;
     DestroyEffect(laser1Effect);
     DestroyEffect(laser2Effect);
     DestroyEffect(laser3Effect);
@@ -80,7 +84,7 @@ if (!volleyball)
     StopChasingGlobalVariable(detonationCounter);
 }
 
-rule: "Show counter"
+rule: "Volleyball: Show counter"
 if (volleyball)
 if (!ballIsOnStand)
 if (ballReady)
@@ -88,7 +92,7 @@ if (ballReady)
     CreateInWorldText(
         VisibleTo:AllPlayers(OppositeTeamOf(onTeam)),
         Header:detonationCounter,
-        Position:ballLocation() + Vector(0, 0.5, 0),
+        Position:PositionOf(rootBall) + Vector(0, 1.5, 0),
         Scale:2,
         Clipping:Clipping.ClipAgainstSurfaces,
         TextColor:Color.White,
@@ -99,7 +103,7 @@ if (ballReady)
     CreateInWorldText(
         VisibleTo:AllPlayers(onTeam),
         Header:<"<1> <0> <1>", detonationCounter, IconString(Icon.Warning)>,
-        Position:ballLocation() + Vector(0, 0.5, 0),
+        Position:PositionOf(rootBall) + Vector(0, 1.5, 0),
         Scale:2,
         Clipping:Clipping.ClipAgainstSurfaces,
         TextColor:Color.Red,
@@ -108,7 +112,7 @@ if (ballReady)
     counterText2 = LastTextID();
 }
 
-rule: "Kill players touching net"
+rule: "Volleyball: Kill players touching net"
 Event.OngoingPlayer
 if (volleyball)
 if (!isWorkingDummy)
@@ -120,7 +124,7 @@ if (YOf(PositionOf()) < 158.38)
     Kill(EventPlayer(), null);
 }
 
-rule: "Start volleyball counter"
+rule: "Volleyball: Start volleyball counter"
 if (volleyball)
 if (ballReady)
 if (IsOnGround(rootBall))
@@ -131,7 +135,7 @@ if (!ballIsOnStand)
     isCountingDown = true;
 }
 
-rule: "Ball on Team 1's side"
+rule: "Volleyball: Ball on Team 1's side"
 if (volleyball)
 if (ballReady)
 if (!ballIsOnStand)
@@ -141,7 +145,7 @@ if (XOf(PositionOf(rootBall)) > 0)
     sideSwitched();
 }
 
-rule: "Ball on Team 2's side"
+rule: "Volleyball: Ball on Team 2's side"
 if (volleyball)
 if (ballReady)
 if (!ballIsOnStand)
@@ -159,7 +163,7 @@ method sideSwitched()
     detonationTime = Max(2, detonationTime - 1);
 }
 
-rule: "Volleyball detonates"
+rule: "Volleyball: Volleyball detonates"
 if (volleyball)
 if (ballReady)
 if (IsOnGround(rootBall))

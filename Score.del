@@ -1,6 +1,5 @@
 import "Ball.del";
 
-define globalvar goals;
 define globalvar blueGoalEffect !;
 define globalvar redGoalEffect !;
 
@@ -10,8 +9,16 @@ define globalvar redScore = 0;
 macro blueGoal(): Vector(123, 165, 150);
 macro redGoal(): Vector(-123, 165, 150);
 
-rule: "Spawn goals"
-if (goals)
+rule: "Football: Start/Stop"
+if (IsCommunicating(HostPlayer(), Communication.VoiceLineUp))
+{
+    if (gamemode != 1)
+        gamemode = 1;
+    else gamemode = 0;
+}
+
+rule: "Football: Spawn goals"
+if (gamemode == 1 || gamemode == 2)
 {
     // Blue goal
     CreateEffect(
@@ -34,17 +41,18 @@ if (goals)
     redGoalEffect = LastCreatedEntity();
 }
 
-rule: "Destroy goals"
-if (!goals)
+rule: "Football: Destroy goals"
+if (gamemode != 1)
+if (gamemode != 2)
 {
     DestroyEffect(blueGoalEffect);
     DestroyEffect(redGoalEffect);
 }
 
-rule: "Blue score"
+rule: "Football: Blue score"
 if (ballReady)
-if (goals)
-if (DistanceBetween(ballLocation(), redGoal()) <= 13)
+if (gamemode == 1 || gamemode == 2)
+if (DistanceBetween(rootBall, redGoal()) <= 13)
 {
     PlayEffect(AllPlayers(), PlayEffect.RingExplosion, Color.Team1, redGoal(), 100);
     PlayEffect(AllPlayers(), PlayEffect.GoodExplosion, Color.Team1, redGoal(), 10);
@@ -55,10 +63,10 @@ if (DistanceBetween(ballLocation(), redGoal()) <= 13)
     messageThrower(Team.Team1);
 }
 
-rule: "Red score"
+rule: "Football: Red score"
 if (ballReady)
-if (goals)
-if (DistanceBetween(ballLocation(), blueGoal()) <= 13)
+if (gamemode == 1 || gamemode == 2)
+if (DistanceBetween(rootBall, blueGoal()) <= 13)
 {
     PlayEffect(AllPlayers(), PlayEffect.RingExplosion, Color.Team2, blueGoal(), 100);
     PlayEffect(AllPlayers(), PlayEffect.GoodExplosion, Color.Team2, blueGoal(), 10);

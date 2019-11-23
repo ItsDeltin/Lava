@@ -1,14 +1,16 @@
 import "Lava.del";
 
-rule: "Debug Laser Dodge"
-if (IsCommunicating(HostPlayer(), Communication.EmoteLeft))
+rule: "Lasers: Start/Stop"
+if (IsCommunicating(HostPlayer(), Communication.VoiceLineLeft))
 {
-    gamemode = 4;
-    doingLasers = !doingLasers;
-    rotateLasers = true;
+    if (gamemode != 4)
+    {
+        gamemode = 4;
+        rotateLasers = true;
+    }
+    else gamemode = 0;
 }
 
-define globalvar doingLasers = false;
 define globalvar lasersReady = false;
 
 define globalvar rotateLasers = false;
@@ -35,8 +37,8 @@ macro dyc(define line, define pos)     : ZOf(pos) - ZOf(line);
 macro dxl(define line)                 : XOf(midpoint) - XOf(line);
 macro dyl(define line)                 : ZOf(midpoint) - ZOf(line);
 
-rule: "Setup laser game"
-if (doingLasers)
+rule: "Lasers: Setup laser game"
+if (gamemode == 4)
 {
     LaserDangerLevel = 1;
 
@@ -124,14 +126,17 @@ if (doingLasers)
 }
 macro boundarySubdivisions(): 10;
 
-rule: "Clean up lasers"
-if (!doingLasers)
+rule: "Lasers: Clean up lasers"
+if (gamemode != 4)
 if (lasersReady)
 {
     lasersReady = false;
 
-    ChaseGlobalVariableOverTime(laserLength, 0, 5, TimeChaseReevaluation.None);
-    Wait(5);
+    if (gamemode != 3)
+    {
+        ChaseGlobalVariableOverTime(laserLength, 0, 5, TimeChaseReevaluation.None);
+        Wait(5);
+    }
     StopChasingGlobalVariable(laserLength);
 
     DestroyEffect(laser1Effect);
@@ -161,8 +166,8 @@ define playervar lastDamage;
 
 macro getOutOfRange(): RemoveFromArray(AllPlayers(), PlayersWithinRadius(midpoint, boundaryLength, Team.All, RadiusLOS.Off));
 
-rule: "Kill intersecting players"
-if (doingLasers)
+rule: "Lasers: (High Server Loa​d) Kill intersecting players"
+if (gamemode == 4)
 if (lasersReady)
 {
     if (rotateLasers)
@@ -191,8 +196,8 @@ if (lasersReady)
     LoopIfConditionIsTrue();
 }
 
-rule: "Finished rotating"
-if (doingLasers)
+rule: "Lasers: Finished rotating"
+if (gamemode == 4)
 if (lasersReady)
 if (rotateLasers)
 if (laser1Rot == 360 * 4)
@@ -214,8 +219,8 @@ if (laser3Rot == 360 * 3)
 
 define globalvar outOfRange;
 
-rule: "Laser discharge"
-if (doingLasers)
+rule: "Lasers: Laser discharge"
+if (gamemode == 4)
 if (lasersReady)
 if (rotateLasers)
 {

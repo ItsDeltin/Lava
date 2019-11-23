@@ -1,8 +1,10 @@
 import "Lava.del";
 
-rule: "Debug toggle"
-if (IsCommunicating(HostPlayer(), Communication.EmoteDown))
+rule: "Maze: Start/Stop"
+if (IsCommunicating(HostPlayer(), Communication.VoiceLineDown))
 {
+    DestroyAllEffects();
+    gamemode = 5;
     generateStep = 1;
 }
 
@@ -408,7 +410,7 @@ if (!isWorkingDummy)
     Teleport(EventPlayer(), randomMazeSpot());
 }
 
-rule: "Maze: Kill players on walls"
+rule: "(High Server Loa​d) Maze: Kill players on walls"
 if (generateStep == 6)
 {
     foreach (define player in FilteredArray(AllPlayers(), !ArrayElement().isWorkingDummy))

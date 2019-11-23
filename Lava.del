@@ -17,7 +17,7 @@ define globalvar gamemode = 0;
 // 4 = Lasers
 // 5 = Maze
 
-rule: "Respawn when alive"
+rule: "Generic Respawn"
 Event.OngoingPlayer
 if (HasSpawned())
 if (IsAlive())
@@ -75,14 +75,12 @@ define globalvar availableBlueSpawns = [1,2,3,4,5];
 define globalvar availableRedSpawns = [1,2,3,4,5];
 
 rule: "Start"
-if (gamemode == 0)
+if (gamemode == 1)
 {
-    Wait(10);
     AllPlayers().inputEnabled = false;
     gamemode = 1;
     AllPlayers().doRespawn = true;
     respawnBall();
-    goals = true;
     for (define i = 5; i > 0; i--)
     {
         SmallMessage(AllPlayers(), i);
@@ -99,7 +97,7 @@ macro columnCount(): 35;
 
 define globalvar arenaEffects = [];
 
-rule: "Setup Arena"
+rule: "Setup Arena (Disable when using Maze)"
 {
     OuterWalls();
 
@@ -112,11 +110,13 @@ rule: "Setup Arena"
 
     for (define x ! = 0; x <= rowCount(); x++)
     {
+        define a! = LinearInterpolate(cliffBlue, cliffRed, x*rowFraction);
+        define b! = LinearInterpolate(towerBlue, towerRed, x*rowFraction);
         CreateBeamEffect(
             AllPlayers(),
             BeamType.GrappleBeam,
-            LinearInterpolate(cliffBlue, cliffRed, x*rowFraction),
-            LinearInterpolate(towerBlue, towerRed, x*rowFraction),
+            a,
+            b,
             Color.Red,
             EffectRev.VisibleTo
         );
@@ -124,11 +124,13 @@ rule: "Setup Arena"
     }
     for (define z ! = 0; z <= columnCount(); z++)
     {
+        define a! = LinearInterpolate(cliffBlue, towerBlue, z*columnFraction);
+        define b! = LinearInterpolate(cliffRed, towerRed, z*columnFraction);
         CreateBeamEffect(
             AllPlayers(),
             BeamType.GrappleBeam,
-            LinearInterpolate(cliffBlue, towerBlue, z*columnFraction),
-            LinearInterpolate(cliffRed, towerRed, z*columnFraction),
+            a,
+            b,
             Color.Red,
             EffectRev.VisibleTo
         );
@@ -137,33 +139,33 @@ rule: "Setup Arena"
 
     // Pole flair
     CreateEffect(AllPlayers(), Effect.Orb, Color.Orange, TopPolePos(), 0.25, EffectRev.VisibleTo);
-    // ModifyGlobalVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
-    CreateBeamEffect(
-        AllPlayers(),
-        BeamType.GoodBeam,
-        flairPos(),
-        TopPolePos(),
-        Color.Red
-    );
-    // ModifyGlobalVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
-    ChaseGlobalVariableAtRate(killzoneRot, 180, 25, RateChaseReevaluation.DestinationAndRate);
+    // // ModifyGlobalVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
+    // CreateBeamEffect(
+    //     AllPlayers(),
+    //     BeamType.GoodBeam,
+    //     flairPos(),
+    //     TopPolePos(),
+    //     Color.Red
+    // );
+    // // ModifyGlobalVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
+    // ChaseGlobalVariableAtRate(killzoneRot, 180, 25, RateChaseReevaluation.DestinationAndRate);
 }
 
-macro flairPos(): Destination(xyPolePos(136.42), DirectionFromAngles(killzoneRot, 0), 11);
+// macro flairPos(): Destination(xyPolePos(136.42), DirectionFromAngles(killzoneRot, 0), 11);
 
-rule: "Reset killzone rot"
-if (killzoneRot == 180)
-{
-    killzoneRot = -180;
-}
+// rule: "Reset killzone rot"
+// if (killzoneRot == 180)
+// {
+//     killzoneRot = -180;
+// }
 
-rule: "Blip end"
-if (AbsoluteValue(killzoneRot - 22.5) % 45 < 1)
-{
-    PlayEffect(AllPlayers(), PlayEffect.GoodExplosion, Color.Red, flairPos(), 1);
-}
+// rule: "Blip end"
+// if (AbsoluteValue(killzoneRot - 22.5) % 45 < 1)
+// {
+//     PlayEffect(AllPlayers(), PlayEffect.GoodExplosion, Color.Red, flairPos(), 1);
+// }
 
-define globalvar killzoneRot = -180;
+// define globalvar killzoneRot = -180;
 
 method OuterWalls()
 {

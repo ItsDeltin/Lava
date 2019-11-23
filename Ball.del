@@ -1,20 +1,5 @@
 import "Lava.del";
 
-rule: "Debug Ball"
-if (IsCommunicating(HostPlayer(), Communication.EmoteUp))
-{
-    if (!ball)
-    {
-        ball = true;
-        goals = true;
-    }
-    else
-    {
-        ball = false;
-        goals = false;
-    }
-}
-
 define globalvar ball1;
 define globalvar ball2;
 define playervar isBall;
@@ -30,12 +15,13 @@ define globalvar blueScoreText !;
 define globalvar redScoreText !;
 define globalvar ballEffect !;
 
-define globalvar ball = true;
+define globalvar ball;
 define globalvar ballReady;
 
-rule: "Setup balls"
-if (ball)
+rule: "Ball: Setup"
+if (gamemode == 1 || gamemode == 2 || gamemode == 3)
 {
+    ball = true;
     // Blue's score text
     CreateHudText(
         VisibleTo      : AllPlayers(Team.Team1),
@@ -88,9 +74,12 @@ if (ball)
     ballReady = true;
 }
 
-rule: "Clean up ball game"
-if (!ball)
+rule: "Ball: Clean up"
+if (gamemode != 1)
+if (gamemode != 2)
+if (gamemode != 3)
 {
+    ball = false;
     ballReady = false;
     DestroyHudText(blueScoreText);
     DestroyHudText(redScoreText);
@@ -105,7 +94,7 @@ if (!ball)
 macro ballLocation(): tpTo != null ? tpTo + Vector(0, 1, 0) : Midpoint(ball1,ball2) + Vector(0, 0.5, 0);
 macro ballSpeed(): SpeedOf(rootBall);
 
-rule: "Link"
+rule: "Ball: (High Server Loa​d) Link"
 if (ball)
 {
     if (isStunned(ball1))
@@ -149,15 +138,15 @@ if (ball)
 }
 macro isStunned(define player): HasStatus(player, Status.Stunned);
 
-rule: "Respawn ball"
+rule: "Ball: Respawn ball"
 if (ball)
-if (IsDead(ball1) || IsDead(ball2) || YOf(ballLocation()) < 140 || ZOf(ballLocation()) > 217)
+if (IsDead(ball1) || IsDead(ball2) || YOf(PositionOf(rootBall)) < 140 || ZOf(PositionOf(rootBall)) > 217)
 {
     SmallMessage(AllPlayers(), "Respawning Ball");
     respawnBall();   
 }
 
-rule: "Bounce back ball"
+rule: "Ball: Bounce back ball"
 if (ball)
 if (!ballIsOnStand)
 if (!HasStatus(rootBall, Status.Stunned))
@@ -180,7 +169,7 @@ method respawnBall()
     Teleport(ball2, TopPolePos() + Vector(0, 1, 0));
 }
 
-rule: "On Ball Hit"
+rule: "Ball: On Ball Hit"
 Event.OnDamageTaken
 if (isBall)
 if (!IsInSpawnRoom(ball1) && !IsInSpawnRoom(ball2))
@@ -203,7 +192,7 @@ if (!IsInSpawnRoom(ball1) && !IsInSpawnRoom(ball2))
     }
 }
 
-rule: "On Fire Strike"
+rule: "Ball: On Fire Strike"
 Event.OnDamageTaken
 if (isBall)
 if (EventDamage() == 95)
@@ -230,7 +219,7 @@ if (EventDamage() == 95)
 }
 macro ExplosionRange(): 10;
 
-rule: "Getting charged"
+rule: "Ball: Getting charged"
 Event.OngoingPlayer
 if (isBall)
 if (HasStatus(EventPlayer(), Status.Stunned))
@@ -248,14 +237,14 @@ if (HasStatus(EventPlayer(), Status.Stunned))
     }
 }
 
-rule: "Effect when ball hits ground"
+rule: "Ball: Effect when ball hits ground"
 if (ball)
 if (IsOnGround(rootBall))
 {
     PlayEffect(AllPlayers(), PlayEffect.RingExplosion, Color.Turquoise, PositionOf(rootBall), 5);
 }
 
-rule: "Fast ball effect"
+rule: "Ball: Fast ball effect"
 if (ball)
 if (!ballIsOnStand)
 if (ballSpeed() >= 10 || IsInAir(rootBall))
@@ -267,8 +256,7 @@ if (ballSpeed() >= 10 || IsInAir(rootBall))
 
 define globalvar lastCrutchAction ! = 0;
 
-disabled rule: "Shoot At Team"
-if (goals)
+disabled rule: "Ball: Shoot At Team"
 if (AbsoluteValue(blueScore - redScore) >= 2)
 if (!HasStatus(ball1, Status.Stunned))
 if (!HasStatus(ball2, Status.Stunned))

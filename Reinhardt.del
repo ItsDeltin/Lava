@@ -5,7 +5,7 @@ define playervar chargeStart = null;
 
 define globalvar defaultMoveSpeed ! = 150;
 
-rule: "Setup Reinhardt"
+rule: "Player: Setup"
 Event.OngoingPlayer
 Player.Reinhardt
 {
@@ -13,7 +13,7 @@ Player.Reinhardt
     DisallowButton(EventPlayer(), Button.Ultimate);
 }
 
-rule: "Charge Speed Boost"
+rule: "Player: Charge Speed Boost"
 Event.OngoingPlayer
 Player.Reinhardt
 if (IsUsingAbility1())
@@ -22,7 +22,7 @@ if (IsUsingAbility1())
     SetMoveSpeed(EventPlayer(), 200);
 }
 
-rule: "Charge Speed Boost Revert"
+rule: "Player: Charge Speed Boost Revert"
 Event.OngoingPlayer
 Player.Reinhardt
 if (!IsUsingAbility1())
@@ -30,7 +30,7 @@ if (!IsUsingAbility1())
     SetMoveSpeed(EventPlayer(), defaultMoveSpeed);
 }
 
-rule: "Hit pole"
+rule: "Player: Hit pole"
 Event.OngoingPlayer
 Player.Reinhardt
 if (!IsUsingAbility1())
@@ -61,7 +61,7 @@ macro shieldIsOut(define player): IsButtonHeld(player, Button.SecondaryFire)
     && !IsUsingAbility2(player)
     && HeroOf(player) == Hero.Reinhardt;
 
-rule: "Shield Surf"
+rule: "Player: Shield Surf"
 Event.OngoingPlayer
 Player.Reinhardt
 if (IsUsingAbility1())
@@ -79,7 +79,7 @@ if (IsTrueForAny(
     ApplyImpulse(EventPlayer(), Up(), 15, Relative.ToWorld, ContraryMotion.Incorporate);
 }
 
-rule: "Shield HUD"
+disabled rule: "Player: Shield HUD (maybe high server loa​d?)"
 {
     CreateHudText(
         VisibleTo  : FilteredArray(PlayersOnHero(Hero.Reinhardt), shieldIsOut(ArrayElement()) && VerticalFacingAngleOf(ArrayElement()) > -40),
@@ -103,7 +103,7 @@ rule: "Shield HUD"
     );
 }
 
-rule: "Start braking"
+rule: "Player: Start braking"
 Event.OngoingPlayer
 Player.Reinhardt
 if (IsUsingAbility1())
@@ -130,7 +130,7 @@ define playervar knockedFrom = null;
 define playervar force;
 define playervar heightOffset;
 
-rule: "Knocked"
+rule: "Player: Knocked from"
 Event.OngoingPlayer
 if (knockedFrom != null)
 if (!isWorkingDummy)
@@ -147,7 +147,7 @@ define playervar wallMarker ! = false;
 define playervar wallBuilder ! = null;
 
 // Wall Powerup
-rule: "Ability: Wall Marker"
+rule: "Ability: Wall: Marker"
 Event.OngoingPlayer
 Player.Reinhardt
 if (IsButtonHeld(EventPlayer(), Button.Interact))
@@ -166,7 +166,7 @@ if (!usingWallAbility)
     usingWallAbility = true;
 }
 
-rule: "Ability: Wall Input"
+rule: "Ability: Wall: Input"
 Event.OngoingPlayer
 Player.Reinhardt
 if (!IsButtonHeld(EventPlayer(), Button.Interact))
@@ -196,7 +196,7 @@ if (usingWallAbility)
     usingWallAbility = false;
 }
 
-rule: "Ability: Wall Destroy"
+rule: "Ability: Wall: Destroy"
 Event.OngoingPlayer
 Player.Reinhardt
 if (IsButtonHeld(EventPlayer(), Button.Interact))
