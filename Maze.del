@@ -1,7 +1,7 @@
 import "Lava.del";
 
 rule: "Maze: Start/Stop"
-if (IsCommunicating(HostPlayer(), Communication.VoiceLineDown))
+if (CurrentGameMode() == GameMode.Deathmatch)
 {
     DestroyAllEffects();
     gamemode = 5;
@@ -20,7 +20,7 @@ define globalvar generateStep = 0;
 define globalvar numberOfVisits ! = 0;
 define globalvar loadingHudText !;
 
-macro mazeWidth()  : 15;
+macro mazeWidth()  : 10;
 macro mazeHeight() : 10;
 macro buildMazeAt(): Vector(-86.56, 154.88, 83.64);
 macro Scale(): 8;
@@ -284,11 +284,14 @@ if (generateStep == 3)
             ZOf(buildMazeAt()) + ZOf(wallData)
         );
 
+        define a! = Vector(XOf(wallData), YOf(buildMazeAt()) + mazeWallHeight(), ZOf(wallData));
+        define b! = Vector(YOf(wallData), YOf(buildMazeAt()) + mazeWallHeight(), ZOf(wallData));
+
         CreateBeamEffect(
             AllPlayers(),
             BeamType.GrappleBeam,
-            Vector(XOf(wallData), YOf(buildMazeAt()) + mazeWallHeight(), ZOf(wallData)),
-            Vector(YOf(wallData), YOf(buildMazeAt()) + mazeWallHeight(), ZOf(wallData)),
+            a,
+            b,
             Color.Red,
             EffectRev.None
         );
@@ -369,11 +372,14 @@ if (generateStep == 4)
             XOf(buildMazeAt()) + ZOf(wallData)
         );
 
+        define a! = Vector(ZOf(wallData), YOf(buildMazeAt()) + mazeWallHeight(), XOf(wallData));
+        define b! = Vector(ZOf(wallData), YOf(buildMazeAt()) + mazeWallHeight(), YOf(wallData));
+
         CreateBeamEffect(
             AllPlayers(),
             BeamType.GrappleBeam,
-            Vector(ZOf(wallData), YOf(buildMazeAt()) + mazeWallHeight(), XOf(wallData)),
-            Vector(ZOf(wallData), YOf(buildMazeAt()) + mazeWallHeight(), YOf(wallData)),
+            a,
+            b,
             Color.Red,
             EffectRev.None
         );
@@ -388,7 +394,7 @@ if (generateStep == 5)
     DestroyHudText(loadingHudText);
     CreateEffect(AllPlayers(), Effect.Cloud, Color.White, mazeCenter(), mazeWidth() * Scale(), EffectRev.None);
 
-    CreateDummyBot(Hero.Roadhog, Team.Team1, -1, randomMazeSpot(), Vector());
+    CreateDummyBot(Hero.Roadhog, Team.All, -1, randomMazeSpot(), Vector());
     navigator = LastCreatedEntity();
     navigator.isWorkingDummy = true;
     MinWait();
@@ -481,6 +487,8 @@ if (IsCommunicating(HostPlayer(), Communication.UltimateStatus))
                 ModifyGlobalVariable(aStarCheck, Operation.AppendToArray, Vector(x, i, z - 1));
                 visited[indexFromCoord(x,z-1)] = true;
             }
+
+            MinWait();
             
             if (x < mazeWidth() - 1 && !hasRightWall(cellCheck) && !visited[indexFromCoord(x + 1,z)])
             {

@@ -9,6 +9,22 @@ define globalvar redScore = 0;
 macro blueGoal(): Vector(123, 165, 150);
 macro redGoal(): Vector(-123, 165, 150);
 
+rule: "Football: Countdown"
+if (gamemode == 1)
+{
+    AllPlayers().inputEnabled = false;
+    gamemode = 1;
+    AllPlayers().doRespawn = true;
+    respawnBall();
+    for (define i = 5; i > 0; i--)
+    {
+        SmallMessage(AllPlayers(), i);
+        Wait(1);
+    }
+    BigMessage(AllPlayers(), "Start!");
+    AllPlayers().inputEnabled = true;
+}
+
 rule: "Football: Start/Stop"
 if (IsCommunicating(HostPlayer(), Communication.VoiceLineUp))
 {

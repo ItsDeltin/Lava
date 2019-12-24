@@ -33,6 +33,10 @@ if (!isWorkingDummy)
 {
     Respawn();
     MinWait();
+    if (CurrentGameMode() == GameMode.Deathmatch)
+    {
+        Wait(1);
+    }
     // Volleyball and initial soccer
     if (gamemode >= 0 && gamemode <= 3)
     {
@@ -74,22 +78,6 @@ if (!isWorkingDummy)
 define globalvar availableBlueSpawns = [1,2,3,4,5];
 define globalvar availableRedSpawns = [1,2,3,4,5];
 
-rule: "Start"
-if (gamemode == 1)
-{
-    AllPlayers().inputEnabled = false;
-    gamemode = 1;
-    AllPlayers().doRespawn = true;
-    respawnBall();
-    for (define i = 5; i > 0; i--)
-    {
-        SmallMessage(AllPlayers(), i);
-        Wait(1);
-    }
-    BigMessage(AllPlayers(), "Start!");
-    AllPlayers().inputEnabled = true;
-}
-
 macro notWorkingDummy(): FilteredArray(AllPlayers(), !ArrayElement().isWorkingDummy);
 
 macro rowCount(): 50;
@@ -98,6 +86,7 @@ macro columnCount(): 35;
 define globalvar arenaEffects = [];
 
 rule: "Setup Arena (Disable when using Maze)"
+if (CurrentGameMode() == GameMode.Skirmish)
 {
     OuterWalls();
 
