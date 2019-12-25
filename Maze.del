@@ -10,15 +10,15 @@ if (CurrentGameMode() == GameMode.Deathmatch)
 
 // x/zAxisWalls are array of vectors determining the location of each wall.
 // The X in the vector for xAxisWalls determines where the wall starts on the X axis. The Y determines where it ends. The Z is where on the Z axis the wall is.
-define globalvar xAxisWalls = [];
-define globalvar zAxisWalls = [];
+globalvar define xAxisWalls = [];
+globalvar define zAxisWalls = [];
 
-define globalvar cellStates = [];
-define globalvar toVisitX   = [];
-define globalvar toVisitY   = [];
-define globalvar generateStep = 0;
-define globalvar numberOfVisits ! = 0;
-define globalvar loadingHudText !;
+globalvar define cellStates = [];
+globalvar define toVisitX   = [];
+globalvar define toVisitY   = [];
+globalvar define generateStep = 0;
+globalvar define numberOfVisits ! = 0;
+globalvar define loadingHudText !;
 
 macro mazeWidth()  : 10;
 macro mazeHeight() : 10;
@@ -68,9 +68,9 @@ if (generateStep == 1)
 }
 
 // define globalvar dirIndex ! =[1,mazeHeight(),-1,-mazeHeight()];
-define globalvar dirFlag  ! =[TopWall(), RightWall(), BottomWall(), LeftWall()];
-define globalvar offsetX  ! =[0,1,0,-1];
-define globalvar offsetY  ! =[1,0,-1,0];
+globalvar define dirFlag  ! =[TopWall(), RightWall(), BottomWall(), LeftWall()];
+globalvar define offsetX  ! =[0,1,0,-1];
+globalvar define offsetY  ! =[1,0,-1,0];
 
 rule: "Maze: Generate: Visit Cells"
 if (generateStep == 2)
@@ -276,16 +276,16 @@ if (generateStep == 3)
         }
     }
 
-    foreach (define wallData in xAxisWalls)
+    for (define xi = 0; xi < CountOf(xAxisWalls); xi++)
     {
-        wallData = Vector(
-            XOf(buildMazeAt()) + XOf(wallData),
-            XOf(buildMazeAt()) + YOf(wallData),
-            ZOf(buildMazeAt()) + ZOf(wallData)
+        xAxisWalls[xi] = Vector(
+            XOf(buildMazeAt()) + XOf(xAxisWalls[xi]),
+            XOf(buildMazeAt()) + YOf(xAxisWalls[xi]),
+            ZOf(buildMazeAt()) + ZOf(xAxisWalls[xi])
         );
 
-        define a! = Vector(XOf(wallData), YOf(buildMazeAt()) + mazeWallHeight(), ZOf(wallData));
-        define b! = Vector(YOf(wallData), YOf(buildMazeAt()) + mazeWallHeight(), ZOf(wallData));
+        define a! = Vector(XOf(xAxisWalls[xi]), YOf(buildMazeAt()) + mazeWallHeight(), ZOf(xAxisWalls[xi]));
+        define b! = Vector(YOf(xAxisWalls[xi]), YOf(buildMazeAt()) + mazeWallHeight(), ZOf(xAxisWalls[xi]));
 
         CreateBeamEffect(
             AllPlayers(),
@@ -364,16 +364,16 @@ if (generateStep == 4)
         }
     }
 
-    foreach (define wallData in zAxisWalls)
+    for (define zi = 0; zi < CountOf(zAxisWalls); zi++)
     {
-        wallData = Vector(
-            ZOf(buildMazeAt()) + XOf(wallData),
-            ZOf(buildMazeAt()) + YOf(wallData),
-            XOf(buildMazeAt()) + ZOf(wallData)
+        zAxisWalls[zi] = Vector(
+            ZOf(buildMazeAt()) + XOf(zAxisWalls[zi]),
+            ZOf(buildMazeAt()) + YOf(zAxisWalls[zi]),
+            XOf(buildMazeAt()) + ZOf(zAxisWalls[zi])
         );
 
-        define a! = Vector(ZOf(wallData), YOf(buildMazeAt()) + mazeWallHeight(), XOf(wallData));
-        define b! = Vector(ZOf(wallData), YOf(buildMazeAt()) + mazeWallHeight(), YOf(wallData));
+        define a! = Vector(ZOf(zAxisWalls[zi]), YOf(buildMazeAt()) + mazeWallHeight(), XOf(zAxisWalls[zi]));
+        define b! = Vector(ZOf(zAxisWalls[zi]), YOf(buildMazeAt()) + mazeWallHeight(), YOf(zAxisWalls[zi]));
 
         CreateBeamEffect(
             AllPlayers(),
@@ -436,10 +436,10 @@ if (generateStep == 6)
     LoopIfConditionIsTrue();
 }
 
-define globalvar navigator;
-define globalvar navigateTo;
-define globalvar walkPath = [];
-define globalvar isGettingPath ! = false;
+globalvar define navigator;
+globalvar define navigateTo;
+globalvar define walkPath = [];
+globalvar define isGettingPath ! = false;
 
 rule: "Maze: Hunter Nav: Get path"
 if (generateStep == 6)
@@ -455,7 +455,7 @@ if (IsCommunicating(HostPlayer(), Communication.UltimateStatus))
     define originZ ! = RoundToInteger(ZOf(mazePos(PositionOf(navigator))), Rounding.Nearest);
 
     define aStarCheck = [];
-    ModifyGlobalVariable(aStarCheck, Operation.AppendToArray, Vector(navigateToX, -1, navigateToZ));
+    ModifyVariable(aStarCheck, Operation.AppendToArray, Vector(navigateToX, -1, navigateToZ));
 
     define found ! = -1;
 
@@ -477,14 +477,14 @@ if (IsCommunicating(HostPlayer(), Communication.UltimateStatus))
             // Left wall
             if (x > 0 && !hasLeftWall(cellCheck) && !visited[indexFromCoord(x - 1,z)])
             {
-                ModifyGlobalVariable(aStarCheck, Operation.AppendToArray, Vector(x - 1, i, z));
+                ModifyVariable(aStarCheck, Operation.AppendToArray, Vector(x - 1, i, z));
                 visited[indexFromCoord(x-1,z)] = true;
             }
             
             // Bottom wall
             if (z > 0 && !hasBottomWall(cellCheck) && !visited[indexFromCoord(x,z - 1)])
             {
-                ModifyGlobalVariable(aStarCheck, Operation.AppendToArray, Vector(x, i, z - 1));
+                ModifyVariable(aStarCheck, Operation.AppendToArray, Vector(x, i, z - 1));
                 visited[indexFromCoord(x,z-1)] = true;
             }
 
@@ -492,14 +492,14 @@ if (IsCommunicating(HostPlayer(), Communication.UltimateStatus))
             
             if (x < mazeWidth() - 1 && !hasRightWall(cellCheck) && !visited[indexFromCoord(x + 1,z)])
             {
-                ModifyGlobalVariable(aStarCheck, Operation.AppendToArray, Vector(x + 1, i, z));
+                ModifyVariable(aStarCheck, Operation.AppendToArray, Vector(x + 1, i, z));
                 visited[indexFromCoord(x+1,z)] = true;
             }
             
             // Top wall
             if (z < mazeHeight() - 1 && !hasTopWall(cellCheck) && !visited[indexFromCoord(x,z + 1)])
             {
-                ModifyGlobalVariable(aStarCheck, Operation.AppendToArray, Vector(x, i, z + 1));
+                ModifyVariable(aStarCheck, Operation.AppendToArray, Vector(x, i, z + 1));
                 visited[indexFromCoord(x,z+1)] = true;
             }
         }

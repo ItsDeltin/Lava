@@ -1,9 +1,9 @@
 import "Lava.del";
 import "Ball.del";
 
-define playervar chargeStart = null;
+playervar define chargeStart = null;
 
-define globalvar defaultMoveSpeed ! = 150;
+globalvar define defaultMoveSpeed ! = 150;
 
 rule: "Player: Setup"
 Event.OngoingPlayer
@@ -126,9 +126,9 @@ macro chargingPlayer(define player):
         )
     );
 
-define playervar knockedFrom = null;
-define playervar force;
-define playervar heightOffset;
+playervar define knockedFrom = null;
+playervar define force;
+playervar define heightOffset;
 
 rule: "Player: Knocked from"
 Event.OngoingPlayer
@@ -139,12 +139,12 @@ if (!isWorkingDummy)
     knockedFrom = null;
 }
 
-define globalvar FloorPoint = Vector(0, 154.88, 0);
-define globalvar FloorNormal = Vector(0, 1, 0);
+globalvar define FloorPoint = Vector(0, 154.88, 0);
+globalvar define FloorNormal = Vector(0, 1, 0);
 
-define playervar usingWallAbility ! = false;
-define playervar wallMarker ! = false;
-define playervar wallBuilder ! = null;
+playervar define usingWallAbility ! = false;
+playervar define wallMarker ! = false;
+playervar define wallBuilder ! = null;
 
 // Wall Powerup
 rule: "Ability: Wall: Marker"
@@ -236,7 +236,7 @@ if (DistanceBetween(EventPlayer(), rootBall) < 3)
     ApplyImpulse(a, Up(), 15, Relative.ToWorld, ContraryMotion.Cancel);
 }
 
-define playervar inputEnabled ! = true;
+playervar define inputEnabled ! = true;
 
 rule: "Disable Input"
 Event.OngoingPlayer

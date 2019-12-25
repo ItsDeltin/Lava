@@ -1,22 +1,22 @@
 import "Lava.del";
 
-define globalvar ball1;
-define globalvar ball2;
-define playervar isBall;
-define globalvar ballIsOnStand = true;
-define globalvar tpFrom;
-define globalvar tpTo;
-define globalvar rootBall;
+globalvar define ball1;
+globalvar define ball2;
+playervar define isBall;
+globalvar define ballIsOnStand = true;
+globalvar define tpFrom;
+globalvar define tpTo;
+globalvar define rootBall;
 
-define globalvar thrower = null;
-define globalvar throwType = 0;
+globalvar define thrower = null;
+globalvar define throwType = 0;
 
-define globalvar blueScoreText !;
-define globalvar redScoreText !;
-define globalvar ballEffect !;
+globalvar define blueScoreText !;
+globalvar define redScoreText !;
+globalvar define ballEffect !;
 
-define globalvar ball;
-define globalvar ballReady;
+globalvar define ball;
+globalvar define ballReady;
 
 rule: "Ball: Setup"
 if (gamemode == 1 || gamemode == 2 || gamemode == 3)
@@ -192,20 +192,22 @@ if (!IsInSpawnRoom(ball1) && !IsInSpawnRoom(ball2))
     }
 }
 
+globalvar define fuse;
+
 rule: "Ball: On Fire Strike"
 Event.OnDamageTaken
 if (isBall)
 if (EventDamage() == 95)
 {
-    define fuse = 0;
-    ChasePlayerVariableOverTime(EventPlayer(), fuse, 2, 3);
+    fuse = 0;
+    ChaseGlobalVariableOverTime(fuse, 2, 3);
 
     CreateEffect(AllPlayers(), Effect.BadAura, Color.Orange, ballLocation(), fuse, EffectRev.VisibleToPositionAndRadius);
     define fuseEffect = LastCreatedEntity();
     Wait(3, WaitBehavior.IgnoreCondition);
     DestroyEffect(fuseEffect);
 
-    StopChasingPlayerVariable(EventPlayer(), fuse);
+    StopChasingGlobalVariable(fuse);
 
     PlayEffect(AllPlayers(), PlayEffect.GoodExplosion, Color.Orange, ballLocation(), ExplosionRange());
     PlayEffect(AllPlayers(), PlayEffect.ExplosionSound, Color.Orange, ballLocation(), 100);
@@ -254,7 +256,7 @@ if (ballSpeed() >= 10 || IsInAir(rootBall))
     LoopIfConditionIsTrue();
 }
 
-define globalvar lastCrutchAction ! = 0;
+globalvar define lastCrutchAction ! = 0;
 
 disabled rule: "Ball: Shoot At Team"
 if (AbsoluteValue(blueScore - redScore) >= 2)

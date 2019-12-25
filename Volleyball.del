@@ -8,14 +8,14 @@ if (IsCommunicating(HostPlayer(), Communication.VoiceLineRight))
     else gamemode = 0;
 }
 
-define globalvar volleyball;
-define globalvar detonationCounter;
-define globalvar detonationTime;
-define globalvar isCountingDown;
-define globalvar onTeam;
-define globalvar counterText1 !;
-define globalvar counterText2 !;
-define globalvar tutorialText !;
+globalvar define volleyball;
+globalvar define detonationCounter;
+globalvar define detonationTime;
+globalvar define isCountingDown;
+globalvar define onTeam;
+globalvar define counterText1 !;
+globalvar define counterText2 !;
+globalvar define tutorialText !;
 
 rule: "Volleyball: Setup"
 if (gamemode == 3)

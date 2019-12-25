@@ -11,24 +11,24 @@ if (IsCommunicating(HostPlayer(), Communication.VoiceLineLeft))
     else gamemode = 0;
 }
 
-define globalvar lasersReady = false;
+globalvar define lasersReady = false;
 
-define globalvar rotateLasers = false;
-define globalvar rotationSpeed = 0; // Number of degrees per second
-define globalvar laserLength = 0;
-define globalvar boundaryLength = 50;
+globalvar define rotateLasers = false;
+globalvar define rotationSpeed = 0; // Number of degrees per second
+globalvar define laserLength = 0;
+globalvar define boundaryLength = 50;
 
-define globalvar midpoint;
+globalvar define midpoint;
 
-define globalvar laser1Rot;
-define globalvar laser2Rot;
-define globalvar laser3Rot;
+globalvar define laser1Rot;
+globalvar define laser2Rot;
+globalvar define laser3Rot;
 
-define globalvar laser1Effect !;
-define globalvar laser2Effect !;
-define globalvar laser3Effect !;
-define globalvar ringEffectArray !;
-define globalvar outOfRangeHUD !;
+globalvar define laser1Effect !;
+globalvar define laser2Effect !;
+globalvar define laser3Effect !;
+globalvar define ringEffectArray !;
+globalvar define outOfRangeHUD !;
 
 macro isOnLine(define line, define player): AbsoluteValue(cross(line, PositionOf(player))) < 200;
 macro cross(define line, define pos)   : dxc(line, pos) * dyl(line) - dyc(line, pos) * dxl(line);
@@ -162,7 +162,7 @@ macro intersectingFrom(define rotation, define height): RayCastHitPlayer(rotatio
 macro intersectingRot(define rotation, define height)       : intersectingFrom(       rot(midpoint + Vector(0, height, 0), rotation, laserLength), Vector(0, height, 0));
 macro inverseIntersectingRot(define rotation, define height): intersectingFrom(inverseRot(midpoint + Vector(0, height, 0), rotation, laserLength), Vector(0, height, 0));
 
-define playervar lastDamage;
+playervar define lastDamage;
 
 macro getOutOfRange(): RemoveFromArray(AllPlayers(), PlayersWithinRadius(midpoint, boundaryLength, Team.All, RadiusLOS.Off));
 
@@ -179,13 +179,13 @@ if (lasersReady)
     define intersecting = [];
 
     define line1 = rot(midpoint, laser1Rot, laserLength);
-    ModifyGlobalVariable(intersecting, Operation.AppendToArray,
+    ModifyVariable(intersecting, Operation.AppendToArray,
         FilteredArray(AllPlayers(), !IsInAir(ArrayElement()) && isOnLine(line1, ArrayElement())));
 
     Wait(0.05);
 
     define line2 = rot(midpoint, laser2Rot, laserLength);
-    ModifyGlobalVariable(intersecting, Operation.AppendToArray, 
+    ModifyVariable(intersecting, Operation.AppendToArray, 
         FilteredArray(AllPlayers(), !(IsCrouching(ArrayElement()) || (IsOnGround(ArrayElement()) && IsUsingAbility1(ArrayElement()))) && isOnLine(line2, ArrayElement())));
     
     intersecting = FilteredArray(intersecting, TotalTimeElapsed() - ArrayElement().lastDamage > 1);
@@ -217,7 +217,7 @@ if (laser3Rot == 360 * 3)
     SmallMessage(AllPlayers(), "Finished rotating");
 }
 
-define globalvar outOfRange;
+globalvar define outOfRange;
 
 rule: "Lasers: Laser discharge"
 if (gamemode == 4)
@@ -235,9 +235,9 @@ if (rotateLasers)
     LoopIfConditionIsTrue();
 }
 
-define globalvar LaserDangerLevel ! = 0;
-define globalvar updateLaserDangerLevel ! = 0;
-define globalvar laserDangerLevelHud !;
+globalvar define LaserDangerLevel ! = 0;
+globalvar define updateLaserDangerLevel ! = 0;
+globalvar define laserDangerLevelHud !;
 
 rule: "Laser Danger Level"
 if (updateLaserDangerLevel != LaserDangerLevel)

@@ -1,10 +1,10 @@
 import "Ball.del";
 
-define globalvar blueGoalEffect !;
-define globalvar redGoalEffect !;
+globalvar define blueGoalEffect !;
+globalvar define redGoalEffect !;
 
-define globalvar blueScore = 0;
-define globalvar redScore = 0;
+globalvar define blueScore = 0;
+globalvar define redScore = 0;
 
 macro blueGoal(): Vector(123, 165, 150);
 macro redGoal(): Vector(-123, 165, 150);
