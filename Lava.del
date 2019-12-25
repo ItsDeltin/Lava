@@ -56,9 +56,9 @@ if (!isWorkingDummy)
         if (gamemode == 1)
         {
             if (TeamOf(EventPlayer()) == Team.Team1)
-                ModifyGlobalVariable(availableBlueSpawns, Operation.RemoveFromArrayByValue, spawnAt);
+                ModifyVariable(availableBlueSpawns, Operation.RemoveFromArrayByValue, spawnAt);
             else
-                ModifyGlobalVariable(availableRedSpawns, Operation.RemoveFromArrayByValue, spawnAt);
+                ModifyVariable(availableRedSpawns, Operation.RemoveFromArrayByValue, spawnAt);
             
             inputEnabled = false;
         }
@@ -109,7 +109,7 @@ if (CurrentGameMode() == GameMode.Skirmish)
             Color.Red,
             EffectRev.VisibleTo
         );
-        ModifyGlobalVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
+        ModifyVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
     }
     for (define z ! = 0; z <= columnCount(); z++)
     {
@@ -123,7 +123,7 @@ if (CurrentGameMode() == GameMode.Skirmish)
             Color.Red,
             EffectRev.VisibleTo
         );
-        ModifyGlobalVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
+        ModifyVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
     }
 
     // Pole flair
@@ -167,7 +167,7 @@ method OuterWalls()
         Color.Orange,
         EffectRev.VisibleTo
     );
-    ModifyGlobalVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
+    ModifyVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
     // Tower side
     CreateBeamEffect(
         AllPlayers(),
@@ -177,7 +177,7 @@ method OuterWalls()
         Color.Orange,
         EffectRev.VisibleTo
     );
-    ModifyGlobalVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
+    ModifyVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
     // Team 1 side
     // inner
     CreateBeamEffect(
@@ -188,7 +188,7 @@ method OuterWalls()
         Color.Team1,
         EffectRev.VisibleTo
     );
-    ModifyGlobalVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
+    ModifyVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
     // Outer
     CreateBeamEffect(
         AllPlayers(),
@@ -198,7 +198,7 @@ method OuterWalls()
         Color.Team1,
         EffectRev.VisibleTo
     );
-    ModifyGlobalVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
+    ModifyVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
     // Team 2 side
     // Inner
     CreateBeamEffect(
@@ -209,7 +209,7 @@ method OuterWalls()
         Color.Team2,
         EffectRev.VisibleTo
     );
-    ModifyGlobalVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
+    ModifyVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
     //Outer
     CreateBeamEffect(
         AllPlayers(),
@@ -219,7 +219,7 @@ method OuterWalls()
         Color.Team2,
         EffectRev.VisibleTo
     );
-    ModifyGlobalVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
+    ModifyVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
 }
 
 macro PolePos()   : Vector(0, 154.88, 150);

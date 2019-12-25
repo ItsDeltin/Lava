@@ -68,7 +68,7 @@ if (generateStep == 1)
 }
 
 // define globalvar dirIndex ! =[1,mazeHeight(),-1,-mazeHeight()];
-globalvar define dirFlag  ! =[TopWall(), RightWall(), BottomWall(), LeftWall()];
+globalvar define dirFlag   =[TopWall(), RightWall(), BottomWall(), LeftWall()];
 globalvar define offsetX  ! =[0,1,0,-1];
 globalvar define offsetY  ! =[1,0,-1,0];
 
@@ -78,8 +78,8 @@ if (generateStep == 2)
     define initialX = RandomInteger(0, mazeWidth() - 1);
     define initialY = RandomInteger(0, mazeHeight() - 1);
 
-    ModifyGlobalVariable(toVisitX, Operation.AppendToArray, initialX);
-    ModifyGlobalVariable(toVisitY, Operation.AppendToArray, initialY);
+    ModifyVariable(toVisitX, Operation.AppendToArray, initialX);
+    ModifyVariable(toVisitY, Operation.AppendToArray, initialY);
 
     cellStates[indexFromCoord(initialX, initialY)] += Visited();
 
@@ -90,7 +90,7 @@ if (generateStep == 2)
         define x ! = LastOf(toVisitX);
         define y ! = LastOf(toVisitY);
 
-        define removeAt = CountOf(toVisitX) - 1;
+        define removeAt ! = CountOf(toVisitX) - 1;
 
         define order ! = RandomizedArray([0,1,2,3]);
         foreach (define i in order)
@@ -104,15 +104,15 @@ if (generateStep == 2)
                 cellStates[indexFromCoord(x, y)] -= dirFlag[i];
                 cellStates[checkIndex] -= dirFlag[i + (i < 2 ? 2 : -2)];
                 cellStates[checkIndex] += Visited();
-                ModifyGlobalVariable(toVisitX, Operation.AppendToArray, checkX);
-                ModifyGlobalVariable(toVisitY, Operation.AppendToArray, checkY);
+                ModifyVariable(toVisitX, Operation.AppendToArray, checkX);
+                ModifyVariable(toVisitY, Operation.AppendToArray, checkY);
             }
         }
 
         MinWait();
 
-        ModifyGlobalVariable(toVisitX, Operation.RemoveFromArrayByIndex, removeAt);
-        ModifyGlobalVariable(toVisitY, Operation.RemoveFromArrayByIndex, removeAt);
+        ModifyVariable(toVisitX, Operation.RemoveFromArrayByIndex, removeAt);
+        ModifyVariable(toVisitY, Operation.RemoveFromArrayByIndex, removeAt);
     }
 
     generateStep = 3;
@@ -234,7 +234,7 @@ if (generateStep == 3)
             }
             else if (topLineStart != -1)
             {
-                ModifyGlobalVariable(xAxisWalls, Operation.AppendToArray, 
+                ModifyVariable(xAxisWalls, Operation.AppendToArray, 
                     Vector(
                         // Wall start
                         (topLineStart - 0.5) * Scale(),
@@ -250,7 +250,7 @@ if (generateStep == 3)
 
         if (topLineStart != -1)
         {
-            ModifyGlobalVariable(xAxisWalls, Operation.AppendToArray, 
+            ModifyVariable(xAxisWalls, Operation.AppendToArray, 
                 Vector(
                     // Wall start
                     (topLineStart - 0.5) * Scale(),
@@ -263,7 +263,7 @@ if (generateStep == 3)
         }
         if (bottomLineStart != -1)
         {
-            ModifyGlobalVariable(xAxisWalls, Operation.AppendToArray, 
+            ModifyVariable(xAxisWalls, Operation.AppendToArray, 
                 Vector(
                     // Wall start
                     (bottomLineStart - 0.5) * Scale(),
@@ -322,7 +322,7 @@ if (generateStep == 4)
             }
             else if (rightLineStart != -1)
             {
-                ModifyGlobalVariable(zAxisWalls, Operation.AppendToArray, 
+                ModifyVariable(zAxisWalls, Operation.AppendToArray, 
                     Vector(
                         // Wall start
                         (rightLineStart - 0.5) * Scale(),
@@ -338,7 +338,7 @@ if (generateStep == 4)
 
         if (rightLineStart != -1)
         {
-            ModifyGlobalVariable(zAxisWalls, Operation.AppendToArray, 
+            ModifyVariable(zAxisWalls, Operation.AppendToArray, 
                 Vector(
                     // Wall start
                     (rightLineStart - 0.5) * Scale(),
@@ -351,7 +351,7 @@ if (generateStep == 4)
         }
         if (leftLineStart != -1)
         {
-            ModifyGlobalVariable(zAxisWalls, Operation.AppendToArray, 
+            ModifyVariable(zAxisWalls, Operation.AppendToArray, 
                 Vector(
                     // Wall start
                     (leftLineStart - 0.5) * Scale(),
@@ -509,7 +509,7 @@ if (IsCommunicating(HostPlayer(), Communication.UltimateStatus))
     walkPath = [];
     while (found != -1)
     {
-        ModifyGlobalVariable(walkPath, Operation.AppendToArray, Vector(
+        ModifyVariable(walkPath, Operation.AppendToArray, Vector(
             XOf(buildMazeAt()) + (XOf(aStarCheck[found]) * Scale()),
             YOf(buildMazeAt()),
             ZOf(buildMazeAt()) + (ZOf(aStarCheck[found]) * Scale())
@@ -553,7 +553,7 @@ if (!isGettingPath)
 if (CountOf(walkPath) > 0)
 if (DistanceBetween(navigator, FirstOf(walkPath)) < 1)
 {
-    ModifyGlobalVariable(walkPath, Operation.RemoveFromArrayByIndex, 0);
+    ModifyVariable(walkPath, Operation.RemoveFromArrayByIndex, 0);
 }
 
 rule: "Maze: Hunter Nav: Stop"
