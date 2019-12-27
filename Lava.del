@@ -17,6 +17,27 @@ globalvar define gamemode = 0;
 // 4 = Lasers
 // 5 = Maze
 
+
+rule: "OSTW"
+{
+    CreateHudText(
+        VisibleTo: AllPlayers(),
+        Text: "Created by Deltin with OSTW",
+        TextColor: Color.SkyBlue,
+        Location: Location.Right,
+        Spectators: Spectators.VisibleAlways,
+        SortOrder: 0
+    );
+    CreateHudText(
+        VisibleTo: AllPlayers(),
+        Subheader: "https://github.com/ItsDeltin/Overwatch-Script-To-Workshop",
+        SubheaderColor: Color.Blue,
+        Location: Location.Right,
+        Spectators: Spectators.VisibleAlways,
+        SortOrder: 1
+    );
+}
+
 rule: "Generic Respawn"
 Event.OngoingPlayer
 if (HasSpawned())
