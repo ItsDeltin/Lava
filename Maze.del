@@ -1,10 +1,10 @@
 import "Lava.del";
 
 rule: "Maze: Start/Stop"
-if (CurrentGameMode() == GameMode.Deathmatch)
+if (IsCommunicating(HostPlayer(), Communication.VoiceLineDown))
 {
     DestroyAllEffects();
-    gamemode = 5;
+    gamemode = Mode.Maze;
     generateStep = 1;
 }
 
@@ -20,29 +20,29 @@ globalvar define generateStep = 0;
 globalvar define numberOfVisits ! = 0;
 globalvar define loadingHudText !;
 
-macro mazeWidth()  : 10;
-macro mazeHeight() : 10;
-macro buildMazeAt(): Vector(-86.56, 154.88, 83.64);
-macro Scale(): 8;
+define mazeWidth()  : 10;
+define mazeHeight() : 10;
+define buildMazeAt(): Vector(-86.56, 154.88, 83.64);
+define Scale(): 8;
 // Flags, each must be double of the one before.
-macro TopWall()    : 1;
-macro RightWall()  : 2;
-macro BottomWall() : 4;
-macro LeftWall()   : 8;
-macro Visited()    : 16;
+define TopWall()    : 1;
+define RightWall()  : 2;
+define BottomWall() : 4;
+define LeftWall()   : 8;
+define Visited()    : 16;
 
-macro indexFromCoord(define x, define z): (x * mazeHeight()) + z;
+define indexFromCoord(define x, define z): (x * mazeHeight()) + z;
 
-macro mazeWallHeight(): 1.2;
+define mazeWallHeight(): 1.2;
 
-macro mazePos(define pos): (pos - buildMazeAt()) / Scale();
-macro randomMazeSpot(): Vector(
+define mazePos(define pos): (pos - buildMazeAt()) / Scale();
+define randomMazeSpot(): Vector(
         XOf(buildMazeAt()) + (RandomInteger(0, mazeWidth() - 1) * Scale()),
         YOf(buildMazeAt()),
         ZOf(buildMazeAt()) + (RandomInteger(0, mazeHeight() - 1) * Scale())
     );
 
-macro mazeCenter(): buildMazeAt() + Vector(mazeWidth() * Scale() / 2, 0, mazeHeight() * Scale() / 2);
+define mazeCenter(): buildMazeAt() + Vector(mazeWidth() * Scale() / 2, 0, mazeHeight() * Scale() / 2);
 
 rule: "Maze: Generate: Initial states"
 if (generateStep == 1)
@@ -211,7 +211,7 @@ if (generateStep == 2)
 //     visited = [];
 //     generateStep = 3;
 // }
-// macro loopMakerDist(define visited, define x1, define z1, define x2, define z2): AbsoluteValue(visited[indexFromCoord(x1,z1)] - visited[indexFromCoord(x2,z2)]);
+// define loopMakerDist(define visited, define x1, define z1, define x2, define z2): AbsoluteValue(visited[indexFromCoord(x1,z1)] - visited[indexFromCoord(x2,z2)]);
 
 rule: "Maze: Generate: Create Walls: X axis"
 if (generateStep == 3)
@@ -287,14 +287,7 @@ if (generateStep == 3)
         define a! = Vector(XOf(xAxisWalls[xi]), YOf(buildMazeAt()) + mazeWallHeight(), ZOf(xAxisWalls[xi]));
         define b! = Vector(YOf(xAxisWalls[xi]), YOf(buildMazeAt()) + mazeWallHeight(), ZOf(xAxisWalls[xi]));
 
-        CreateBeamEffect(
-            AllPlayers(),
-            BeamType.GrappleBeam,
-            a,
-            b,
-            Color.Red,
-            EffectRev.None
-        );
+        MakeWall(a, b);
     }
 
     generateStep = 4;
@@ -375,17 +368,22 @@ if (generateStep == 4)
         define a! = Vector(ZOf(zAxisWalls[zi]), YOf(buildMazeAt()) + mazeWallHeight(), XOf(zAxisWalls[zi]));
         define b! = Vector(ZOf(zAxisWalls[zi]), YOf(buildMazeAt()) + mazeWallHeight(), YOf(zAxisWalls[zi]));
 
-        CreateBeamEffect(
-            AllPlayers(),
-            BeamType.GrappleBeam,
-            a,
-            b,
-            Color.Red,
-            EffectRev.None
-        );
+        MakeWall(a, b);
     }
 
     generateStep = 5;
+}
+
+void MakeWall(ref define start, ref define end)
+{
+    CreateBeamEffect(
+        AllPlayers(),
+        BeamType.GoodBeam,
+        start,
+        end,
+        Color.Red,
+        EffectRev.VisibleTo
+    );
 }
 
 rule: "Maze: Hunter and Misc Setup"
@@ -394,7 +392,7 @@ if (generateStep == 5)
     DestroyHudText(loadingHudText);
     CreateEffect(AllPlayers(), Effect.Cloud, Color.White, mazeCenter(), mazeWidth() * Scale(), EffectRev.None);
 
-    CreateDummyBot(Hero.Roadhog, Team.All, -1, randomMazeSpot(), Vector());
+    CreateDummyBot(Hero.Roadhog, Team.Team1, -1, randomMazeSpot(), Vector());
     navigator = LastCreatedEntity();
     navigator.isWorkingDummy = true;
     MinWait();
@@ -412,7 +410,6 @@ if (IsAlive())
 if (!isWorkingDummy)
 {
     defaultMoveSpeed = 100;
-    SetMoveSpeed(EventPlayer(), 100);
     Teleport(EventPlayer(), randomMazeSpot());
 }
 
@@ -520,10 +517,10 @@ if (IsCommunicating(HostPlayer(), Communication.UltimateStatus))
     aStarCheck = [];
     isGettingPath = false;
 }
-macro hasTopWall(define cell): cell % 2 > 0;
-macro hasRightWall(define cell): cell >= 2 && (cell - 2) % 4 <= 1;
-macro hasBottomWall(define cell): cell >= 4 && (cell - 4) % 8 <= 3;
-macro hasLeftWall(define cell): cell >= 8;
+define hasTopWall(define cell): cell % 2 > 0;
+define hasRightWall(define cell): cell >= 2 && (cell - 2) % 4 <= 1;
+define hasBottomWall(define cell): cell >= 4 && (cell - 4) % 8 <= 3;
+define hasLeftWall(define cell): cell >= 8;
 
 rule: "Maze: Hunter Nav: Start moving"
 if (generateStep == 6)

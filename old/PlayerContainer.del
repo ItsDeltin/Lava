@@ -69,17 +69,17 @@ public method ActivateScoper(define id, define data)
 
 // 123.0179
 // ^^^ Gets the whole number (123)
-public macro GetData(): RoundToInteger(EventDamage(), Rounding.Down);
+public define GetData(): RoundToInteger(EventDamage(), Rounding.Down);
 
-macro GetPlayer(): PlayersInSlot(rawPlayerID() - ((rawPlayerID() < 6) ? 0 : 6), decodeTeam());
+define GetPlayer(): PlayersInSlot(rawPlayerID() - ((rawPlayerID() < 6) ? 0 : 6), decodeTeam());
 
 // 123.0179
 //       ^^ Gets the last 2 digits (79)
 // Use Nearest because of optimizations at this decimal level
-macro GetID(): RoundToInteger((EventDamage() * 10000) % 100, Rounding.Nearest);
+define GetID(): RoundToInteger((EventDamage() * 10000) % 100, Rounding.Nearest);
 
 // 123.0179
 //     ^^ Gets the first 2 digits (01)
-macro rawPlayerID(): RoundToInteger((EventDamage() * 100) % 100, Rounding.Down);
+define rawPlayerID(): RoundToInteger((EventDamage() * 100) % 100, Rounding.Down);
 
-macro decodeTeam(): (rawPlayerID() < 6) ? Team.Team1 : Team.Team2;
+define decodeTeam(): (rawPlayerID() < 6) ? Team.Team1 : Team.Team2;

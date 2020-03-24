@@ -6,8 +6,8 @@ globalvar define redGoalEffect !;
 globalvar define blueScore = 0;
 globalvar define redScore = 0;
 
-macro blueGoal(): Vector(123, 165, 150);
-macro redGoal(): Vector(-123, 165, 150);
+define blueGoal(): Vector(123, 165, 150);
+define redGoal(): Vector(-123, 165, 150);
 
 rule: "Football: Countdown"
 if (gamemode == 1)
@@ -23,6 +23,9 @@ if (gamemode == 1)
     }
     BigMessage(AllPlayers(), "Start!");
     AllPlayers().inputEnabled = true;
+
+    availableBlueSpawns = [1,2,3,4,5];
+    availableRedSpawns = [1,2,3,4,5];
 }
 
 rule: "Football: Start/Stop"
@@ -93,7 +96,7 @@ if (DistanceBetween(rootBall, blueGoal()) <= 13)
     messageThrower(Team.Team2);
 }
 
-method messageThrower(define team)
+void messageThrower(define team)
 {
     if (TeamOf(thrower) != team)
     {

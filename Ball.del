@@ -19,7 +19,7 @@ globalvar define ball;
 globalvar define ballReady;
 
 rule: "Ball: Setup"
-if (gamemode == 1 || gamemode == 2 || gamemode == 3)
+if (gamemode == Mode.SoccerCountdown || gamemode == Mode.Soccer || gamemode == Mode.Volleyball)
 {
     ball = true;
     // Blue's score text
@@ -75,9 +75,9 @@ if (gamemode == 1 || gamemode == 2 || gamemode == 3)
 }
 
 rule: "Ball: Clean up"
-if (gamemode != 1)
-if (gamemode != 2)
-if (gamemode != 3)
+if (gamemode != Mode.SoccerCountdown)
+if (gamemode != Mode.Soccer)
+if (gamemode != Mode.Maze)
 {
     ball = false;
     ballReady = false;
@@ -91,8 +91,8 @@ if (gamemode != 3)
     rootBall = null;
 }
 
-macro ballLocation(): tpTo != null ? tpTo + Vector(0, 1, 0) : Midpoint(ball1,ball2) + Vector(0, 0.5, 0);
-macro ballSpeed(): SpeedOf(rootBall);
+define ballLocation(): tpTo != null ? tpTo + Vector(0, 1, 0) : Midpoint(ball1,ball2) + Vector(0, 0.5, 0);
+define ballSpeed(): SpeedOf(rootBall);
 
 rule: "Ball: (High Server Loa​d) Link"
 if (ball)
@@ -136,7 +136,7 @@ if (ball)
     Wait(0.1);
     LoopIfConditionIsTrue();
 }
-macro isStunned(define player): HasStatus(player, Status.Stunned);
+define isStunned(define player): HasStatus(player, Status.Stunned);
 
 rule: "Ball: Respawn ball"
 if (ball)
@@ -156,7 +156,7 @@ if (isOnWall(rootBall))
     ApplyImpulse(rootBall, DirectionTowards(PositionOf(rootBall), TopPolePos() + Vector(0, 20, 0)), 15, Relative.ToWorld, ContraryMotion.Cancel);
 }
 
-method respawnBall()
+void respawnBall()
 {
     ballIsOnStand = true;
 
@@ -200,14 +200,14 @@ if (isBall)
 if (EventDamage() == 95)
 {
     fuse = 0;
-    ChaseGlobalVariableOverTime(fuse, 2, 3);
+    ChaseVariableOverTime(fuse, 2, 3, TimeChaseReevaluation.None);
 
     CreateEffect(AllPlayers(), Effect.BadAura, Color.Orange, ballLocation(), fuse, EffectRev.VisibleToPositionAndRadius);
     define fuseEffect = LastCreatedEntity();
     Wait(3, WaitBehavior.IgnoreCondition);
     DestroyEffect(fuseEffect);
 
-    StopChasingGlobalVariable(fuse);
+    StopChasingVariable(fuse);
 
     PlayEffect(AllPlayers(), PlayEffect.GoodExplosion, Color.Orange, ballLocation(), ExplosionRange());
     PlayEffect(AllPlayers(), PlayEffect.ExplosionSound, Color.Orange, ballLocation(), 100);
@@ -219,7 +219,7 @@ if (EventDamage() == 95)
     inExplosionRange.force = 30;
     inExplosionRange.heightOffset = 1.5;
 }
-macro ExplosionRange(): 10;
+define ExplosionRange(): 10;
 
 rule: "Ball: Getting charged"
 Event.OngoingPlayer

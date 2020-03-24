@@ -1,0 +1,28 @@
+{
+    "Heroes": {
+        "General": {
+            "Enabled Heroes": ["Reinhardt"],
+            "Reinhardt": {
+                "Charge Cooldown Time": 0,
+                "Charge Knockback Scalar": 200,
+                "Fire Strike Cooldown Time": 50,
+                "Rocket Hammer Knockback Scalar": 400
+            },
+            "Torbjörn": {
+                "Primary Fire": false
+            }
+        }
+    },
+    "Modes": {
+        "All": {
+            "Game Mode Start": "Immediately",
+            "Hero Limit": "Off",
+            "Respawn As Random Hero": true,
+            "Respawn Time Scalar": 0
+        },
+        "Skirmish": {
+            "Enabled": true,
+            "Enabled Maps": ["Lijiang Tower (Lunar New Year)", "Lijiang Tower"]
+        }
+    }
+}

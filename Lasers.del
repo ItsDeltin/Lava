@@ -3,12 +3,12 @@ import "Lava.del";
 rule: "Lasers: Start/Stop"
 if (IsCommunicating(HostPlayer(), Communication.VoiceLineLeft))
 {
-    if (gamemode != 4)
+    if (gamemode != Mode.Lasers)
     {
-        gamemode = 4;
+        gamemode = Mode.Lasers;
         rotateLasers = true;
     }
-    else gamemode = 0;
+    else gamemode = Mode.Waiting;
 }
 
 globalvar define lasersReady = false;
@@ -30,15 +30,15 @@ globalvar define laser3Effect !;
 globalvar define ringEffectArray !;
 globalvar define outOfRangeHUD !;
 
-macro isOnLine(define line, define player): AbsoluteValue(cross(line, PositionOf(player))) < 200;
-macro cross(define line, define pos)   : dxc(line, pos) * dyl(line) - dyc(line, pos) * dxl(line);
-macro dxc(define line, define pos)     : XOf(pos) - XOf(line);
-macro dyc(define line, define pos)     : ZOf(pos) - ZOf(line);
-macro dxl(define line)                 : XOf(midpoint) - XOf(line);
-macro dyl(define line)                 : ZOf(midpoint) - ZOf(line);
+define isOnLine(define line, define player): AbsoluteValue(cross(line, PositionOf(player))) < 200;
+define cross(define line, define pos)   : dxc(line, pos) * dyl(line) - dyc(line, pos) * dxl(line);
+define dxc(define line, define pos)     : XOf(pos) - XOf(line);
+define dyc(define line, define pos)     : ZOf(pos) - ZOf(line);
+define dxl(define line)                 : XOf(midpoint) - XOf(line);
+define dyl(define line)                 : ZOf(midpoint) - ZOf(line);
 
 rule: "Lasers: Setup laser game"
-if (gamemode == 4)
+if (gamemode == Mode.Lasers)
 {
     LaserDangerLevel = 1;
 
@@ -78,8 +78,8 @@ if (gamemode == 4)
     {
         // Create the boundary ring
         ringEffectArray = [];
-        define fraction ! = 360 / boundarySubdivisions();
-        for (define i ! = 0; i < boundarySubdivisions() - 1; i++)
+        define fraction = 360 / boundarySubdivisions();
+        for (define i = 0; i < boundarySubdivisions() - 1; i++)
         {
             CreateBeamEffect(
                 AllPlayers(),
@@ -108,23 +108,23 @@ if (gamemode == 4)
         outOfRangeHUD = LastTextID();
     }
 
-    ChaseGlobalVariableOverTime(laserLength, 150, 5, TimeChaseReevaluation.None);
+    ChaseVariableOverTime(laserLength, 150, 5, TimeChaseReevaluation.None);
     Wait(5);
-    StopChasingGlobalVariable(laserLength);
+    StopChasingVariable(laserLength);
     lasersReady = true;
 
     if (rotateLasers)
     {
-        ChaseGlobalVariableAtRate(laser1Rot, 360 * 4, rotationSpeed, RateChaseReevaluation.DestinationAndRate);
-        ChaseGlobalVariableAtRate(laser2Rot, -(360 * 4), rotationSpeed * 1.25, RateChaseReevaluation.DestinationAndRate);
-        ChaseGlobalVariableAtRate(laser3Rot, 360 * 3, rotationSpeed * 0.85, RateChaseReevaluation.DestinationAndRate);
+        ChaseVariableAtRate(laser1Rot, 360 * 4, rotationSpeed, RateChaseReevaluation.DestinationAndRate);
+        ChaseVariableAtRate(laser2Rot, -(360 * 4), rotationSpeed * 1.25, RateChaseReevaluation.DestinationAndRate);
+        ChaseVariableAtRate(laser3Rot, 360 * 3, rotationSpeed * 0.85, RateChaseReevaluation.DestinationAndRate);
 
-        ChaseGlobalVariableOverTime(rotationSpeed, 45, 5, TimeChaseReevaluation.None);
+        ChaseVariableOverTime(rotationSpeed, 45, 5, TimeChaseReevaluation.None);
         Wait(5);
-        StopChasingGlobalVariable(rotationSpeed);
+        StopChasingVariable(rotationSpeed);
     }
 }
-macro boundarySubdivisions(): 10;
+define boundarySubdivisions(): 10;
 
 rule: "Lasers: Clean up lasers"
 if (gamemode != 4)
@@ -134,10 +134,10 @@ if (lasersReady)
 
     if (gamemode != 3)
     {
-        ChaseGlobalVariableOverTime(laserLength, 0, 5, TimeChaseReevaluation.None);
+        ChaseVariableOverTime(laserLength, 0, 5, TimeChaseReevaluation.None);
         Wait(5);
     }
-    StopChasingGlobalVariable(laserLength);
+    StopChasingVariable(laserLength);
 
     DestroyEffect(laser1Effect);
     DestroyEffect(laser2Effect);
@@ -145,26 +145,26 @@ if (lasersReady)
     DestroyEffectArray(ringEffectArray, 2);
     DestroyHudText(outOfRangeHUD);
 
-    StopChasingGlobalVariable(laser1Rot);
-    StopChasingGlobalVariable(laser2Rot);
-    StopChasingGlobalVariable(laser3Rot);
+    StopChasingVariable(laser1Rot);
+    StopChasingVariable(laser2Rot);
+    StopChasingVariable(laser3Rot);
     laser1Rot = 0;
     laser2Rot = 0;
     laser3Rot = 0;
     rotateLasers = false;
 }
 
-macro rot(define pos, define angle, define length): Destination(pos, DirectionFromAngles(angle, 0), length);
-macro inverseRot(define pos, define angle, define length): Destination(pos, DirectionFromAngles(angle + 180, 0), length);
+define rot(define pos, define angle, define length): Destination(pos, DirectionFromAngles(angle, 0), length);
+define inverseRot(define pos, define angle, define length): Destination(pos, DirectionFromAngles(angle + 180, 0), length);
 
-macro intersectingFrom(define rotation, define height): RayCastHitPlayer(rotation, midpoint + height, AllLivingPlayers(), null, false);
+define intersectingFrom(define rotation, define height): RayCastHitPlayer(rotation, midpoint + height, AllLivingPlayers(), null, false);
 
-macro intersectingRot(define rotation, define height)       : intersectingFrom(       rot(midpoint + Vector(0, height, 0), rotation, laserLength), Vector(0, height, 0));
-macro inverseIntersectingRot(define rotation, define height): intersectingFrom(inverseRot(midpoint + Vector(0, height, 0), rotation, laserLength), Vector(0, height, 0));
+define intersectingRot(define rotation, define height)       : intersectingFrom(       rot(midpoint + Vector(0, height, 0), rotation, laserLength), Vector(0, height, 0));
+define inverseIntersectingRot(define rotation, define height): intersectingFrom(inverseRot(midpoint + Vector(0, height, 0), rotation, laserLength), Vector(0, height, 0));
 
 playervar define lastDamage;
 
-macro getOutOfRange(): RemoveFromArray(AllPlayers(), PlayersWithinRadius(midpoint, boundaryLength, Team.All, RadiusLOS.Off));
+define getOutOfRange(): RemoveFromArray(AllPlayers(), PlayersWithinRadius(midpoint, boundaryLength, Team.All, RadiusLOS.Off));
 
 rule: "Lasers: (High Server Loa​d) Kill intersecting players"
 if (gamemode == 4)
@@ -206,9 +206,9 @@ if (laser3Rot == 360 * 3)
 {
     DestroyHudText(outOfRangeHUD);
     DestroyEffectArray(ringEffectArray, 2);
-    StopChasingGlobalVariable(laser1Rot);
-    StopChasingGlobalVariable(laser2Rot);
-    StopChasingGlobalVariable(laser3Rot);
+    StopChasingVariable(laser1Rot);
+    StopChasingVariable(laser2Rot);
+    StopChasingVariable(laser3Rot);
     laser1Rot = 0;
     laser2Rot = 0;
     laser3Rot = 0;

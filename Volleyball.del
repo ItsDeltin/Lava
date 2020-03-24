@@ -81,7 +81,7 @@ if (gamemode != 3)
     DestroyInWorldText(counterText1);
     DestroyInWorldText(counterText2);
     DestroyHudText(tutorialText);
-    StopChasingGlobalVariable(detonationCounter);
+    StopChasingVariable(detonationCounter);
 }
 
 rule: "Volleyball: Show counter"
@@ -131,7 +131,7 @@ if (IsOnGround(rootBall))
 if (!isCountingDown)
 if (!ballIsOnStand)
 {
-    ChaseGlobalVariableAtRate(detonationCounter, 0, 1, RateChaseReevaluation.None);
+    ChaseVariableAtRate(detonationCounter, 0, 1, RateChaseReevaluation.None);
     isCountingDown = true;
 }
 
@@ -155,9 +155,9 @@ if (XOf(PositionOf(rootBall)) < 0)
     sideSwitched();
 }
 
-method sideSwitched()
+void sideSwitched()
 {
-    StopChasingGlobalVariable(detonationCounter);
+    StopChasingVariable(detonationCounter);
     detonationCounter = detonationTime;
     isCountingDown = false;
     detonationTime = Max(2, detonationTime - 1);
@@ -190,7 +190,7 @@ if (detonationCounter == 0)
 
     isCountingDown = false;
     detonationTime = 10;
-    StopChasingGlobalVariable(detonationCounter);
+    StopChasingVariable(detonationCounter);
     DestroyInWorldText(counterText1);
     DestroyInWorldText(counterText2);
     respawnBall();

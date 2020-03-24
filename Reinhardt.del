@@ -55,7 +55,7 @@ if (DistanceBetween(EventPlayer(), PolePos()) < 3)
     }
 }
 
-macro shieldIsOut(define player): IsButtonHeld(player, Button.SecondaryFire)
+define shieldIsOut(define player): IsButtonHeld(player, Button.SecondaryFire)
     && !HasStatus(player, Status.Stunned)
     && !IsUsingAbility1(player)
     && !IsUsingAbility2(player)
@@ -118,7 +118,7 @@ if (IsOnGround())
     StopAccelerating(EventPlayer());
 }
 
-macro chargingPlayer(define player):
+define chargingPlayer(define player):
     FirstOf(
         FilteredArray(
             AllPlayers(),
@@ -208,9 +208,9 @@ if (wallBuilder != null)
     usingWallAbility = false;
 }
 
-macro LineIntersectingPlane(define pos, define dir, define planeNormal, define planePos):
+define LineIntersectingPlane(define pos, define dir, define planeNormal, define planePos):
     pos + Normalize(dir) * ((DotProduct(planeNormal, planePos) - DotProduct(planeNormal, pos)) / DotProduct(planeNormal, Normalize(dir)));
-macro TeamWithAvailableSlots(define preferTeam): NumberOfPlayers(preferTeam) < 6 ? preferTeam : OppositeTeamOf(preferTeam);
+define TeamWithAvailableSlots(define preferTeam): NumberOfPlayers(preferTeam) < 6 ? preferTeam : OppositeTeamOf(preferTeam);
 
 // rule: "Ability: Ball Shield"
 // Event.OngoingPlayer
@@ -249,8 +249,6 @@ if (!isWorkingDummy)
     DisallowButton(EventPlayer(), Button.Crouch);
     DisallowButton(EventPlayer(), Button.Interact);
     DisallowButton(EventPlayer(), Button.Jump);
-    DisallowButton(EventPlayer(), Button.PrimaryFire);
-    DisallowButton(EventPlayer(), Button.SecondaryFire);
     DisallowButton(EventPlayer(), Button.Ultimate);
 }
 
@@ -265,7 +263,5 @@ if (!isWorkingDummy)
     AllowButton(EventPlayer(), Button.Crouch);
     AllowButton(EventPlayer(), Button.Interact);
     AllowButton(EventPlayer(), Button.Jump);
-    AllowButton(EventPlayer(), Button.PrimaryFire);
-    AllowButton(EventPlayer(), Button.SecondaryFire);
     AllowButton(EventPlayer(), Button.Ultimate);
 }

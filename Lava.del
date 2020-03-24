@@ -5,11 +5,12 @@ import "Lasers.del";
 import "Volleyball.del";
 import "Maze.del";
 import "Debug Tools.del";
+import "customGameSettings.json";
 
 globalvar define origin = Vector(-0.18, 154.88, 60);
 playervar define isWorkingDummy;
 playervar define doRespawn !;
-globalvar define gamemode = 0;
+globalvar Mode gamemode = Mode.Waiting;
 // 0 = Waiting
 // 1 = Soccer countdown
 // 2 = Soccer
@@ -17,6 +18,15 @@ globalvar define gamemode = 0;
 // 4 = Lasers
 // 5 = Maze
 
+enum Mode
+{
+    Waiting,
+    SoccerCountdown,
+    Soccer,
+    Volleyball,
+    Lasers,
+    Maze
+}
 
 rule: "OSTW"
 {
@@ -26,7 +36,7 @@ rule: "OSTW"
         TextColor: Color.SkyBlue,
         Location: Location.Right,
         Spectators: Spectators.VisibleAlways,
-        SortOrder: 0
+        SortOrder: -2
     );
     CreateHudText(
         VisibleTo: AllPlayers(),
@@ -34,7 +44,7 @@ rule: "OSTW"
         SubheaderColor: Color.Blue,
         Location: Location.Right,
         Spectators: Spectators.VisibleAlways,
-        SortOrder: 1
+        SortOrder: -1
     );
 }
 
@@ -54,10 +64,6 @@ if (!isWorkingDummy)
 {
     Respawn();
     MinWait();
-    if (CurrentGameMode() == GameMode.Deathmatch)
-    {
-        Wait(1);
-    }
     // Volleyball and initial soccer
     if (gamemode >= 0 && gamemode <= 3)
     {
@@ -99,10 +105,10 @@ if (!isWorkingDummy)
 globalvar define availableBlueSpawns = [1,2,3,4,5];
 globalvar define availableRedSpawns = [1,2,3,4,5];
 
-macro notWorkingDummy(): FilteredArray(AllPlayers(), !ArrayElement().isWorkingDummy);
+define notWorkingDummy(): FilteredArray(AllPlayers(), !ArrayElement().isWorkingDummy);
 
-macro rowCount(): 50;
-macro columnCount(): 35;
+define rowCount(): 50;
+define columnCount(): 35;
 
 globalvar define arenaEffects = [];
 
@@ -111,17 +117,17 @@ if (CurrentGameMode() == GameMode.Skirmish)
 {
     OuterWalls();
 
-    define cliffBlue ! = Vector(107.07, 154.88, 63.61);
-    define cliffRed ! = Vector(-109.08, 154.88, 65.06);
-    define towerBlue ! = Vector(108.08, 154.88, 213.35);
-    define towerRed ! = Vector(-108.07, 154.88, 214.81);
-    define rowFraction ! = 1/rowCount();
-    define columnFraction ! = 1/columnCount();
+    define cliffBlue = Vector(107.07, 154.88, 63.61);
+    define cliffRed = Vector(-109.08, 154.88, 65.06);
+    define towerBlue = Vector(108.08, 154.88, 213.35);
+    define towerRed = Vector(-108.07, 154.88, 214.81);
+    define rowFraction = 1/rowCount();
+    define columnFraction = 1/columnCount();
 
-    for (define x ! = 0; x <= rowCount(); x++)
+    for (define x = 0; x <= rowCount(); x++)
     {
-        define a! = LinearInterpolate(cliffBlue, cliffRed, x*rowFraction);
-        define b! = LinearInterpolate(towerBlue, towerRed, x*rowFraction);
+        define a = LinearInterpolate(cliffBlue, cliffRed, x*rowFraction);
+        define b = LinearInterpolate(towerBlue, towerRed, x*rowFraction);
         CreateBeamEffect(
             AllPlayers(),
             BeamType.GrappleBeam,
@@ -132,10 +138,10 @@ if (CurrentGameMode() == GameMode.Skirmish)
         );
         ModifyVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
     }
-    for (define z ! = 0; z <= columnCount(); z++)
+    for (define z = 0; z <= columnCount(); z++)
     {
-        define a! = LinearInterpolate(cliffBlue, towerBlue, z*columnFraction);
-        define b! = LinearInterpolate(cliffRed, towerRed, z*columnFraction);
+        define a = LinearInterpolate(cliffBlue, towerBlue, z*columnFraction);
+        define b = LinearInterpolate(cliffRed, towerRed, z*columnFraction);
         CreateBeamEffect(
             AllPlayers(),
             BeamType.GrappleBeam,
@@ -161,7 +167,7 @@ if (CurrentGameMode() == GameMode.Skirmish)
     // ChaseGlobalVariableAtRate(killzoneRot, 180, 25, RateChaseReevaluation.DestinationAndRate);
 }
 
-// macro flairPos(): Destination(xyPolePos(136.42), DirectionFromAngles(killzoneRot, 0), 11);
+// define flairPos(): Destination(xyPolePos(136.42), DirectionFromAngles(killzoneRot, 0), 11);
 
 // rule: "Reset killzone rot"
 // if (killzoneRot == 180)
@@ -177,7 +183,7 @@ if (CurrentGameMode() == GameMode.Skirmish)
 
 // define globalvar killzoneRot = -180;
 
-method OuterWalls()
+void OuterWalls()
 {
     // Cliff side
     CreateBeamEffect(
@@ -243,12 +249,12 @@ method OuterWalls()
     ModifyVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
 }
 
-macro PolePos()   : Vector(0, 154.88, 150);
-macro TopPolePos(): Vector(0, 161.5,  150);
-macro BaseOffset(): Vector(0, 0.5, 0);
-macro xyPolePos(define y): Vector(0, y, 150);
+define PolePos()   : Vector(0, 154.88, 150);
+define TopPolePos(): Vector(0, 161.5,  150);
+define BaseOffset(): Vector(0, 0.5, 0);
+define xyPolePos(define y): Vector(0, y, 150);
 
-macro isOnWall(define player): IsOnGround(player) && AbsoluteValue(YOf(PositionOf(player)) - 158.44) < 0.2;
+define isOnWall(define player): IsOnGround(player) && AbsoluteValue(YOf(PositionOf(player)) - 158.44) < 0.2;
 
 rule: "I want to die"
 if (IsButtonHeld(HostPlayer(), Button.Ultimate))
