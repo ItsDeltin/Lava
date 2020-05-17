@@ -3,8 +3,8 @@ import "Ball.del";
 rule: "Volleyball: Start/Stop"
 if (IsCommunicating(HostPlayer(), Communication.VoiceLineRight))
 {
-    if (gamemode != 3)
-        gamemode = 3;
+    if (gamemode != Mode.Volleyball)
+        gamemode = Mode.Volleyball;
     else gamemode = 0;
 }
 
@@ -20,6 +20,8 @@ globalvar define tutorialText !;
 rule: "Volleyball: Setup"
 if (gamemode == 3)
 {
+    InitSpawns();
+    respawnBall();
     volleyball = true;
     LaserDangerLevel = 3;
 
