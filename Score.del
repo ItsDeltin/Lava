@@ -5,15 +5,27 @@ globalvar define redGoalEffect !;
 
 globalvar define blueScore = 0;
 globalvar define redScore = 0;
+globalvar define totalScore = 0;
 
 define blueGoal(): Vector(123, 165, 150);
 define redGoal(): Vector(-123, 165, 150);
+
+rule: "Switch gamemode"
+if (totalScore != 0)
+if (totalScore % 3 == 0)
+{
+    if (gamemode == Mode.Volleyball) gamemode = Mode.SoccerCountdown;
+    else gamemode = Mode.Volleyball;
+}
 
 rule: "Football: Countdown"
 if (gamemode == 1)
 {
     AllPlayers().inputEnabled = false;
     gamemode = 1;
+
+    InitSpawns();
+
     AllPlayers().doRespawn = true;
     respawnBall();
     for (define i = 5; i > 0; i--)
@@ -23,9 +35,16 @@ if (gamemode == 1)
     }
     BigMessage(AllPlayers(), "Start!");
     AllPlayers().inputEnabled = true;
+}
 
-    availableBlueSpawns = [1,2,3,4,5];
-    availableRedSpawns = [1,2,3,4,5];
+void InitSpawns()
+{
+    Heal(AllPlayers(), null, 9999);
+    for (define i = 0; i < 5; i++)
+    {
+        Teleport(PlayersInSlot(i, Team.Team1), Vector(60, 154.88, (150 - 30) + (((150 + 30) - (150 - 30))/5)*i));
+        Teleport(PlayersInSlot(i, Team.Team2), Vector(-60, 154.88, (150 - 30) + (((150 + 30) - (150 - 30))/5)*i));
+    }
 }
 
 rule: "Football: Start/Stop"
@@ -79,6 +98,7 @@ if (DistanceBetween(rootBall, redGoal()) <= 13)
     PlayEffect(AllPlayers(Team.Team2), PlayEffect.DebuffImpactSound, Color.White, redGoal(), 1000);
 
     blueScore++;
+    totalScore++;
     messageThrower(Team.Team1);
 }
 
@@ -93,6 +113,7 @@ if (DistanceBetween(rootBall, blueGoal()) <= 13)
     PlayEffect(AllPlayers(Team.Team1), PlayEffect.DebuffImpactSound, Color.White, blueGoal(), 1000);
 
     redScore++;
+    totalScore++;
     messageThrower(Team.Team2);
 }
 
