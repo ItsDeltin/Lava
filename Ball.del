@@ -77,7 +77,7 @@ if (gamemode == Mode.SoccerCountdown || gamemode == Mode.Soccer || gamemode == M
 rule: "Ball: Clean up"
 if (gamemode != Mode.SoccerCountdown)
 if (gamemode != Mode.Soccer)
-if (gamemode != Mode.Maze)
+if (gamemode != Mode.Volleyball)
 {
     ball = false;
     ballReady = false;
@@ -174,7 +174,6 @@ Event.OnDamageTaken
 if (isBall)
 if (!IsInSpawnRoom(ball1) && !IsInSpawnRoom(ball2))
 {
-    SmallMessage(AllPlayers(), EventDamage());
     Heal(EventPlayer(), null, EventDamage());
 
     // Hammer hit
