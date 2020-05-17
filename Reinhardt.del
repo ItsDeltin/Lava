@@ -139,6 +139,7 @@ if (!isWorkingDummy)
     knockedFrom = null;
 }
 
+/*
 globalvar define FloorPoint = Vector(0, 154.88, 0);
 globalvar define FloorNormal = Vector(0, 1, 0);
 
@@ -211,6 +212,7 @@ if (wallBuilder != null)
 define LineIntersectingPlane(define pos, define dir, define planeNormal, define planePos):
     pos + Normalize(dir) * ((DotProduct(planeNormal, planePos) - DotProduct(planeNormal, pos)) / DotProduct(planeNormal, Normalize(dir)));
 define TeamWithAvailableSlots(define preferTeam): NumberOfPlayers(preferTeam) < 6 ? preferTeam : OppositeTeamOf(preferTeam);
+*/
 
 // rule: "Ability: Ball Shield"
 // Event.OngoingPlayer
@@ -225,16 +227,16 @@ define TeamWithAvailableSlots(define preferTeam): NumberOfPlayers(preferTeam) < 
 //     ApplyImpulse(a, FacingDirectionOf(), 20, Relative.ToWorld, ContraryMotion.Cancel);
 // }
 
-rule: "Ability: Throw ball"
-Event.OngoingPlayer
-Player.Reinhardt
-if (ball)
-if (IsButtonHeld(EventPlayer(), Button.Jump))
-if (DistanceBetween(EventPlayer(), rootBall) < 3)
-{
-    define a ! = [ball1,ball2];
-    ApplyImpulse(a, Up(), 15, Relative.ToWorld, ContraryMotion.Cancel);
-}
+// rule: "Ability: Throw ball"
+// Event.OngoingPlayer
+// Player.Reinhardt
+// if (ball)
+// if (IsButtonHeld(EventPlayer(), Button.Jump))
+// if (DistanceBetween(EventPlayer(), rootBall) < 3)
+// {
+//     define a ! = [ball1,ball2];
+//     ApplyImpulse(a, Up(), 15, Relative.ToWorld, ContraryMotion.Cancel);
+// }
 
 playervar define inputEnabled ! = true;
 
@@ -264,4 +266,16 @@ if (!isWorkingDummy)
     AllowButton(EventPlayer(), Button.Interact);
     AllowButton(EventPlayer(), Button.Jump);
     AllowButton(EventPlayer(), Button.Ultimate);
+}
+
+playervar define healOverTime;
+
+rule: "Heal"
+Event.OnDamageTaken
+Player.Reinhardt
+{
+    StopHealOverTime(healOverTime);
+    Wait(10, WaitBehavior.RestartWhenTrue);
+    StartHealOverTime(EventPlayer(), null, 9999, 100);
+    healOverTime = LastHealOverTime();
 }
