@@ -7,6 +7,7 @@ import "Maze.del";
 import "Debug Tools.del";
 import "customGameSettings.json";
 
+globalvar define started = false;
 globalvar define origin = Vector(-0.18, 154.88, 60);
 playervar define isWorkingDummy;
 playervar define doRespawn !;
@@ -67,28 +68,8 @@ if (!isWorkingDummy)
     // Volleyball and initial soccer
     if (gamemode >= 0 && gamemode <= 3)
     {
-        define useSpawnArray;
-        if (gamemode == 1)
-        {
-            if (TeamOf(EventPlayer()) == Team.Team1)
-                useSpawnArray = availableBlueSpawns;
-            else
-                useSpawnArray = availableRedSpawns;
-        }
-        else useSpawnArray = [1,2,3,4,5];
-        define spawnAt ! = RandomValueInArray(useSpawnArray);
-
+        define spawnAt ! = RandomValueInArray([1,2,3,4,5]);
         Teleport(EventPlayer(), Vector(TeamOf(EventPlayer()) == Team.Team1 ? 60 : -60, 154.88, (150 - 30) + (((150 + 30) - (150 - 30))/5)*spawnAt));
-
-        if (gamemode == 1)
-        {
-            if (TeamOf(EventPlayer()) == Team.Team1)
-                ModifyVariable(availableBlueSpawns, Operation.RemoveFromArrayByValue, spawnAt);
-            else
-                ModifyVariable(availableRedSpawns, Operation.RemoveFromArrayByValue, spawnAt);
-            
-            inputEnabled = false;
-        }
     } 
     // Maze
     else if (gamemode == 5)
@@ -101,11 +82,6 @@ if (!isWorkingDummy)
 
     doRespawn = false;
 }
-
-globalvar define availableBlueSpawns = [1,2,3,4,5];
-globalvar define availableRedSpawns = [1,2,3,4,5];
-
-define notWorkingDummy(): FilteredArray(AllPlayers(), !ArrayElement().isWorkingDummy);
 
 define rowCount(): 50;
 define columnCount(): 35;
@@ -260,4 +236,13 @@ rule: "I want to die"
 if (IsButtonHeld(HostPlayer(), Button.Ultimate))
 {
     CreateDummyBot(Hero.Reinhardt, NumberOfPlayers(Team.Team1) < 6 ? Team.Team1 : Team.Team2, -1, PositionOf(HostPlayer()), Vector());
+}
+
+rule: "Start"
+if (!started)
+if (IsTrueForAll(AllPlayers(), HasSpawned(ArrayElement()) || IsDead(ArrayElement())))
+{
+    started = true;
+    Wait(10);
+    gamemode = Mode.SoccerCountdown;
 }
