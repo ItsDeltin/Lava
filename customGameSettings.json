@@ -24,5 +24,9 @@
             "Enabled": true,
             "Enabled Maps": ["Lijiang Tower (Lunar New Year)", "Lijiang Tower"]
         }
+    },
+    "Lobby": {
+        "Max Team 1 Players": 5,
+        "Max Team 2 Players": 5
     }
 }
