@@ -81,6 +81,7 @@ if (!isWorkingDummy)
         Teleport(EventPlayer(), origin + Vector(20, 0, 20));
 
     SetFacing(EventPlayer(), DirectionTowards(EyePosition(), TopPolePos()));
+    EventPlayer().blueSide = TeamOf() == Team.Team1;
 
     doRespawn = false;
 }

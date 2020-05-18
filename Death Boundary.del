@@ -3,6 +3,9 @@ import "Lava.del";
 rule: "Ceiling Bounce"
 Event.OngoingPlayer
 if (EyePosition(EventPlayer()).Y > 173)
+if (HasSpawned())
+if (IsAlive())
+if (!IsInSpawnRoom())
 {
     Teleport(EventPlayer(), PositionOf(EventPlayer()) * Vector(1, 0, 1) + Vector(0, 170.5, 0));
     ApplyImpulse(EventPlayer(), Down(), 0.001, Relative.ToWorld, ContraryMotion.Cancel);

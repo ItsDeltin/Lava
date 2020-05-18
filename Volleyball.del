@@ -1,4 +1,4 @@
-import "Ball.del";
+import "Lava.del";
 
 rule: "Volleyball: Start/Stop"
 if (IsCommunicating(HostPlayer(), Communication.VoiceLineRight))
@@ -117,16 +117,20 @@ if (ballReady)
     counterText2 = LastTextID();
 }
 
+playervar define blueSide = true;
+
 rule: "Volleyball: Kill players touching net"
 Event.OngoingPlayer
 if (volleyball)
 if (!isWorkingDummy)
 // The net is at x=0 of the map, so just test if the player has a low X coordinate.
-if (AbsoluteValue(XOf(PositionOf())) <= 1)
+if ((blueSide && (PositionOf().X < 0.35)) || (!blueSide && (PositionOf().X > -0.35)))
 // 158.38 is the base position plus the height of the tallest net beam effect.
-if (YOf(PositionOf()) < 158.38)
 {
-    Kill(EventPlayer(), null);
+    if (YOf(PositionOf()) < 158.38)
+        Kill(EventPlayer(), null);
+    else
+        blueSide = !blueSide;
 }
 
 rule: "Volleyball: Start volleyball counter"
