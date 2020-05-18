@@ -1,0 +1,16 @@
+class Trigger {
+    define isActive = false;
+    define arguments;
+
+    public define IsActive: isActive;
+    public define Arguments: arguments;
+
+    public void Activate(define _args = null) "Activate Trigger"{
+        arguments = _args;
+        isActive = true;
+        MinWait();
+        isActive = false;
+    }
+
+
+}

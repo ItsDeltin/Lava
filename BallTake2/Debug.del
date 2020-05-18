@@ -1,0 +1,6 @@
+rule: "[Debug] Show Player Position"
+Event.OngoingPlayer
+if(HostPlayer() == EventPlayer())
+{
+    CreateHudText(EventPlayer(), PositionOf(EventPlayer()), null, null, Location.Left, 0, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+}
