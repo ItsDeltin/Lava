@@ -105,7 +105,9 @@ rule: "Player: Shield HUD"
 }
 
 playervar define arrowAnimation = 0;
+playervar define arrowAnimation2 = 0;
 playervar define arrowEffects;
+define arrowDestination: 1.6;
 
 rule: "Player: Shield Arrow"
 Event.OngoingPlayer
@@ -113,11 +115,19 @@ Player.Reinhardt
 if (isRamp(EventPlayer()))
 {
     arrowAnimation = 0;
-    ChaseVariableAtRate(arrowAnimation, 1, 0.6, RateChaseReevaluation.None);
-    CreateBeamEffect(AllPlayers(), BeamType.GoodBeam, ArrowNodeBase(1), ArrowNodeTip(1), Color.Green);
+    arrowAnimation2 = 0.8;
+    ChaseVariableAtRate(arrowAnimation, arrowDestination, 0.6, RateChaseReevaluation.None);
+    ChaseVariableAtRate(arrowAnimation2, arrowDestination, 0.6, RateChaseReevaluation.None);
+
+    CreateBeamEffect(FilteredArray(AllPlayers(), arrowAnimation <= 1), BeamType.GoodBeam, ArrowNodeBase(arrowAnimation, 1), ArrowNodeTip(arrowAnimation, 1), Color.Green);
     arrowEffects[0] = LastCreatedEntity();
-    CreateBeamEffect(AllPlayers(), BeamType.GoodBeam, ArrowNodeBase(-1), ArrowNodeTip(-1), Color.Green);
+    CreateBeamEffect(FilteredArray(AllPlayers(), arrowAnimation <= 1), BeamType.GoodBeam, ArrowNodeBase(arrowAnimation, -1), ArrowNodeTip(arrowAnimation, -1), Color.Green);
     arrowEffects[1] = LastCreatedEntity();
+
+    CreateBeamEffect(FilteredArray(AllPlayers(), arrowAnimation2 <= 1), BeamType.GoodBeam, ArrowNodeBase(arrowAnimation2, 1), ArrowNodeTip(arrowAnimation2, 1), Color.Green);
+    arrowEffects[2] = LastCreatedEntity();
+    CreateBeamEffect(FilteredArray(AllPlayers(), arrowAnimation2 <= 1), BeamType.GoodBeam, ArrowNodeBase(arrowAnimation2, -1), ArrowNodeTip(arrowAnimation2, -1), Color.Green);
+    arrowEffects[3] = LastCreatedEntity();
 }
 
 rule: "Player: Destroy Shield Arrow"
@@ -127,10 +137,12 @@ if (!isRamp(EventPlayer()))
     StopChasingVariable(arrowAnimation);
     DestroyEffect(arrowEffects[0]);
     DestroyEffect(arrowEffects[1]);
+    DestroyEffect(arrowEffects[2]);
+    DestroyEffect(arrowEffects[3]);
 }
 
-define ArrowNodeBase(define x): Local(EyePosition(), FacingDirectionOf(), 0.75, Min(arrowAnimation, 0.2) * 5 * x, Min(Max(arrowAnimation - 0.2, 0), 1) * 5 - 2.1);
-define ArrowNodeTip(define x): Local(EyePosition(), FacingDirectionOf(), 0.75, Min(Max(arrowAnimation - 0.8, 0), 0.2) * 5 * x, Min(arrowAnimation, 0.8) * 5 - 2.1);
+define ArrowNodeBase(define f, define x): Local(EyePosition(), FacingDirectionOf(), 0.75, Min(f, 0.2) * 5 * x, Min(Max(f - 0.2, 0), 1) * 5 - 2.1);
+define ArrowNodeTip(define f, define x): Local(EyePosition(), FacingDirectionOf(), 0.75, Min(Max(f - 0.8, 0), 0.2) * 5 * x, Min(f, 0.8) * 5 - 2.1);
 
 define Local(Vector pos, Vector dir, define forward, define right, define up): pos
     + dir * forward
@@ -139,9 +151,15 @@ define Local(Vector pos, Vector dir, define forward, define right, define up): p
 
 rule: "Reset arrow"
 Event.OngoingPlayer
-if (arrowAnimation == 1)
+if (arrowAnimation == arrowDestination)
 {
     arrowAnimation = 0;
+}
+rule: "Reset arrow 2"
+Event.OngoingPlayer
+if (arrowAnimation2 == arrowDestination)
+{
+    arrowAnimation2 = 0;
 }
 
 rule: "Player: Start braking"
@@ -155,7 +173,7 @@ if (IsOnGround())
     PlayEffect(AllPlayers(), PlayEffect.BadExplosion, Color.White, PositionOf(), 0.5);
     PlayEffect(EventPlayer(), PlayEffect.DebuffImpactSound, Color.White, EyePosition(), 100);
     Wait(0.8);
-    SetStatus(EventPlayer(), null, Status.Frozen, 0.04);
+    CancelPrimaryAction(EventPlayer());
     StopAccelerating(EventPlayer());
 }
 
