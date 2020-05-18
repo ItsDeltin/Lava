@@ -1,0 +1,78 @@
+import "Debug.del";
+
+enum Mode
+{
+    Waiting,
+    SoccerCountdown,
+    Soccer,
+    Volleyball,
+    Dodgeball
+}
+
+playervar define isWorkingDummy;
+playervar define doRespawn;
+
+globalvar Mode gamemode = Mode.Waiting;
+
+
+define TopPolePos: Vector(0, 161.5,  150);
+globalvar define origin = Vector(-0.18, 154.88, 60);
+
+define FirstFloorBeam: [Vector(60, 154.8, 114), Vector(-60, 154.8, 114)];
+
+
+rule: "[Arena] Generic Respawn"
+Event.OngoingPlayer
+if (HasSpawned())
+if (IsAlive())
+if (!isWorkingDummy)
+{
+    doRespawn = true;
+}
+
+rule: "[Arena] Respawn"
+Event.OngoingPlayer
+if (doRespawn)
+if (!isWorkingDummy)
+{
+    Respawn();
+    MinWait();
+    // Volleyball and initial soccer
+    if (gamemode >= 0 && gamemode <= 4)
+    {
+        define spawnAt ! = RandomValueInArray([1,2,3,4,5]);
+        Teleport(EventPlayer(), Vector(TeamOf(EventPlayer()) == Team.Team1 ? 60 : -60, 154.88, (150 - 30) + (((150 + 30) - (150 - 30))/5)*spawnAt));
+    } 
+    else
+        Teleport(EventPlayer(), origin + Vector(20, 0, 20));
+
+    SetFacing(EventPlayer(), DirectionTowards(EyePosition(), TopPolePos));
+
+    doRespawn = false;
+}
+
+
+rule: "[Arena] Create Field"
+Event.OngoingGlobal
+{
+    for(define i = 0; i < 38; i++){
+        define position1 = FirstFloorBeam[0] + Vector(0, 0, i*2);
+        define position2 = FirstFloorBeam[1] + Vector(0, 0, i*2);
+
+        CreateBeamEffect(AllPlayers(), BeamType.GrappleBeam, position1, position2, Color.Green, EffectRev.VisibleTo);
+    }
+}
+
+
+rule: "[Arena] Player leaves field, push them back out"
+Event.OngoingPlayer
+if(((ZOf(PositionOf(EventPlayer())) < 114) || (ZOf(PositionOf(EventPlayer())) > 188.3))
+    || ((XOf(PositionOf(EventPlayer())) > 60) || (XOf(PositionOf(EventPlayer())) < -60)))
+{
+    while(((ZOf(PositionOf(EventPlayer())) < 114) || (ZOf(PositionOf(EventPlayer())) > 188.3)) || ((XOf(PositionOf(EventPlayer())) > 60) || (XOf(PositionOf(EventPlayer())) < -60))){
+        ApplyImpulse(EventPlayer(), DirectionTowards(EventPlayer(), TopPolePos), 3, Relative.ToWorld, ContraryMotion.Cancel);
+        ApplyImpulse(EventPlayer(), -VelocityOf(EventPlayer()), 3, Relative.ToWorld, ContraryMotion.Incorporate);
+
+        MinWait();
+    }
+}
