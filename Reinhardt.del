@@ -61,14 +61,15 @@ define shieldIsOut(define player): IsButtonHeld(player, Button.SecondaryFire)
     && !IsUsingAbility2(player)
     && HeroOf(player) == Hero.Reinhardt;
 
+define isRamp(define player): shieldIsOut(player) && VerticalFacingAngleOf(player) < -40;
+
 rule: "Player: Shield Surf"
 Event.OngoingPlayer
 Player.Reinhardt
 if (IsUsingAbility1())
 if (IsTrueForAny(
         AllPlayers(),
-        shieldIsOut(ArrayElement())
-        && VerticalFacingAngleOf(ArrayElement()) < -40
+        isRamp(ArrayElement())
         && ArrayElement() != EventPlayer()
         && DistanceBetween(EventPlayer(), ArrayElement()) <= 5
         && IsInViewAngle(ArrayElement(), PositionOf(EventPlayer()), 100)
@@ -79,7 +80,7 @@ if (IsTrueForAny(
     ApplyImpulse(EventPlayer(), Up(), 15, Relative.ToWorld, ContraryMotion.Incorporate);
 }
 
-disabled rule: "Player: Shield HUD (maybe high server loa​d?)"
+rule: "Player: Shield HUD"
 {
     CreateHudText(
         VisibleTo  : FilteredArray(PlayersOnHero(Hero.Reinhardt), shieldIsOut(ArrayElement()) && VerticalFacingAngleOf(ArrayElement()) > -40),
@@ -101,6 +102,46 @@ disabled rule: "Player: Shield HUD (maybe high server loa​d?)"
         SortOrder  : 3,
         Spectators : Spectators.VisibleNever
     );
+}
+
+playervar define arrowAnimation = 0;
+playervar define arrowEffects;
+
+rule: "Player: Shield Arrow"
+Event.OngoingPlayer
+Player.Reinhardt
+if (isRamp(EventPlayer()))
+{
+    arrowAnimation = 0;
+    ChaseVariableAtRate(arrowAnimation, 1, 0.6, RateChaseReevaluation.None);
+    CreateBeamEffect(AllPlayers(), BeamType.GoodBeam, ArrowNodeBase(1), ArrowNodeTip(1), Color.Green);
+    arrowEffects[0] = LastCreatedEntity();
+    CreateBeamEffect(AllPlayers(), BeamType.GoodBeam, ArrowNodeBase(-1), ArrowNodeTip(-1), Color.Green);
+    arrowEffects[1] = LastCreatedEntity();
+}
+
+rule: "Player: Destroy Shield Arrow"
+Event.OngoingPlayer
+if (!isRamp(EventPlayer()))
+{
+    StopChasingVariable(arrowAnimation);
+    DestroyEffect(arrowEffects[0]);
+    DestroyEffect(arrowEffects[1]);
+}
+
+define ArrowNodeBase(define x): Local(EyePosition(), FacingDirectionOf(), 0.75, Min(arrowAnimation, 0.2) * 5 * x, Min(Max(arrowAnimation - 0.2, 0), 1) * 5 - 2.1);
+define ArrowNodeTip(define x): Local(EyePosition(), FacingDirectionOf(), 0.75, Min(Max(arrowAnimation - 0.8, 0), 0.2) * 5 * x, Min(arrowAnimation, 0.8) * 5 - 2.1);
+
+define Local(Vector pos, Vector dir, define forward, define right, define up): pos
+    + dir * forward
+    + Normalize(dir.CrossProduct(Up())) * right
+    + -Normalize(dir.CrossProduct(CrossProduct(dir, Up()))) * up;
+
+rule: "Reset arrow"
+Event.OngoingPlayer
+if (arrowAnimation == 1)
+{
+    arrowAnimation = 0;
 }
 
 rule: "Player: Start braking"

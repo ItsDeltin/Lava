@@ -235,7 +235,11 @@ define isOnWall(define player): IsOnGround(player) && AbsoluteValue(YOf(Position
 rule: "I want to die"
 if (IsButtonHeld(HostPlayer(), Button.Ultimate))
 {
-    CreateDummyBot(Hero.Reinhardt, NumberOfPlayers(Team.Team1) < 6 ? Team.Team1 : Team.Team2, -1, PositionOf(HostPlayer()), Vector());
+    CreateDummyBot(Hero.Reinhardt, NumberOfPlayers(Team.Team1) < 6 ? Team.Team1 : Team.Team2, -1, PositionOf(HostPlayer()), FacingDirectionOf(HostPlayer()));
+    LastCreatedEntity().isWorkingDummy = true;
+    StartHoldingButton(LastCreatedEntity(), Button.SecondaryFire);
+    MinWait();
+    SetFacing(LastCreatedEntity(), FacingDirectionOf(HostPlayer()), Relative.ToWorld);
 }
 
 rule: "Start"

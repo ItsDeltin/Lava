@@ -91,6 +91,9 @@ if (volleyball)
 if (!ballIsOnStand)
 if (ballReady)
 {
+    DestroyInWorldText(counterText1);
+    DestroyInWorldText(counterText2);
+
     CreateInWorldText(
         VisibleTo:AllPlayers(OppositeTeamOf(onTeam)),
         Header:detonationCounter,
