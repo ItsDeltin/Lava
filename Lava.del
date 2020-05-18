@@ -4,7 +4,9 @@ import "Score.del";
 import "Lasers.del";
 import "Volleyball.del";
 import "Maze.del";
-import "Debug Tools.del";
+import "!Debug Tools.del";
+import "!Debug Camera.del";
+import "Death Boundary.del";
 import "customGameSettings.json";
 
 globalvar define started = false;
