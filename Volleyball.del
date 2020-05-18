@@ -139,6 +139,7 @@ if (ballReady)
 if (IsOnGround(rootBall))
 if (!isCountingDown)
 if (!ballIsOnStand)
+if (!ballIsGettingCharged)
 {
     ChaseVariableAtRate(detonationCounter, 0, 1, RateChaseReevaluation.None);
     isCountingDown = true;
@@ -178,6 +179,7 @@ if (ballReady)
 if (IsOnGround(rootBall))
 if (isCountingDown)
 if (detonationCounter == 0)
+if (!ballIsGettingCharged)
 {
     PlayEffect(AllPlayers(), PlayEffect.RingExplosionSound, Color.Team1, PositionOf(rootBall), 150);
 
@@ -197,10 +199,25 @@ if (detonationCounter == 0)
         redScore++;
     }
 
-    isCountingDown = false;
     detonationTime = 10;
+    respawnBall();
+    StopVolleyballCountdown();
+}
+
+rule: "Volleyball: Reset on respawn" 1
+if (volleyball)
+if (ballReady)
+if (isCountingDown)
+if (ballIsOnStand)
+{
+    SmallMessage(AllPlayers(), "Volleyball: Reset");
+    StopVolleyballCountdown();
+}
+
+void StopVolleyballCountdown()
+{
+    isCountingDown = false;
     StopChasingVariable(detonationCounter);
     DestroyInWorldText(counterText1);
     DestroyInWorldText(counterText2);
-    respawnBall();
 }

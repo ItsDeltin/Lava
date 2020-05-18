@@ -18,6 +18,8 @@ globalvar define ballEffect !;
 globalvar define ball;
 globalvar define ballReady;
 
+define ballIsGettingCharged: HasStatus(ball1, Status.Stunned) || HasStatus(ball2, Status.Stunned);
+
 rule: "Ball: Setup"
 if (gamemode == Mode.SoccerCountdown || gamemode == Mode.Soccer || gamemode == Mode.Volleyball)
 {
@@ -154,19 +156,21 @@ if (ballSpeed() < 1)
 if (isOnWall(rootBall))
 {
     ApplyImpulse(rootBall, DirectionTowards(PositionOf(rootBall), TopPolePos() + Vector(0, 20, 0)), 15, Relative.ToWorld, ContraryMotion.Cancel);
+    MinWait();
+    LoopIfConditionIsTrue();
 }
 
 void respawnBall()
 {
-    ballIsOnStand = true;
-
     Respawn(ball1);
     Respawn(ball2);
-
     MinWait();
 
     Teleport(ball1, TopPolePos());
     Teleport(ball2, TopPolePos() + Vector(0, 1, 0));
+    MinWait();
+
+    ballIsOnStand = true;
 }
 
 rule: "Ball: On Ball Hit"
@@ -253,6 +257,15 @@ if (ballSpeed() >= 10 || IsInAir(rootBall))
     PlayEffect(FilteredArray(AllPlayers(), DistanceBetween(ArrayElement(), rootBall) > 6), PlayEffect.BadExplosion, Color.Turquoise, ballLocation(), 0.3);
     MinWait();
     LoopIfConditionIsTrue();
+}
+
+rule: "Ball: Alternative Knock Off Stand"
+if (ball)
+if (ballIsOnStand)
+if (DistanceBetween(ball1, TopPolePos()) > 1 && DistanceBetween(ball2, TopPolePos()) > 1)
+{
+    Wait(0.5, WaitBehavior.AbortWhenFalse);
+    ballIsOnStand = false;
 }
 
 globalvar define lastCrutchAction ! = 0;
