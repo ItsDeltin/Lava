@@ -9,6 +9,10 @@ globalvar define tpTo;
 globalvar define rootBall;
 
 globalvar define thrower = null;
+// 0 = hammer
+// 1 = bump
+// 2 = charge
+// 3 = fire
 globalvar define throwType = 0;
 
 globalvar define blueScoreText !;
@@ -202,6 +206,13 @@ Event.OnDamageTaken
 if (isBall)
 if (EventDamage() == 95)
 {
+    if (!ballIsOnStand && !ballOnGround)
+    {
+        ApplyImpulse(rootBall, Attacker().fireStrikeDirection, SpeedOf(rootBall) * 3, Relative.ToWorld, ContraryMotion.Cancel);
+        thrower = Attacker();
+        throwType = 3;
+    }
+
     fuse = 0;
     ChaseVariableOverTime(fuse, 2, 3, TimeChaseReevaluation.None);
 

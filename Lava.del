@@ -36,18 +36,18 @@ rule: "OSTW"
     CreateHudText(
         VisibleTo: AllPlayers(),
         Text: "Created by Deltin with OSTW",
-        TextColor: Color.SkyBlue,
-        Location: Location.Right,
+        TextColor: Color.Orange,
+        Location: Location.Left,
         Spectators: Spectators.VisibleAlways,
-        SortOrder: -2
+        SortOrder: -101
     );
     CreateHudText(
         VisibleTo: AllPlayers(),
         Subheader: "https://github.com/ItsDeltin/Overwatch-Script-To-Workshop",
         SubheaderColor: Color.Blue,
-        Location: Location.Right,
+        Location: Location.Left,
         Spectators: Spectators.VisibleAlways,
-        SortOrder: -1
+        SortOrder: -100
     );
 }
 

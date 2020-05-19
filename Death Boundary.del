@@ -8,11 +8,9 @@ if (HasSpawned())
 if (IsAlive())
 if (!IsInSpawnRoom())
 {
-    MinWait();
-    AbortIfConditionIsFalse();
     SmallMessage(AllPlayers(), <"<0> hit boundary at <1>, speed: <2>", EventPlayer(), PositionOf(EventPlayer()), SpeedOf(EventPlayer())>);
 
-    Teleport(EventPlayer(), PositionOf(EventPlayer()) * Vector(1, 0, 1) + Vector(0, 170.5, 0));
+    Teleport(EventPlayer(), PositionOf(EventPlayer()) * Vector(1, 0, 1) + Vector(0, 169.5, 0));
     ApplyImpulse(EventPlayer(), Down(), 0.001, Relative.ToWorld, ContraryMotion.Cancel);
 
     if (isBall && EventPlayer() != rootBall)
@@ -21,5 +19,6 @@ if (!IsInSpawnRoom())
         ApplyImpulse(rootBall, Down(), 0.001, Relative.ToWorld, ContraryMotion.Cancel);
     }
 
+    MinWait();
     LoopIfConditionIsTrue();
 }

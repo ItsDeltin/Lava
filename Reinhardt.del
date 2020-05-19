@@ -1,5 +1,4 @@
 import "Lava.del";
-import "Ball.del";
 
 playervar define chargeStart = null;
 
@@ -141,8 +140,8 @@ if (!isRamp(EventPlayer()))
     DestroyEffect(arrowEffects[3]);
 }
 
-define ArrowNodeBase(define f, define x): Local(EyePosition(), FacingDirectionOf(), 0.75, Min(f, 0.2) * 5 * x, Min(Max(f - 0.2, 0), 1) * 5 - 2.1);
-define ArrowNodeTip(define f, define x): Local(EyePosition(), FacingDirectionOf(), 0.75, Min(Max(f - 0.8, 0), 0.2) * 5 * x, Min(f, 0.8) * 5 - 2.1);
+define ArrowNodeBase(define f, define x): Local(EyePosition(), FacingDirectionOf(), 0.75, Min(f, 0.2) * 5 * x, Min(Max(f - 0.2, 0), 1) * 5 - 2.25);
+define ArrowNodeTip(define f, define x): Local(EyePosition(), FacingDirectionOf(), 0.75, Min(Max(f - 0.8, 0), 0.2) * 5 * x, Min(f, 0.8) * 5 - 2.25);
 
 define Local(Vector pos, Vector dir, define forward, define right, define up): pos
     + dir * forward
@@ -337,4 +336,13 @@ Player.Reinhardt
     Wait(10, WaitBehavior.RestartWhenTrue);
     StartHealOverTime(EventPlayer(), null, 9999, 100);
     healOverTime = LastHealOverTime();
+}
+
+playervar define fireStrikeDirection!;
+
+rule: "Fire strike direction"
+Player.Reinhardt
+if (IsUsingAbility2())
+{
+    fireStrikeDirection = FacingDirectionOf();
 }
