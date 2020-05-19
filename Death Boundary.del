@@ -7,6 +7,7 @@ if (HasSpawned())
 if (IsAlive())
 if (!IsInSpawnRoom())
 {
+    SmallMessage(AllPlayers(), <"<0> hit boundary at <1>", EventPlayer(), PositionOf(EventPlayer())>);
     Teleport(EventPlayer(), PositionOf(EventPlayer()) * Vector(1, 0, 1) + Vector(0, 170.5, 0));
     ApplyImpulse(EventPlayer(), Down(), 0.001, Relative.ToWorld, ContraryMotion.Cancel);
     MinWait();
