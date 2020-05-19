@@ -22,7 +22,8 @@
         },
         "Skirmish": {
             "Enabled": true,
-            "Enabled Maps": ["Lijiang Tower (Lunar New Year)", "Lijiang Tower"]
+            "Enabled Maps": ["Lijiang Tower (Lunar New Year)", "Lijiang Tower"],
+            "Limit Valid Control Points": "First"
         }
     },
     "Lobby": {
