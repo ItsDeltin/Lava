@@ -13,8 +13,7 @@ globalvar define detonationCounter;
 globalvar define detonationTime;
 globalvar define isCountingDown;
 globalvar define onTeam;
-globalvar define counterText1 !;
-globalvar define counterText2 !;
+globalvar define counterTexts;
 globalvar define tutorialText !;
 
 rule: "Volleyball: Setup"
@@ -80,8 +79,7 @@ if (gamemode != 3)
     DestroyEffect(laser1Effect);
     DestroyEffect(laser2Effect);
     DestroyEffect(laser3Effect);
-    DestroyInWorldText(counterText1);
-    DestroyInWorldText(counterText2);
+    DestroyCounterText();
     DestroyHudText(tutorialText);
     StopChasingVariable(detonationCounter);
 }
@@ -91,8 +89,7 @@ if (volleyball)
 if (!ballIsOnStand)
 if (ballReady)
 {
-    DestroyInWorldText(counterText1);
-    DestroyInWorldText(counterText2);
+    DestroyCounterText();
 
     CreateInWorldText(
         VisibleTo:AllPlayers(OppositeTeamOf(onTeam)),
@@ -103,10 +100,10 @@ if (ballReady)
         TextColor:Color.White,
         Spectators:Spectators.VisibleAlways
     );
-    counterText1 = LastTextID();
+    counterTexts[0] = LastTextID();
 
     CreateInWorldText(
-        VisibleTo:AllPlayers(onTeam),
+        VisibleTo: FilteredArray(AllPlayers(onTeam), !ballIsGettingCharged && ballOnGround),
         Header:<"<1> <0> <1>", detonationCounter, IconString(Icon.Warning)>,
         Position:PositionOf(rootBall) + Vector(0, 1.5, 0),
         Scale:2,
@@ -114,10 +111,34 @@ if (ballReady)
         TextColor:Color.Red,
         Spectators:Spectators.VisibleAlways
     );
-    counterText2 = LastTextID();
+    counterTexts[1] = LastTextID();
+
+    CreateInWorldText(
+        VisibleTo: FilteredArray(AllPlayers(onTeam), ballIsGettingCharged || !ballOnGround),
+        Header:<"<1> <0> <1>", detonationCounter, IconString(Icon.Warning)>,
+        Position:PositionOf(rootBall) + Vector(0, 1.5, 0),
+        Scale:2,
+        Clipping:Clipping.ClipAgainstSurfaces,
+        TextColor:Color.Orange,
+        Spectators:Spectators.VisibleAlways
+    );
+    counterTexts[2] = LastTextID();
 }
 
 playervar define blueSide = true;
+
+// For some reason, IsOnGround(rootBall) isn't reevaluating
+globalvar define ballOnGround;
+rule: "e"
+if (IsOnGround(rootBall))
+{
+    ballOnGround = true;
+}
+rule: "e"
+if (IsInAir(rootBall))
+{
+    ballOnGround = false;
+}
 
 rule: "Volleyball: Kill players touching net"
 Event.OngoingPlayer
@@ -218,6 +239,12 @@ void StopVolleyballCountdown()
 {
     isCountingDown = false;
     StopChasingVariable(detonationCounter);
-    DestroyInWorldText(counterText1);
-    DestroyInWorldText(counterText2);
+    DestroyCounterText();
+}
+
+void DestroyCounterText() "Destroy Counter Text"
+{
+    DestroyInWorldText(counterTexts[0]);
+    DestroyInWorldText(counterTexts[1]);
+    DestroyInWorldText(counterTexts[2]);
 }
