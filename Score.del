@@ -60,19 +60,24 @@ if (IsCommunicating(HostPlayer(), Communication.VoiceLineUp))
 globalvar define blueGoalSize;
 globalvar define redGoalSize;
 define considerBallPos: PositionOf(rootBall);
-define goalMod: Max(1 - (DistanceBetween(rootBall, blueNearest) / 15), 0) * 10;
+define goalMod(define goalPos): Max(1 - (DistanceBetween(rootBall, goalPos) / 15), 0) * 10;
 Vector nearestPlanePoint(define pointPosition, define planePosition, define planeNormal): pointPosition + (-DotProduct(planeNormal, pointPosition - planePosition) / DotProduct(planeNormal, planeNormal)) * planeNormal;
-Vector bluePos: Vector(115.69, 156.68, 148.52); // 103.43
-Vector blueNormal: Vector(-0.95, 0.31, -0.02);
 Vector rightOf(Vector dir): Normalize(dir.CrossProduct(Up()));
 Vector upOf(Vector dir): Normalize(dir.CrossProduct(dir.CrossProduct(Up())));
-Vector blueNearest: nearestPlanePoint(considerBallPos, bluePos, blueNormal);
 Vector signedDistance(define pointPosition, define planePoint, define planeNormal): DotProduct(planeNormal, (pointPosition - planePoint));
+// blue
+Vector blueNearest: nearestPlanePoint(considerBallPos, bluePos, blueNormal);
+Vector bluePos: Vector(115.69, 156.68, 148.52);
+Vector blueNormal: Vector(-0.90, 0.43, 0);
+// red
+Vector redNearest: nearestPlanePoint(considerBallPos, redPos, redNormal);
+Vector redPos: Vector(-115.69, 156.68, 148.52);
+Vector redNormal: Vector(0.90, 0.43, 0);
 
-define g_down(define p, define d): p + upOf(d) * blueGoalSize;
-define g_right(define p, define d): p - rightOf(d) * blueGoalSize;
-define g_up(define p, define d): p - upOf(d) * blueGoalSize;
-define g_left(define p, define d): p + rightOf(d) * blueGoalSize;
+define g_down(define p, define d, define size): p + upOf(d) * size;
+define g_right(define p, define d, define size): p - rightOf(d) * size;
+define g_up(define p, define d, define size): p - upOf(d) * size;
+define g_left(define p, define d, define size): p + rightOf(d) * size;
 
 define MakeBeam(Color color, ref define s, ref define e)
 {
@@ -80,28 +85,31 @@ define MakeBeam(Color color, ref define s, ref define e)
     return LastCreatedEntity();
 }
 
-void MakeBeams(Color color, ref define nearest, ref define normal)
+void MakeBeams(Color color, ref define nearest, ref define normal, ref define size)
 {
-    MakeBeam(color, g_up(nearest, normal), g_right(nearest, normal));
-    MakeBeam(color, g_right(nearest, normal), g_down(nearest, normal));
-    MakeBeam(color, g_down(nearest, normal), g_left(nearest, normal));
-    MakeBeam(color, g_left(nearest, normal), g_up(nearest, normal));
+    MakeBeam(color, g_up(nearest, normal, size), g_right(nearest, normal, size));
+    MakeBeam(color, g_right(nearest, normal, size), g_down(nearest, normal, size));
+    MakeBeam(color, g_down(nearest, normal, size), g_left(nearest, normal, size));
+    MakeBeam(color, g_left(nearest, normal, size), g_up(nearest, normal, size));
 }
 
 void ChaseGoalEffects() "Chase Goal Effects"
 {
     blueGoalSize = 0;
-    ChaseVariableAtRate(blueGoalSize, goalMod, 10, RateChaseReevaluation.DestinationAndRate);
+    redGoalSize = 0;
+    ChaseVariableAtRate(blueGoalSize, goalMod(blueNearest), 10, RateChaseReevaluation.DestinationAndRate);
+    ChaseVariableAtRate(redGoalSize, goalMod(redNearest), 10, RateChaseReevaluation.DestinationAndRate);
 }
 
 rule: "Football: Spawn goals"
 if (gamemode == Mode.SoccerCountdown || gamemode == Mode.Soccer)
 {
     ChaseGoalEffects();
-    MakeBeams(Color.Team1, blueNearest, blueNormal);
+    MakeBeams(Color.Team1, blueNearest, blueNormal, blueGoalSize);
+    MakeBeams(Color.Team2, redNearest, redNormal, redGoalSize);
 
     // CreateEffect(AllPlayers(), Effect.Orb, Color.Yellow, blueNearest, 0.5, EffectRev.VisibleToPositionAndRadius); // For debugging
-    // CreateHudText(AllPlayers(), <"SD: <0>, BR: <1>, GAMEMODE: <2>", signedDistance(considerBallPos, bluePos, blueNormal) < 0, ballReady, gamemode == Mode.Soccer>);
+    // CreateEffect(AllPlayers(), Effect.Orb, Color.Yellow, redNearest, 0.5, EffectRev.VisibleToPositionAndRadius); // For debugging
 }
 
 rule: "Football: Destroy goals"
@@ -115,16 +123,22 @@ if (gamemode != Mode.Soccer)
 rule: "Football: Blue score"
 if (ballReady)
 if (gamemode == Mode.Soccer)
-if (DistanceBetween(rootBall, redGoal()) <= 13)
+if (signedDistance(considerBallPos, redPos, redNormal) < 0)
 {
-    PlayEffect(AllPlayers(), PlayEffect.RingExplosion, Color.Team1, redGoal(), 100);
-    PlayEffect(AllPlayers(), PlayEffect.GoodExplosion, Color.Team1, redGoal(), 10);
-    PlayEffect(AllPlayers(Team.Team1), PlayEffect.BuffExplosionSound, Color.White, redGoal(), 1000);
-    PlayEffect(AllPlayers(Team.Team2), PlayEffect.DebuffImpactSound, Color.White, redGoal(), 1000);
+    PlayEffect(AllPlayers(Team.Team1), PlayEffect.BuffExplosionSound, Color.White, blueGoal(), 1000);
+    PlayEffect(AllPlayers(Team.Team2), PlayEffect.DebuffImpactSound, Color.White, blueGoal(), 1000);
 
     blueScore++;
     totalScore++;
+
+    ChaseVariableOverTime(redGoalSize, 0, 0.35, TimeChaseReevaluation.None);
+    Wait(0.35);
+    PlayEffect(AllPlayers(), PlayEffect.RingExplosion, Color.Team2, blueNearest, 100);
+
     messageThrower(Team.Team1);
+
+    Wait(5);
+    ChaseGoalEffects();
 }
 
 rule: "Football: Red score"
@@ -132,8 +146,6 @@ if (ballReady)
 if (gamemode == Mode.Soccer)
 if (signedDistance(considerBallPos, bluePos, blueNormal) < 0)
 {
-    // PlayEffect(AllPlayers(), PlayEffect.RingExplosion, Color.Team2, blueGoal(), 100);
-    // PlayEffect(AllPlayers(), PlayEffect.GoodExplosion, Color.Team2, blueGoal(), 10);
     PlayEffect(AllPlayers(Team.Team2), PlayEffect.BuffExplosionSound, Color.White, blueGoal(), 1000);
     PlayEffect(AllPlayers(Team.Team1), PlayEffect.DebuffImpactSound, Color.White, blueGoal(), 1000);
 
@@ -142,7 +154,7 @@ if (signedDistance(considerBallPos, bluePos, blueNormal) < 0)
 
     ChaseVariableOverTime(blueGoalSize, 0, 0.35, TimeChaseReevaluation.None);
     Wait(0.35);
-    PlayEffect(AllPlayers(), PlayEffect.RingExplosion, Color.Team2, blueNearest, 100);
+    PlayEffect(AllPlayers(), PlayEffect.RingExplosion, Color.Team2, redNearest, 100);
 
     messageThrower(Team.Team2);
 
