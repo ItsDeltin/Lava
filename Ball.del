@@ -184,6 +184,8 @@ void respawnBall() "Respawn Ball"
     Teleport(ball2, TopPolePos() + Vector(0, 1, 0));
     MinWait();
 
+    ApplyImpulse([ball1, ball2], Vector(1, 1, 1), 0.0001, Relative.ToWorld, ContraryMotion.Cancel);
+
     ballIsOnStand = true;
     ballReady = true;
 }
