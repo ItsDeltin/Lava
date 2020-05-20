@@ -191,7 +191,7 @@ void OuterWalls()
         BeamType.BadBeam,
         Vector(108.08, 158.44, 213.35),
         Vector(107.07, 158.44, 63.61),
-        Color.Team1,
+        Color.Team2,
         EffectRev.VisibleTo
     );
     ModifyVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
@@ -201,7 +201,7 @@ void OuterWalls()
         BeamType.BadBeam,
         Vector(115.69, 158.44, 213.35),
         Vector(115.69, 158.44, 63.61),
-        Color.Team1,
+        Color.Team2,
         EffectRev.VisibleTo
     );
     ModifyVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
@@ -212,7 +212,7 @@ void OuterWalls()
         BeamType.BadBeam,
         Vector(-109.08, 158.44, 65.06),
         Vector(-108.07, 158.44, 214.81),
-        Color.Team2,
+        Color.Team1,
         EffectRev.VisibleTo
     );
     ModifyVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
@@ -222,7 +222,7 @@ void OuterWalls()
         BeamType.BadBeam,
         Vector(-118.45, 158.44, 65.06),
         Vector(-118.45, 158.44, 214.81),
-        Color.Team2,
+        Color.Team1,
         EffectRev.VisibleTo
     );
     ModifyVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
