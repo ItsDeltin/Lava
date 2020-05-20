@@ -68,7 +68,7 @@ Vector bluePos: Vector(115.69, 156.68, 148.52);
 Vector blueNormal: Vector(-0.90, 0.43, 0);
 // red
 Vector redNearest: nearestPlanePoint(considerBallPos, redPos, redNormal);
-Vector redPos: Vector(-115.69, 156.68, 148.52);
+Vector redPos: Vector(-118.45, 156.68, 148.52);
 Vector redNormal: Vector(0.90, 0.43, 0);
 
 define g_down(define p, define d, define size): p + upOf(d) * size;
