@@ -94,16 +94,16 @@ void ChaseGoalEffects() "Chase Goal Effects"
 {
     blueGoalSize = 0;
     redGoalSize = 0;
-    ChaseVariableAtRate(blueGoalSize, goalMod(blueNearest), 10, RateChaseReevaluation.DestinationAndRate);
-    ChaseVariableAtRate(redGoalSize, goalMod(redNearest), 10, RateChaseReevaluation.DestinationAndRate);
+    ChaseVariableAtRate(blueGoalSize, goalMod(blueNearest), 30, RateChaseReevaluation.DestinationAndRate);
+    ChaseVariableAtRate(redGoalSize, goalMod(redNearest), 30, RateChaseReevaluation.DestinationAndRate);
 }
 
 rule: "Football: Spawn goals"
 if (gamemode == Mode.SoccerCountdown || gamemode == Mode.Soccer)
 {
     ChaseGoalEffects();
-    MakeBeams(Color.Team1, blueNearest, blueNormal, blueGoalSize, 0);
-    MakeBeams(Color.Team2, redNearest, redNormal, redGoalSize, 4);
+    MakeBeams(Color.Team2, blueNearest, blueNormal, blueGoalSize, 0);
+    MakeBeams(Color.Team1, redNearest, redNormal, redGoalSize, 4);
 
     // CreateEffect(AllPlayers(), Effect.Orb, Color.Yellow, blueNearest, 0.5, EffectRev.VisibleToPositionAndRadius); // For debugging
     // CreateEffect(AllPlayers(), Effect.Orb, Color.Yellow, redNearest, 0.5, EffectRev.VisibleToPositionAndRadius); // For debugging
@@ -139,49 +139,53 @@ if (signedDistance(considerBallPos, bluePos, blueNormal) < 0)
     });
 }
 
-void Score(Color teamColor, Team team, define nearest, BlockLambda score)
+void Score(Color teamColor, ref define team, define nearest, BlockLambda score)
 {
     totalScore++;
     score.Invoke();
 
     Wait(0.35);
+
     PlayEffect(AllPlayers(), PlayEffect.RingExplosion, teamColor, nearest, 100);
     PlayEffect(AllPlayers(team), PlayEffect.BuffExplosionSound, Color.White, nearest, 1000);
     PlayEffect(AllPlayers(OppositeTeamOf(team)), PlayEffect.DebuffImpactSound, Color.White, nearest, 1000);
+    messageThrower(team, teamColor);
 
-    messageThrower(team);
+    SetSlowMotion(25);
+    Wait(1);
+    SetSlowMotion(100);
 
-    Wait(5);
+    Wait(3);
     ChaseGoalEffects();
 }
 
-void messageThrower(define team)
+void messageThrower(ref define team, Color teamColor)
 {
     scoreboardOrder--;
     if (TeamOf(thrower) != team)
     {
         BigMessage(AllPlayers(), <"Wrong goal, <0>!", thrower>);
-        ThrowHud(Color.Red, IconString(Icon.X));
+        ThrowHud(teamColor, IconString(Icon.X));
     }
     else if (throwType == 0)
     {
         BigMessage(AllPlayers(), <"<0> scored a hammer shot!", thrower>);
-        ThrowHud(Color.White, AbilityIconString(Hero.Reinhardt, ButtonValue(Button.PrimaryFire)));
+        ThrowHud(teamColor, AbilityIconString(Hero.Reinhardt, ButtonValue(Button.PrimaryFire)));
     }
     else if (throwType == 1)
     {
         BigMessage(AllPlayers(), <"<0> scored a bump shot!", thrower>);
-        ThrowHud(Color.Purple, AbilityIconString(Hero.Doomfist, ButtonValue(Button.Ability1)));
+        ThrowHud(teamColor, AbilityIconString(Hero.Doomfist, ButtonValue(Button.Ability1)));
     }
     else if (throwType == 2)
     {
         BigMessage(AllPlayers(), <"<0> scored a charge shot!", thrower>);
-        ThrowHud(Color.Yellow, AbilityIconString(Hero.Reinhardt, ButtonValue(Button.Ability1)));
+        ThrowHud(teamColor, AbilityIconString(Hero.Reinhardt, ButtonValue(Button.Ability1)));
     }
     else if (throwType == 3)
     {
         BigMessage(AllPlayers(), <"<0> scored a fire shot!", thrower>);
-        ThrowHud(Color.Orange, AbilityIconString(Hero.Reinhardt, ButtonValue(Button.Ability2)));
+        ThrowHud(teamColor, AbilityIconString(Hero.Reinhardt, ButtonValue(Button.Ability2)));
     }
 }
 
