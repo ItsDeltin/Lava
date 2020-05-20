@@ -230,7 +230,7 @@ if (EventDamage() == 95)
 
     Damage(inExplosionRange, Attacker(), 200);
     inExplosionRange.knockedFrom = ballLocation();
-    inExplosionRange.force = 30;
+    inExplosionRange.force = 20;
     inExplosionRange.heightOffset = 1.5;
 }
 define ExplosionRange(): 10;
