@@ -7,17 +7,28 @@ if (EyePosition(EventPlayer()).Y < 176)
 if (HasSpawned())
 if (IsAlive())
 if (!IsInSpawnRoom())
+if (!isBall)
 {
     SmallMessage(AllPlayers(), <"<0> hit boundary at <1>, speed: <2>", EventPlayer(), PositionOf(EventPlayer()), SpeedOf(EventPlayer())>);
 
     Teleport(EventPlayer(), PositionOf(EventPlayer()) * Vector(1, 0, 1) + Vector(0, 169.5, 0));
     ApplyImpulse(EventPlayer(), Down(), 0.001, Relative.ToWorld, ContraryMotion.Cancel);
 
-    if (isBall && EventPlayer() != rootBall)
-    {
-        Teleport(rootBall, PositionOf(rootBall) * Vector(1, 0, 1) + Vector(0, 168.5, 0));
-        ApplyImpulse(rootBall, Down(), 0.001, Relative.ToWorld, ContraryMotion.Cancel);
-    }
+    MinWait();
+    LoopIfConditionIsTrue();
+}
+
+rule: "Ceiling Bounce"
+Event.OngoingPlayer
+if (EyePosition(EventPlayer()).Y > 171)
+if (EyePosition(EventPlayer()).Y < 176)
+if (HasSpawned())
+if (IsAlive())
+if (!IsInSpawnRoom())
+if (rootBall == EventPlayer())
+{
+    Teleport(EventPlayer(), PositionOf(EventPlayer()) * Vector(1, 0, 1) + Vector(0, 169, 0));
+    ApplyImpulse(EventPlayer(), Down(), 0.001, Relative.ToWorld, ContraryMotion.Cancel);
 
     MinWait();
     LoopIfConditionIsTrue();
