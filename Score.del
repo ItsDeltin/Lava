@@ -22,9 +22,8 @@ if (gamemode == 1)
 
     InitSpawns();
 
-    AllPlayers().doRespawn = true;
     respawnBall();
-    for (define i = 5; i > 0; i--)
+    for (define i = 3; i > 0; i--)
     {
         SmallMessage(AllPlayers(), i);
         Wait(1);
@@ -43,6 +42,7 @@ void InitSpawns()
         Teleport(PlayersInSlot(i, Team.Team1), Vector(60, 154.88, (150 - 30) + (((150 + 30) - (150 - 30))/5)*i));
         Teleport(PlayersInSlot(i, Team.Team2), Vector(-60, 154.88, (150 - 30) + (((150 + 30) - (150 - 30))/5)*i));
     }
+    Resurrect(AllPlayers());
 }
 
 rule: "Football: Start/Stop"
@@ -161,7 +161,7 @@ void Score(Color teamColor, ref define team, define nearest, BlockLambda score)
 
 void messageThrower(ref define team, Color teamColor)
 {
-    scoreboardOrder--;
+    scoreboardOrder++;
     if (TeamOf(thrower) != team)
     {
         BigMessage(AllPlayers(), <"Wrong goal, <0>!", thrower>);
