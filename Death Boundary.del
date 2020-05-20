@@ -20,12 +20,13 @@ if (!isBall)
 
 rule: "Ceiling Bounce"
 Event.OngoingPlayer
-if (EyePosition(EventPlayer()).Y > 171)
-if (EyePosition(EventPlayer()).Y < 176)
+if (ballReady)
+if (rootBall == EventPlayer())
 if (HasSpawned())
 if (IsAlive())
 if (!IsInSpawnRoom())
-if (rootBall == EventPlayer())
+if (EyePosition(EventPlayer()).Y > 171)
+if (EyePosition(EventPlayer()).Y < 176)
 {
     Teleport(EventPlayer(), PositionOf(EventPlayer()) * Vector(1, 0, 1) + Vector(0, 169, 0));
     ApplyImpulse(EventPlayer(), Down(), 0.001, Relative.ToWorld, ContraryMotion.Cancel);
