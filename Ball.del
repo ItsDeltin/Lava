@@ -146,10 +146,14 @@ define isStunned(define player): HasStatus(player, Status.Stunned);
 
 rule: "Ball: Respawn ball"
 if (ball)
+if (HasSpawned(ball1))
+if (HasSpawned(ball2))
 if (IsDead(ball1) || IsDead(ball2) || YOf(PositionOf(rootBall)) < 140 || ZOf(PositionOf(rootBall)) > 217)
 {
     SmallMessage(AllPlayers(), "Respawning Ball");
-    respawnBall();   
+    respawnBall();
+    MinWait();
+    LoopIfConditionIsTrue();
 }
 
 rule: "Ball: Bounce back ball"
@@ -164,8 +168,14 @@ if (isOnWall(rootBall))
     LoopIfConditionIsTrue();
 }
 
-void respawnBall()
+void respawnBall() "Respawn Ball"
 {
+    ballReady = false;
+
+    // Stop nearby charging reinhardts nearby
+    CancelPrimaryAction(FilteredArray(AllPlayers(), HeroOf(ArrayElement()) == Hero.Reinhardt && IsUsingAbility1(ArrayElement()) && DistanceBetween(ArrayElement(), rootBall) < 3));
+    MinWait();
+
     Respawn(ball1);
     Respawn(ball2);
     MinWait();
@@ -175,6 +185,7 @@ void respawnBall()
     MinWait();
 
     ballIsOnStand = true;
+    ballReady = true;
 }
 
 rule: "Ball: On Ball Hit"
