@@ -117,6 +117,24 @@ if (DistanceBetween(rootBall, blueGoal()) <= 13)
     messageThrower(Team.Team2);
 }
 
+
+// define Flatten(Vector vec): vec*Vector(1, 0, 1);
+// define FootballDistCalc(define ballPosition, define playerPosition): Min(DistanceBetween(Flatten(ballPosition), Flatten(playerPosition)), 50);
+
+// define footballSlope: (175 - 100) / 50;
+// define FootballMoveSpeed(define ballPosition, define playerPosition): 100 + footballSlope * (FootballDistCalc(ballPosition, playerPosition));
+
+// rule: "Football: Increase player movement speed as distance from ball increases"
+// Event.OngoingPlayer
+// if(gamemode == 2){
+//     while(gamemode == 2){
+//         SetMoveSpeed(EventPlayer(), FootballMoveSpeed(PositionOf(rootBall), PositionOf(EventPlayer())));
+//         Wait(0.032);
+//     }
+// }
+
+
+
 void messageThrower(define team)
 {
     if (TeamOf(thrower) != team)

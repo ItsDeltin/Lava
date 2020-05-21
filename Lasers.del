@@ -1,15 +1,15 @@
 import "Lava.del";
 
-rule: "Lasers: Start/Stop"
-if (IsCommunicating(HostPlayer(), Communication.VoiceLineLeft))
-{
-    if (gamemode != Mode.Lasers)
-    {
-        gamemode = Mode.Lasers;
-        rotateLasers = true;
-    }
-    else gamemode = Mode.Waiting;
-}
+// rule: "Lasers: Start/Stop"
+// if (IsCommunicating(HostPlayer(), Communication.VoiceLineLeft))
+// {
+//     if (gamemode != Mode.Lasers)
+//     {
+//         gamemode = Mode.Lasers;
+//         rotateLasers = true;
+//     }
+//     else gamemode = Mode.Waiting;
+// }
 
 globalvar define lasersReady = false;
 

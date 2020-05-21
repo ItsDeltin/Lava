@@ -1,3 +1,7 @@
+globalvar {
+    0,1,2,3,4,5,6,7,8,9,10,11,12,13,14
+}
+
 import "Reinhardt.del";
 import "Ball.del";
 import "Score.del";
@@ -8,6 +12,7 @@ import "!Debug Tools.del";
 import "!Debug Camera.del";
 import "Death Boundary.del";
 import "customGameSettings.json";
+
 
 globalvar define started = false;
 globalvar define origin = Vector(-0.18, 154.88, 60);
@@ -28,7 +33,8 @@ enum Mode
     Soccer,
     Volleyball,
     Lasers,
-    Maze
+    Maze,
+    Dodgeball
 }
 
 rule: "OSTW"
@@ -67,7 +73,7 @@ if (!isWorkingDummy)
 {
     Respawn();
     MinWait();
-    // Volleyball and initial soccer
+    // Volleyball, soccer, Dodgeball
     if (gamemode >= 0 && gamemode <= 3)
     {
         define spawnAt ! = RandomValueInArray([1,2,3,4,5]);
@@ -77,8 +83,12 @@ if (!isWorkingDummy)
     else if (gamemode == 5)
         Teleport(EventPlayer(), randomMazeSpot());
     // No gamemode
-    else
-        Teleport(EventPlayer(), origin + Vector(20, 0, 20));
+    else if (gamemode == 6)
+        Teleport(EventPlayer())
+    else{
+        define spawnAt ! = RandomValueInArray([1,2,3,4,5]);
+        Teleport(EventPlayer(), Vector(TeamOf(EventPlayer()) == Team.Team1 ? 28 : -28, 154.88, (150 + 120) + (((150 + 120) - (150 + 120))/5)*spawnAt))
+    }
 
     SetFacing(EventPlayer(), DirectionTowards(EyePosition(), TopPolePos()));
     EventPlayer().blueSide = TeamOf() == Team.Team1;
