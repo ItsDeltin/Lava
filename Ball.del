@@ -25,7 +25,7 @@ globalvar define ballReady;
 define ballIsGettingCharged: HasStatus(ball1, Status.Stunned) || HasStatus(ball2, Status.Stunned);
 
 rule: "Ball: Setup"
-if (gamemode == Mode.SoccerCountdown || gamemode == Mode.Soccer || gamemode == Mode.Volleyball)
+if (gamemode == Mode.Soccer || gamemode == Mode.Volleyball)
 {
     ball = true;
     // Blue's score text
@@ -81,7 +81,6 @@ if (gamemode == Mode.SoccerCountdown || gamemode == Mode.Soccer || gamemode == M
 }
 
 rule: "Ball: Clean up"
-if (gamemode != Mode.SoccerCountdown)
 if (gamemode != Mode.Soccer)
 if (gamemode != Mode.Volleyball)
 {

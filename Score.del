@@ -11,12 +11,12 @@ if (totalScore != 0)
 if (totalScore % 5 == 0)
 {
     Wait(5);
-    if (gamemode == Mode.Volleyball) gamemode = Mode.SoccerCountdown;
+    if (gamemode == Mode.Volleyball) gamemode = Mode.Soccer;
     else gamemode = Mode.Volleyball;
 }
 
 rule: "Football: Countdown"
-if (gamemode == 1)
+if (gamemode == Mode.Soccer)
 {
     AllPlayers().inputEnabled = false;
 
@@ -30,8 +30,6 @@ if (gamemode == 1)
     }
     BigMessage(AllPlayers(), "Start!");
     AllPlayers().inputEnabled = true;
-
-    gamemode = 2;
 }
 
 void InitSpawns()
@@ -48,9 +46,8 @@ void InitSpawns()
 rule: "Football: Start/Stop"
 if (IsCommunicating(HostPlayer(), Communication.VoiceLineUp))
 {
-    if (gamemode != 1)
-        gamemode = 1;
-    else gamemode = 0;
+    if (gamemode != Mode.Soccer) gamemode = Mode.Soccer;
+    else gamemode = Mode.Waiting;
 }
 
 
@@ -99,7 +96,7 @@ void ChaseGoalEffects() "Chase Goal Effects"
 }
 
 rule: "Football: Spawn goals"
-if (gamemode == Mode.SoccerCountdown || gamemode == Mode.Soccer)
+if (gamemode == Mode.Soccer)
 {
     ChaseGoalEffects();
     MakeBeams(Color.Team2, blueNearest, blueNormal, blueGoalSize, 0);
@@ -110,7 +107,6 @@ if (gamemode == Mode.SoccerCountdown || gamemode == Mode.Soccer)
 }
 
 rule: "Football: Destroy goals"
-if (gamemode != Mode.SoccerCountdown)
 if (gamemode != Mode.Soccer)
 {
     foreach (define effect in goalEffects)
