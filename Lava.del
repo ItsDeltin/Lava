@@ -1,11 +1,9 @@
 import "Reinhardt.del";
 import "Ball.del";
 import "Score.del";
-import "Lasers.del";
 import "Volleyball.del";
-import "Maze.del";
-import "!Debug Tools.del";
-import "!Debug Camera.del";
+// import "!Debug Tools.del";
+// import "!Debug Camera.del";
 import "Death Boundary.del";
 import "customGameSettings.json";
 
@@ -26,9 +24,6 @@ enum Mode
     Waiting,
     SoccerCountdown,
     Soccer,
-    Volleyball,
-    Lasers,
-    Maze
 }
 
 rule: "OSTW"
@@ -73,9 +68,6 @@ if (!isWorkingDummy)
         define spawnAt ! = RandomValueInArray([1,2,3,4,5]);
         Teleport(EventPlayer(), Vector(TeamOf(EventPlayer()) == Team.Team1 ? 60 : -60, 154.88, (150 - 30) + (((150 + 30) - (150 - 30))/5)*spawnAt));
     } 
-    // Maze
-    else if (gamemode == 5)
-        Teleport(EventPlayer(), randomMazeSpot());
     // No gamemode
     else
         Teleport(EventPlayer(), origin + Vector(20, 0, 20));
@@ -91,6 +83,9 @@ define columnCount(): 28;
 
 globalvar define arenaEffects = [];
 
+define cliffBlue: Vector(107.07, 154.88, 63.61);
+define cliffRed: Vector(-109.08, 154.88, 65.06);
+define towerBlue: Vector(108.08, 154.88, 213.35);
 rule: "Setup Arena (Disable when using Maze)"
 if (CurrentGameMode() == GameMode.Skirmish)
 {
