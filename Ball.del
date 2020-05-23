@@ -169,11 +169,9 @@ if (isOnWall(rootBall))
 
 void respawnBall() "Respawn Ball"
 {
-    ballReady = false;
+    ballReady = false;    
 
-    // Stop nearby charging reinhardts nearby
-    CancelPrimaryAction(FilteredArray(AllPlayers(), HeroOf(ArrayElement()) == Hero.Reinhardt && IsUsingAbility1(ArrayElement()) && DistanceBetween(ArrayElement(), rootBall) < 3));
-    MinWait();
+    stopNearbyCharging();
 
     Teleport([ball1,ball2], ObjectivePosition(0))
     Respawn(ball1);
@@ -187,6 +185,16 @@ void respawnBall() "Respawn Ball"
 
     ballIsOnStand = true;
     ballReady = true;
+}
+
+void stopNearbyCharging() "Stop Nearby Charging"
+{
+    // Stop nearby charging reinhardts nearby
+    if (ballIsGettingCharged)
+    {
+        CancelPrimaryAction(FilteredArray(AllPlayers(), HeroOf(ArrayElement()) == Hero.Reinhardt && IsUsingAbility1(ArrayElement()) && DistanceBetween(ArrayElement(), rootBall) < 3));
+        MinWait();
+    }
 }
 
 rule: "Ball: On Ball Hit"
@@ -346,6 +354,7 @@ Event.OngoingPlayer
 if (rootBall == EventPlayer())
 if (signedDistance(PositionOf(rootBall), Vector(108.08, 154.88, 213.35), owb) < -8)
 {
+    stopNearbyCharging();
     ApplyImpulse(rootBall, owb, Max(5, SpeedOf(rootBall)), Relative.ToWorld, ContraryMotion.Cancel);
     Wait(0.5);
     LoopIfConditionIsTrue();
