@@ -1,0 +1,70 @@
+import "Lava.del";
+
+public void Camera(define players, Vector[] path, Vector[] facing, define speed) playervar "Camera"
+{
+    Vector cameraPos = path[0];
+    define pathIndex = 0;
+    StartCamera(players, cameraPos, facing[pathIndex], 2);
+
+    Wait(1);
+    pathIndex++;
+    for (define t = 0; t < 1; t = Min(1, t + 0.015/speed))
+    {
+        if (t > (1/CountOf(facing))*(pathIndex + 1)) pathIndex++;
+
+        cameraPos = Bezier(path, t);
+        Wait(0.015);
+    }
+
+    StopCamera(players);
+}
+
+playervar define gamemodeTransition = false;
+
+rule: "Gamemode Transition"
+Event.OngoingPlayer
+if (gamemodeTransition)
+{
+    gamemodeTransition = false;
+    // Camera(
+    //     EventPlayer(),
+    //     [
+    //         PositionOf(rootBall) + Vector(0, 5, 10),
+    //         TopPolePos() + Vector(0, 5, 10),
+    //         TopPolePos() + Vector(0, 5, 10),
+    //         EyePosition()
+    //     ],
+    //     [
+    //         PositionOf(rootBall),
+    //         TopPolePos(),
+    //         TopPolePos(),
+    //         TopPolePos()
+    //     ],
+    //     2
+    // );
+    if (gamemode == Mode.Soccer)
+    {
+        StartCamera(EventPlayer(), PositionOf(rootBall) + Vector(0, 5, 10), PositionOf(rootBall), 7);
+        Wait(1);
+        StartCamera(EventPlayer(), TopPolePos() + Vector(0, 5, 10), TopPolePos(), 8.5);
+        Wait(1);
+        StartCamera(EventPlayer(), EyePosition(), TopPolePos(), 5);
+        Wait(1.75);
+        StopCamera(EventPlayer());
+    }
+    else
+    {
+        StartCamera(EventPlayer(), TopPolePos() + Vector(0, 5, 10), TopPolePos(), 8.5);
+        Wait(1);
+        StartCamera(EventPlayer(), EyePosition(), TopPolePos(), 5);
+        Wait(1.75);
+        StopCamera(EventPlayer());
+    }
+}
+
+public Vector Bezier(Vector[] positions, define t) "Bezier"
+{
+    define result! = positions[0];
+    for (define n = 1; n < positions.Length; n++) result = (result*(1-t)) + (positions[n] * t);
+    return result;
+}

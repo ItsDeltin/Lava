@@ -22,7 +22,7 @@ rule: "Volleyball: Setup"
 if (gamemode == Mode.Volleyball)
 {
     InitSpawns();
-    respawnBall();
+    async! respawnBall();
     volleyball = true;
 
     CreateBeamEffect(

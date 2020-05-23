@@ -10,13 +10,22 @@ rule: "Switch gamemode"
 if (totalScore != 0)
 if (totalScore % 5 == 0)
 {
-    Wait(5);
-    if (gamemode == Mode.Volleyball) gamemode = Mode.Soccer;
-    else gamemode = Mode.Volleyball;
+    if (gamemode == Mode.Soccer)
+    {
+        AllPlayers().gamemodeTransition = true;
+        Wait(1);
+        gamemode = Mode.Volleyball;
+    }
+    else if (gamemode == Mode.Volleyball)
+    {
+        AllPlayers().gamemodeTransition = true;
+        Wait(1);
+        gamemode = Mode.Soccer;
+    }
+    SpawnPlayers();
 }
 
-rule: "Football: Countdown"
-if (gamemode == Mode.Soccer)
+void SpawnPlayers() "Spawn Players"
 {
     AllPlayers().inputEnabled = false;
 
@@ -35,12 +44,27 @@ if (gamemode == Mode.Soccer)
 void InitSpawns()
 {
     Heal(AllPlayers(), null, 9999);
+    define blue = RandomizedArray(AllPlayers(Team.Team1));
+    define red = RandomizedArray(AllPlayers(Team.Team2));
+
     for (define i = 0; i < 5; i++)
     {
-        Teleport(PlayersInSlot(i, Team.Team1), Vector(60, 154.88, (150 - 30) + (((150 + 30) - (150 - 30))/5)*i));
-        Teleport(PlayersInSlot(i, Team.Team2), Vector(-60, 154.88, (150 - 30) + (((150 + 30) - (150 - 30))/5)*i));
+        if (i < CountOf(blue) && !blue[i].isWorkingDummy) Teleport(blue[i], Vector(60, 154.88, (150 - 30) + (((150 + 30) - (150 - 30))/5)*i));
+        if (i < CountOf(red) && !red[i].isWorkingDummy) Teleport(red[i], Vector(-60, 154.88, (150 - 30) + (((150 + 30) - (150 - 30))/5)*i));
     }
     Resurrect(AllPlayers());
+    CancelPrimaryAction(AllPlayers());
+    AllPlayers().setFacing = true;
+}
+
+playervar define setFacing = false;
+rule: "Set Facing"
+Event.OngoingPlayer
+if (setFacing)
+{
+    setFacing = false;
+    MinWait();
+    SetFacing(EventPlayer(), DirectionTowards(EyePosition(EventPlayer()), TopPolePos()), Relative.ToWorld);
 }
 
 rule: "Football: Start/Stop"

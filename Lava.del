@@ -5,6 +5,7 @@ import "Volleyball.del";
 // import "!Debug Tools.del";
 // import "!Debug Camera.del";
 import "Death Boundary.del";
+import "Camera.del";
 import "customGameSettings.json";
 
 globalvar define started = false;
@@ -22,12 +23,12 @@ enum Mode
 rule: "OSTW"
 {
     CreateHudText(
-        VisibleTo: AllPlayers(),
-        Text: "Created by Deltin with OSTW",
-        TextColor: Color.Orange,
-        Location: Location.Left,
-        Spectators: Spectators.VisibleAlways,
-        SortOrder: -101
+        VisibleTo     : AllPlayers(),
+        Subheader     : "https://bit.ly/grandeurhammers",
+        SubheaderColor: Color.Orange,
+        Location      : Location.Left,
+        Spectators    : Spectators.VisibleAlways,
+        SortOrder       : -101
     );
     CreateHudText(
         VisibleTo: AllPlayers(),
@@ -37,6 +38,25 @@ rule: "OSTW"
         Spectators: Spectators.VisibleAlways,
         SortOrder: -100
     );
+    CreateHudText(
+        VisibleTo : AllPlayers(),
+        Text      : "Synthwave Olympics",
+        TextColor : Color.Turquoise,
+        Location  : Location.Top,
+        SortOrder : -1,
+        Spectators:Spectators.VisibleAlways
+    );
+    CreateHudText(
+        VisibleTo     : AllPlayers(),
+        Subheader     : <"C-A-P: <0>-<1>-<2>", ServerLoad(), ServerLoadAverage(), ServerLoadPeak()>,
+        SubheaderColor: Color.Green,
+        Location  : Location.Top,
+        SortOrder : -0.9,
+        Spectators:Spectators.VisibleAlways
+    );
+    SetObjectiveDescription(AllPlayers(), "♥", ObjectiveRev.VisibleToSortOrderAndString);
+    DisableCompletion();
+    SetMatchTime(0);
 }
 
 rule: "Generic Respawn"
@@ -231,4 +251,43 @@ if (IsTrueForAll(AllPlayers(), HasSpawned(ArrayElement()) || IsDead(ArrayElement
     started = true;
     Wait(10);
     gamemode = Mode.Soccer;
+    SpawnPlayers();
 }
+
+// globalvar define currentHeroIndex! = 0;
+// globalvar define currentHeroHud! = null;
+// rule: "Next hero index"
+// if (IsButtonHeld(HostPlayer(), Button.Interact))
+// {
+//     if (currentHeroHud == null)
+//     {
+//         CreateHudText(
+//             VisibleTo: HostPlayer(), 
+//             Header   : <"<0><1><2>",
+//                 AbilityIconString(AllHeroes()[currentHeroIndex], ButtonValue(Button.Ability1)),
+//                 AbilityIconString(AllHeroes()[currentHeroIndex], ButtonValue(Button.Ability2)),
+//                 AbilityIconString(AllHeroes()[currentHeroIndex], ButtonValue(Button.Ultimate))
+//             >
+//         );
+//         currentHeroHud[0] = LastTextID();
+//         CreateHudText(
+//             VisibleTo: HostPlayer(), 
+//             Header   : <"<0><1>",
+//                 AbilityIconString(AllHeroes()[currentHeroIndex], ButtonValue(Button.PrimaryFire)),
+//                 AbilityIconString(AllHeroes()[currentHeroIndex], ButtonValue(Button.SecondaryFire))
+//             >
+//         );
+//         currentHeroHud[1] = LastTextID();
+//     }
+//     else
+//     {
+//         currentHeroIndex++;
+//         if (currentHeroIndex == CountOf(AllHeroes()))
+//         {
+//             currentHeroIndex = 0;
+//             DestroyHudText(currentHeroHud[0]);
+//             DestroyHudText(currentHeroHud[1]);
+//             currentHeroHud = null;
+//         }
+//     }
+// }
