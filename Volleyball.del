@@ -3,9 +3,8 @@ import "Lava.del";
 rule: "Volleyball: Start/Stop"
 if (IsCommunicating(HostPlayer(), Communication.VoiceLineRight))
 {
-    if (gamemode != Mode.Volleyball)
-        gamemode = Mode.Volleyball;
-    else gamemode = 0;
+    if (gamemode != Mode.Volleyball) gamemode = Mode.Volleyball;
+    else gamemode = Mode.Waiting;
 }
 
 globalvar define volleyball;
@@ -15,14 +14,16 @@ globalvar define isCountingDown;
 globalvar define onTeam;
 globalvar define counterTexts;
 globalvar define tutorialText !;
+globalvar define laser1Effect !;
+globalvar define laser2Effect !;
+globalvar define laser3Effect !;
 
 rule: "Volleyball: Setup"
-if (gamemode == 3)
+if (gamemode == Mode.Volleyball)
 {
     InitSpawns();
-    respawnBall();
+    async! respawnBall();
     volleyball = true;
-    LaserDangerLevel = 3;
 
     CreateBeamEffect(
         AllPlayers(),
@@ -72,10 +73,9 @@ if (gamemode == 3)
 }
 
 rule: "Volleyball: Cleanup"
-if (gamemode != 3)
+if (gamemode != Mode.Volleyball)
 {
     volleyball = false;
-    LaserDangerLevel = 0;
     DestroyEffect(laser1Effect);
     DestroyEffect(laser2Effect);
     DestroyEffect(laser3Effect);
@@ -232,7 +232,7 @@ if (ballReady)
 if (isCountingDown)
 if (ballIsOnStand)
 {
-    SmallMessage(AllPlayers(), "Volleyball: Reset");
+    // SmallMessage(AllPlayers(), "Volleyball: Reset");
     StopVolleyballCountdown();
 }
 

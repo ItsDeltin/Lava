@@ -1,13 +1,11 @@
 import "Reinhardt.del";
 import "Ball.del";
 import "Score.del";
-import "Lasers.del";
 import "Volleyball.del";
-import "Maze.del";
-import "Dodgeball.del";
-import "!Debug Tools.del";
-import "!Debug Camera.del";
+// import "!Debug Tools.del";
+// import "!Debug Camera.del";
 import "Death Boundary.del";
+import "Camera.del";
 import "customGameSettings.json";
 import "TheristerCode.ow";
 
@@ -15,35 +13,25 @@ import "TheristerCode.ow";
 globalvar define started = false;
 globalvar define origin = Vector(-0.18, 154.88, 60);
 playervar define isWorkingDummy;
-playervar define doRespawn !;
 globalvar Mode gamemode = Mode.Waiting;
-// 0 = Waiting
-// 1 = Soccer countdown
-// 2 = Soccer
-// 3 = Volleyball
-// 4 = Lasers
-// 5 = Maze
 
 enum Mode
 {
     Waiting,
-    SoccerCountdown,
     Soccer,
     Volleyball,
-    Lasers,
-    Maze,
     Dodgeball
 }
 
 rule: "OSTW"
 {
     CreateHudText(
-        VisibleTo: AllPlayers(),
-        Text: "Created by Deltin with OSTW",
-        TextColor: Color.Orange,
-        Location: Location.Left,
-        Spectators: Spectators.VisibleAlways,
-        SortOrder: -101
+        VisibleTo     : AllPlayers(),
+        Subheader     : "https://bit.ly/grandeurhammers",
+        SubheaderColor: Color.Orange,
+        Location      : Location.Left,
+        Spectators    : Spectators.VisibleAlways,
+        SortOrder       : -101
     );
     CreateHudText(
         VisibleTo: AllPlayers(),
@@ -53,6 +41,25 @@ rule: "OSTW"
         Spectators: Spectators.VisibleAlways,
         SortOrder: -100
     );
+    CreateHudText(
+        VisibleTo : AllPlayers(),
+        Text      : "Synthwave Olympics",
+        TextColor : Color.Turquoise,
+        Location  : Location.Top,
+        SortOrder : -1,
+        Spectators:Spectators.VisibleAlways
+    );
+    CreateHudText(
+        VisibleTo     : AllPlayers(),
+        Subheader     : <"C-A-P: <0>-<1>-<2>", ServerLoad(), ServerLoadAverage(), ServerLoadPeak()>,
+        SubheaderColor: Color.Green,
+        Location  : Location.Top,
+        SortOrder : -0.9,
+        Spectators:Spectators.VisibleAlways
+    );
+    SetObjectiveDescription(AllPlayers(), "♥", ObjectiveRev.VisibleToSortOrderAndString);
+    DisableCompletion();
+    SetMatchTime(0);
 }
 
 rule: "Generic Respawn"
@@ -61,35 +68,27 @@ if (HasSpawned())
 if (IsAlive())
 if (!isWorkingDummy)
 {
-    doRespawn = true;
+    ResetPlayer();
 }
 
-rule: "Respawn"
-Event.OngoingPlayer
-if (doRespawn)
-if (!isWorkingDummy)
+void ResetPlayer() "Reset"
 {
     Respawn();
     MinWait();
-    // Volleyball, soccer, Dodgeball
+    // Volleyball, soccer, waiting
     if (gamemode >= 0 && gamemode <= 3)
     {
         define spawnAt ! = RandomValueInArray([1,2,3,4,5]);
         Teleport(EventPlayer(), Vector(TeamOf(EventPlayer()) == Team.Team1 ? 60 : -60, 154.88, (150 - 30) + (((150 + 30) - (150 - 30))/5)*spawnAt));
     } 
-    // Maze
-    else if (gamemode == 5)
-        Teleport(EventPlayer(), randomMazeSpot());
     // No gamemode
-    else if (gamemode == 6){
+    else if (gamemode == 3){
         define spawnAt ! = RandomValueInArray([1,2,3,4,5]);
         Teleport(EventPlayer(), Vector(TeamOf(EventPlayer()) == Team.Team1 ? 28 : -28, 154.88, (150-10) + (((150 + 10) - (150 - 10))/5)*spawnAt))
     }
 
     SetFacing(EventPlayer(), DirectionTowards(EyePosition(), TopPolePos()));
     EventPlayer().blueSide = TeamOf() == Team.Team1;
-
-    doRespawn = false;
 }
 
 define rowCount(): 40;
@@ -97,15 +96,16 @@ define columnCount(): 28;
 
 globalvar define arenaEffects = [];
 
+define cliffBlue: Vector(107.07, 154.88, 63.61);
+define cliffRed: Vector(-109.08, 154.88, 65.06);
+define towerBlue: Vector(108.08, 154.88, 213.35);
+define towerRed: Vector(-108.07, 154.88, 214.81);
+
 rule: "Setup Arena (Disable when using Maze)"
 if (CurrentGameMode() == GameMode.Skirmish)
 {
     OuterWalls();
 
-    define cliffBlue = Vector(107.07, 154.88, 63.61);
-    define cliffRed = Vector(-109.08, 154.88, 65.06);
-    define towerBlue = Vector(108.08, 154.88, 213.35);
-    define towerRed = Vector(-108.07, 154.88, 214.81);
     define rowFraction = 1/rowCount();
     define columnFraction = 1/columnCount();
 
@@ -255,5 +255,44 @@ if (IsTrueForAll(AllPlayers(), HasSpawned(ArrayElement()) || IsDead(ArrayElement
 {
     started = true;
     Wait(10);
-    gamemode = Mode.SoccerCountdown;
+    gamemode = Mode.Soccer;
+    SpawnPlayers();
 }
+
+// globalvar define currentHeroIndex! = 0;
+// globalvar define currentHeroHud! = null;
+// rule: "Next hero index"
+// if (IsButtonHeld(HostPlayer(), Button.Interact))
+// {
+//     if (currentHeroHud == null)
+//     {
+//         CreateHudText(
+//             VisibleTo: HostPlayer(), 
+//             Header   : <"<0><1><2>",
+//                 AbilityIconString(AllHeroes()[currentHeroIndex], ButtonValue(Button.Ability1)),
+//                 AbilityIconString(AllHeroes()[currentHeroIndex], ButtonValue(Button.Ability2)),
+//                 AbilityIconString(AllHeroes()[currentHeroIndex], ButtonValue(Button.Ultimate))
+//             >
+//         );
+//         currentHeroHud[0] = LastTextID();
+//         CreateHudText(
+//             VisibleTo: HostPlayer(), 
+//             Header   : <"<0><1>",
+//                 AbilityIconString(AllHeroes()[currentHeroIndex], ButtonValue(Button.PrimaryFire)),
+//                 AbilityIconString(AllHeroes()[currentHeroIndex], ButtonValue(Button.SecondaryFire))
+//             >
+//         );
+//         currentHeroHud[1] = LastTextID();
+//     }
+//     else
+//     {
+//         currentHeroIndex++;
+//         if (currentHeroIndex == CountOf(AllHeroes()))
+//         {
+//             currentHeroIndex = 0;
+//             DestroyHudText(currentHeroHud[0]);
+//             DestroyHudText(currentHeroHud[1]);
+//             currentHeroHud = null;
+//         }
+//     }
+// }

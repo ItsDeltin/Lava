@@ -11,15 +11,27 @@ rule: "Switch gamemode"
 if (totalScore != 0)
 if (totalScore % 5 == 0)
 {
-    Wait(5);
-    if (gamemode == Mode.Dodgeball) gamemode = Mode.SoccerCountdown;
-    else if(gamemode == Mode.Soccer) gamemode = Mode.Volleyball; 
-    else if(gamemode == Mode.SoccerCountdown) Abort();
-    else gamemode = Mode.Dodgeball;
+    if (gamemode == Mode.Soccer)
+    {
+        AllPlayers().gamemodeTransition = true;
+        Wait(1);
+        gamemode = Mode.Volleyball;
+    }
+    else if (gamemode == Mode.Volleyball)
+    {
+        AllPlayers().gamemodeTransition = true;
+        Wait(1);
+        gamemode = Mode.Soccer;
+    } else
+    {
+        AllPlayers().gamemodeTransition = true;
+        Wait(1);
+        gamemode = Mode.Dodgeball;
+    }
+    SpawnPlayers();
 }
 
-rule: "Football: Countdown"
-if (gamemode == 1)
+void SpawnPlayers() "Spawn Players"
 {
     AllPlayers().inputEnabled = false;
 
@@ -33,27 +45,39 @@ if (gamemode == 1)
     }
     BigMessage(AllPlayers(), "Start!");
     AllPlayers().inputEnabled = true;
-
-    gamemode = 2;
 }
 
 void InitSpawns()
 {
     Heal(AllPlayers(), null, 9999);
+    define blue = RandomizedArray(AllPlayers(Team.Team1));
+    define red = RandomizedArray(AllPlayers(Team.Team2));
+
     for (define i = 0; i < 5; i++)
     {
-        Teleport(PlayersInSlot(i, Team.Team1), Vector(60, 154.88, (150 - 30) + (((150 + 30) - (150 - 30))/5)*i));
-        Teleport(PlayersInSlot(i, Team.Team2), Vector(-60, 154.88, (150 - 30) + (((150 + 30) - (150 - 30))/5)*i));
+        if (i < CountOf(blue) && !blue[i].isWorkingDummy) Teleport(blue[i], Vector(60, 154.88, (150 - 30) + (((150 + 30) - (150 - 30))/5)*i));
+        if (i < CountOf(red) && !red[i].isWorkingDummy) Teleport(red[i], Vector(-60, 154.88, (150 - 30) + (((150 + 30) - (150 - 30))/5)*i));
     }
     Resurrect(AllPlayers());
+    CancelPrimaryAction(AllPlayers());
+    AllPlayers().setFacing = true;
+}
+
+playervar define setFacing = false;
+rule: "Set Facing"
+Event.OngoingPlayer
+if (setFacing)
+{
+    setFacing = false;
+    MinWait();
+    SetFacing(EventPlayer(), DirectionTowards(EyePosition(EventPlayer()), TopPolePos()), Relative.ToWorld);
 }
 
 rule: "Football: Start/Stop"
 if (IsCommunicating(HostPlayer(), Communication.VoiceLineUp))
 {
-    if (gamemode != 1)
-        gamemode = 1;
-    else gamemode = 0;
+    if (gamemode != Mode.Soccer) gamemode = Mode.Soccer;
+    else gamemode = Mode.Waiting;
 }
 
 
@@ -102,7 +126,7 @@ void ChaseGoalEffects() "Chase Goal Effects"
 }
 
 rule: "Football: Spawn goals"
-if (gamemode == Mode.SoccerCountdown || gamemode == Mode.Soccer)
+if (gamemode == Mode.Soccer)
 {
     ChaseGoalEffects();
     MakeBeams(Color.Team2, blueNearest, blueNormal, blueGoalSize, 0);
@@ -113,7 +137,6 @@ if (gamemode == Mode.SoccerCountdown || gamemode == Mode.Soccer)
 }
 
 rule: "Football: Destroy goals"
-if (gamemode != Mode.SoccerCountdown)
 if (gamemode != Mode.Soccer)
 {
     foreach (define effect in goalEffects)
