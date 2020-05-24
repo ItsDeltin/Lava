@@ -21,12 +21,12 @@ if (totalScore % 5 == 0)
     {
         AllPlayers().gamemodeTransition = true;
         Wait(1);
-        gamemode = Mode.Soccer;
+        gamemode = Mode.Dodgeball;
     } else
     {
         AllPlayers().gamemodeTransition = true;
         Wait(1);
-        gamemode = Mode.Dodgeball;
+        gamemode = Mode.Soccer;
     }
     SpawnPlayers();
 }
