@@ -21,6 +21,9 @@ enum Mode
     Waiting,
     Soccer,
     Volleyball,
+    Fake,
+    AlsoFake,
+    TripleFake,
     Dodgeball
 }
 
@@ -83,7 +86,7 @@ void ResetPlayer(define player) "Reset"
         Teleport(EventPlayer(), Vector(TeamOf(EventPlayer()) == Team.Team1 ? 60 : -60, 154.88, (150 - 30) + (((150 + 30) - (150 - 30))/5)*spawnAt));
     } 
     // No gamemode
-    else if (gamemode == 3){
+    else if (gamemode == Mode.Dodgeball){
         define spawnAt ! = RandomValueInArray([1,2,3,4,5]);
         Teleport(EventPlayer(), Vector(TeamOf(EventPlayer()) == Team.Team1 ? 28 : -28, 154.88, (150-10) + (((150 + 10) - (150 - 10))/5)*spawnAt))
     }
