@@ -3,12 +3,35 @@ import "Lava.del";
 rule: "Ceiling Bounce"
 Event.OngoingPlayer
 if (EyePosition(EventPlayer()).Y > 173)
+if (EyePosition(EventPlayer()).Y < 176)
 if (HasSpawned())
 if (IsAlive())
 if (!IsInSpawnRoom())
+if (HeroOf(EventPlayer()) != Hero.Sigma)
+if (!isBall)
 {
-    Teleport(EventPlayer(), PositionOf(EventPlayer()) * Vector(1, 0, 1) + Vector(0, 170.5, 0));
+    SmallMessage(AllPlayers(), <"<0> hit boundary at <1>, speed: <2>", EventPlayer(), PositionOf(EventPlayer()), SpeedOf(EventPlayer())>);
+
+    Teleport(EventPlayer(), PositionOf(EventPlayer()) * Vector(1, 0, 1) + Vector(0, 169.5, 0));
     ApplyImpulse(EventPlayer(), Down(), 0.001, Relative.ToWorld, ContraryMotion.Cancel);
+
+    MinWait();
+    LoopIfConditionIsTrue();
+}
+
+rule: "Ceiling Bounce"
+Event.OngoingPlayer
+if (ballReady)
+if (rootBall == EventPlayer())
+if (HasSpawned())
+if (IsAlive())
+if (!IsInSpawnRoom())
+if (EyePosition(EventPlayer()).Y > 171)
+if (EyePosition(EventPlayer()).Y < 176)
+{
+    Teleport(EventPlayer(), PositionOf(EventPlayer()) * Vector(1, 0, 1) + Vector(0, 169, 0));
+    ApplyImpulse(EventPlayer(), Down(), 0.001, Relative.ToWorld, ContraryMotion.Cancel);
+
     MinWait();
     LoopIfConditionIsTrue();
 }

@@ -1,17 +1,15 @@
-globalvar {
-    0,1,2,3,4,5,6,7,8,9,10,11,12,13,14
-}
-
 import "Reinhardt.del";
 import "Ball.del";
 import "Score.del";
 import "Lasers.del";
 import "Volleyball.del";
 import "Maze.del";
+import "Dodgeball.del";
 import "!Debug Tools.del";
 import "!Debug Camera.del";
 import "Death Boundary.del";
 import "customGameSettings.json";
+import "TheristerCode.ow";
 
 
 globalvar define started = false;
@@ -42,18 +40,18 @@ rule: "OSTW"
     CreateHudText(
         VisibleTo: AllPlayers(),
         Text: "Created by Deltin with OSTW",
-        TextColor: Color.SkyBlue,
-        Location: Location.Right,
+        TextColor: Color.Orange,
+        Location: Location.Left,
         Spectators: Spectators.VisibleAlways,
-        SortOrder: -2
+        SortOrder: -101
     );
     CreateHudText(
         VisibleTo: AllPlayers(),
         Subheader: "https://github.com/ItsDeltin/Overwatch-Script-To-Workshop",
         SubheaderColor: Color.Blue,
-        Location: Location.Right,
+        Location: Location.Left,
         Spectators: Spectators.VisibleAlways,
-        SortOrder: -1
+        SortOrder: -100
     );
 }
 
@@ -83,11 +81,9 @@ if (!isWorkingDummy)
     else if (gamemode == 5)
         Teleport(EventPlayer(), randomMazeSpot());
     // No gamemode
-    else if (gamemode == 6)
-        Teleport(EventPlayer())
-    else{
+    else if (gamemode == 6){
         define spawnAt ! = RandomValueInArray([1,2,3,4,5]);
-        Teleport(EventPlayer(), Vector(TeamOf(EventPlayer()) == Team.Team1 ? 28 : -28, 154.88, (150 + 120) + (((150 + 120) - (150 + 120))/5)*spawnAt))
+        Teleport(EventPlayer(), Vector(TeamOf(EventPlayer()) == Team.Team1 ? 28 : -28, 154.88, (150-10) + (((150 + 10) - (150 - 10))/5)*spawnAt))
     }
 
     SetFacing(EventPlayer(), DirectionTowards(EyePosition(), TopPolePos()));
@@ -96,8 +92,8 @@ if (!isWorkingDummy)
     doRespawn = false;
 }
 
-define rowCount(): 50;
-define columnCount(): 35;
+define rowCount(): 40;
+define columnCount(): 28;
 
 globalvar define arenaEffects = [];
 
@@ -119,10 +115,10 @@ if (CurrentGameMode() == GameMode.Skirmish)
         define b = LinearInterpolate(towerBlue, towerRed, x*rowFraction);
         CreateBeamEffect(
             AllPlayers(),
-            BeamType.GrappleBeam,
+            BeamType.GoodBeam,
             a,
             b,
-            Color.Red,
+            Color.Purple,
             EffectRev.VisibleTo
         );
         ModifyVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
@@ -133,10 +129,10 @@ if (CurrentGameMode() == GameMode.Skirmish)
         define b = LinearInterpolate(cliffRed, towerRed, z*columnFraction);
         CreateBeamEffect(
             AllPlayers(),
-            BeamType.GrappleBeam,
+            BeamType.GoodBeam,
             a,
             b,
-            Color.Red,
+            Color.Purple,
             EffectRev.VisibleTo
         );
         ModifyVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
@@ -201,7 +197,7 @@ void OuterWalls()
         BeamType.BadBeam,
         Vector(108.08, 158.44, 213.35),
         Vector(107.07, 158.44, 63.61),
-        Color.Team1,
+        Color.Team2,
         EffectRev.VisibleTo
     );
     ModifyVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
@@ -211,7 +207,7 @@ void OuterWalls()
         BeamType.BadBeam,
         Vector(115.69, 158.44, 213.35),
         Vector(115.69, 158.44, 63.61),
-        Color.Team1,
+        Color.Team2,
         EffectRev.VisibleTo
     );
     ModifyVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
@@ -222,7 +218,7 @@ void OuterWalls()
         BeamType.BadBeam,
         Vector(-109.08, 158.44, 65.06),
         Vector(-108.07, 158.44, 214.81),
-        Color.Team2,
+        Color.Team1,
         EffectRev.VisibleTo
     );
     ModifyVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
@@ -232,7 +228,7 @@ void OuterWalls()
         BeamType.BadBeam,
         Vector(-118.45, 158.44, 65.06),
         Vector(-118.45, 158.44, 214.81),
-        Color.Team2,
+        Color.Team1,
         EffectRev.VisibleTo
     );
     ModifyVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
@@ -240,12 +236,10 @@ void OuterWalls()
 
 define PolePos()   : Vector(0, 154.88, 150);
 define TopPolePos(): Vector(0, 161.5,  150);
-define BaseOffset(): Vector(0, 0.5, 0);
-define xyPolePos(define y): Vector(0, y, 150);
 
 define isOnWall(define player): IsOnGround(player) && AbsoluteValue(YOf(PositionOf(player)) - 158.44) < 0.2;
 
-rule: "I want to die"
+disabled rule: "I want to die"
 if (IsButtonHeld(HostPlayer(), Button.Ultimate))
 {
     CreateDummyBot(Hero.Reinhardt, NumberOfPlayers(Team.Team1) < 6 ? Team.Team1 : Team.Team2, -1, PositionOf(HostPlayer()), FacingDirectionOf(HostPlayer()));

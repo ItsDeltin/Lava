@@ -1,0 +1,52 @@
+import "Lava.del";
+
+
+define Magnitude(Vector v): DistanceBetween(Vector(), v);
+
+rule: "Dodgeball: Team1 Boundary"
+Event.OngoingPlayer
+if(gamemode == 6)
+if(TeamOf(EventPlayer()) == Team.Team1)
+if(XOf(PositionOf(EventPlayer())) < 0)
+{
+    MinWait();
+    AbortIfConditionIsFalse();
+
+    ApplyImpulse(EventPlayer(), Vector(1,0,0), 5+Magnitude(VelocityOf(EventPlayer())) , Relative.ToWorld, ContraryMotion.Cancel);
+    MinWait();
+    LoopIfConditionIsTrue();
+    PlayEffect(EventPlayer(), PlayEffect.DebuffImpactSound, Color.White, EventPlayer(), 100);
+}
+
+rule: "Dodgeball: Team2 Boundary"
+Event.OngoingPlayer
+if(gamemode == 6)
+if(TeamOf(EventPlayer()) == Team.Team2)
+if(XOf(PositionOf(EventPlayer())) > 0)
+if(YOf(PositionOf(EventPlayer())) < 200)
+{
+    MinWait();
+    AbortIfConditionIsFalse();
+
+    ApplyImpulse(EventPlayer(), Vector(-1,0,0), 5+Magnitude(VelocityOf(EventPlayer())) , Relative.ToWorld, ContraryMotion.Cancel);
+    MinWait();
+    LoopIfConditionIsTrue();
+    PlayEffect(EventPlayer(), PlayEffect.DebuffImpactSound, Color.White, EventPlayer(), 100);
+}
+
+
+globalvar define beamId;
+
+rule: "Dodgeball: Draw Boundary"
+Event.OngoingGlobal
+if(gamemode == 6){
+    CreateBeamEffect(AllPlayers(), BeamType.GoodBeam, PolePos() - Vector(0,0,20), PolePos() + Vector(0,0,20), Color.Aqua, EffectRev.VisibleTo);
+    beamId = LastCreatedEntity();
+}
+
+
+rule: "Dodgeball: Destroy Boundary"
+Event.OngoingGlobal
+if(gamemode != 6){
+    DestroyEffect(beamId);
+}

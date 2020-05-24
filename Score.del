@@ -1,40 +1,40 @@
+import "Lava.del";
 import "Ball.del";
 
-globalvar define blueGoalEffect !;
-globalvar define redGoalEffect !;
+globalvar define goalEffects;
 
 globalvar define blueScore = 0;
 globalvar define redScore = 0;
 globalvar define totalScore = 0;
 
-define blueGoal(): Vector(123, 165, 150);
-define redGoal(): Vector(-123, 165, 150);
-
 rule: "Switch gamemode"
 if (totalScore != 0)
-if (totalScore % 3 == 0)
+if (totalScore % 5 == 0)
 {
-    if (gamemode == Mode.Volleyball) gamemode = Mode.SoccerCountdown;
-    else gamemode = Mode.Volleyball;
+    Wait(5);
+    if (gamemode == Mode.Dodgeball) gamemode = Mode.SoccerCountdown;
+    else if(gamemode == Mode.Soccer) gamemode = Mode.Volleyball; 
+    else if(gamemode == Mode.SoccerCountdown) Abort();
+    else gamemode = Mode.Dodgeball;
 }
 
 rule: "Football: Countdown"
 if (gamemode == 1)
 {
     AllPlayers().inputEnabled = false;
-    gamemode = 1;
 
     InitSpawns();
 
-    AllPlayers().doRespawn = true;
     respawnBall();
-    for (define i = 5; i > 0; i--)
+    for (define i = 3; i > 0; i--)
     {
         SmallMessage(AllPlayers(), i);
         Wait(1);
     }
     BigMessage(AllPlayers(), "Start!");
     AllPlayers().inputEnabled = true;
+
+    gamemode = 2;
 }
 
 void InitSpawns()
@@ -45,6 +45,7 @@ void InitSpawns()
         Teleport(PlayersInSlot(i, Team.Team1), Vector(60, 154.88, (150 - 30) + (((150 + 30) - (150 - 30))/5)*i));
         Teleport(PlayersInSlot(i, Team.Team2), Vector(-60, 154.88, (150 - 30) + (((150 + 30) - (150 - 30))/5)*i));
     }
+    Resurrect(AllPlayers());
 }
 
 rule: "Football: Start/Stop"
@@ -55,66 +56,110 @@ if (IsCommunicating(HostPlayer(), Communication.VoiceLineUp))
     else gamemode = 0;
 }
 
-rule: "Football: Spawn goals"
-if (gamemode == 1 || gamemode == 2)
-{
-    // Blue goal
-    CreateEffect(
-        AllPlayers(),
-        Effect.GoodAura,
-        Color.Team1,
-        blueGoal(),
-        10
-    );
-    blueGoalEffect = LastCreatedEntity();
 
-    // Red goal
-    CreateEffect(
-        AllPlayers(),
-        Effect.GoodAura,
-        Color.Team2,
-        redGoal(),
-        10
-    );
-    redGoalEffect = LastCreatedEntity();
+globalvar define blueGoalSize;
+globalvar define redGoalSize;
+define considerBallPos: PositionOf(rootBall);
+define goalMod(define goalPos): Max(1 - (DistanceBetween(rootBall, goalPos) / 15), 0) * 10;
+Vector nearestPlanePoint(define pointPosition, define planePosition, define planeNormal): pointPosition + (-DotProduct(planeNormal, pointPosition - planePosition) / DotProduct(planeNormal, planeNormal)) * planeNormal;
+Vector rightOf(Vector dir): Normalize(dir.CrossProduct(Up()));
+Vector upOf(Vector dir): Normalize(dir.CrossProduct(dir.CrossProduct(Up())));
+Vector signedDistance(define pointPosition, define planePoint, define planeNormal): DotProduct(planeNormal, (pointPosition - planePoint));
+// blue
+Vector blueNearest: nearestPlanePoint(considerBallPos, bluePos, blueNormal);
+Vector bluePos: Vector(115.69, 156.68, 148.52);
+Vector blueNormal: Vector(-0.90, 0.43, 0);
+// red
+Vector redNearest: nearestPlanePoint(considerBallPos, redPos, redNormal);
+Vector redPos: Vector(-118.45, 156.68, 148.52);
+Vector redNormal: Vector(0.90, 0.43, 0);
+
+define g_down(define p, define d, define size): p + upOf(d) * size;
+define g_right(define p, define d, define size): p - rightOf(d) * size;
+define g_up(define p, define d, define size): p - upOf(d) * size;
+define g_left(define p, define d, define size): p + rightOf(d) * size;
+
+define MakeBeam(Color color, ref define s, ref define e)
+{
+    CreateBeamEffect(AllPlayers(), BeamType.GoodBeam, s, e, color, EffectRev.VisibleToPositionAndRadius);
+    return LastCreatedEntity();
+}
+
+void MakeBeams(Color color, ref define nearest, ref define normal, ref define size, ref define effectStart)
+{
+    goalEffects[effectStart]     = MakeBeam(color, g_up(nearest, normal, size), g_right(nearest, normal, size));
+    goalEffects[effectStart + 1] = MakeBeam(color, g_right(nearest, normal, size), g_down(nearest, normal, size));
+    goalEffects[effectStart + 2] = MakeBeam(color, g_down(nearest, normal, size), g_left(nearest, normal, size));
+    goalEffects[effectStart + 3] = MakeBeam(color, g_left(nearest, normal, size), g_up(nearest, normal, size));
+}
+
+void ChaseGoalEffects() "Chase Goal Effects"
+{
+    blueGoalSize = 0;
+    redGoalSize = 0;
+    ChaseVariableAtRate(blueGoalSize, goalMod(blueNearest), 30, RateChaseReevaluation.DestinationAndRate);
+    ChaseVariableAtRate(redGoalSize, goalMod(redNearest), 30, RateChaseReevaluation.DestinationAndRate);
+}
+
+rule: "Football: Spawn goals"
+if (gamemode == Mode.SoccerCountdown || gamemode == Mode.Soccer)
+{
+    ChaseGoalEffects();
+    MakeBeams(Color.Team2, blueNearest, blueNormal, blueGoalSize, 0);
+    MakeBeams(Color.Team1, redNearest, redNormal, redGoalSize, 4);
+
+    // CreateEffect(AllPlayers(), Effect.Orb, Color.Yellow, blueNearest, 0.5, EffectRev.VisibleToPositionAndRadius); // For debugging
+    // CreateEffect(AllPlayers(), Effect.Orb, Color.Yellow, redNearest, 0.5, EffectRev.VisibleToPositionAndRadius); // For debugging
 }
 
 rule: "Football: Destroy goals"
-if (gamemode != 1)
-if (gamemode != 2)
+if (gamemode != Mode.SoccerCountdown)
+if (gamemode != Mode.Soccer)
 {
-    DestroyEffect(blueGoalEffect);
-    DestroyEffect(redGoalEffect);
+    foreach (define effect in goalEffects)
+        DestroyEffect(effect);
 }
 
 rule: "Football: Blue score"
 if (ballReady)
-if (gamemode == 1 || gamemode == 2)
-if (DistanceBetween(rootBall, redGoal()) <= 13)
+if (gamemode == Mode.Soccer)
+if (signedDistance(considerBallPos, redPos, redNormal) < 0)
 {
-    PlayEffect(AllPlayers(), PlayEffect.RingExplosion, Color.Team1, redGoal(), 100);
-    PlayEffect(AllPlayers(), PlayEffect.GoodExplosion, Color.Team1, redGoal(), 10);
-    PlayEffect(AllPlayers(Team.Team1), PlayEffect.BuffExplosionSound, Color.White, redGoal(), 1000);
-    PlayEffect(AllPlayers(Team.Team2), PlayEffect.DebuffImpactSound, Color.White, redGoal(), 1000);
-
-    blueScore++;
-    totalScore++;
-    messageThrower(Team.Team1);
+    Score(Color.Team1, Team.Team1, redNearest, () => {
+        blueScore++;
+        ChaseVariableOverTime(redGoalSize, 0, 0.3, TimeChaseReevaluation.None);
+    });
 }
 
 rule: "Football: Red score"
 if (ballReady)
-if (gamemode == 1 || gamemode == 2)
-if (DistanceBetween(rootBall, blueGoal()) <= 13)
+if (gamemode == Mode.Soccer)
+if (signedDistance(considerBallPos, bluePos, blueNormal) < 0)
 {
-    PlayEffect(AllPlayers(), PlayEffect.RingExplosion, Color.Team2, blueGoal(), 100);
-    PlayEffect(AllPlayers(), PlayEffect.GoodExplosion, Color.Team2, blueGoal(), 10);
-    PlayEffect(AllPlayers(Team.Team2), PlayEffect.BuffExplosionSound, Color.White, blueGoal(), 1000);
-    PlayEffect(AllPlayers(Team.Team1), PlayEffect.DebuffImpactSound, Color.White, blueGoal(), 1000);
+    Score(Color.Team2, Team.Team2, blueNearest, () => {
+        redScore++;
+        ChaseVariableOverTime(blueGoalSize, 0, 0.3, TimeChaseReevaluation.None);
+    });
+}
 
-    redScore++;
+void Score(Color teamColor, ref define team, define nearest, BlockLambda score)
+{
     totalScore++;
-    messageThrower(Team.Team2);
+    score.Invoke();
+
+    Wait(0.35);
+
+    PlayEffect(AllPlayers(), PlayEffect.RingExplosion, teamColor, nearest, 100);
+    PlayEffect(AllPlayers(team), PlayEffect.BuffExplosionSound, Color.White, nearest, 1000);
+    PlayEffect(AllPlayers(OppositeTeamOf(team)), PlayEffect.DebuffImpactSound, Color.White, nearest, 1000);
+    messageThrower(team, teamColor);
+
+    SetSlowMotion(25);
+    Wait(1);
+    SetSlowMotion(100);
+
+    Wait(3);
+    ChaseGoalEffects();
 }
 
 
@@ -135,22 +180,47 @@ if (DistanceBetween(rootBall, blueGoal()) <= 13)
 
 
 
-void messageThrower(define team)
+void messageThrower(define team, Color teamColor)
 {
+    scoreboardOrder++;
     if (TeamOf(thrower) != team)
     {
         BigMessage(AllPlayers(), <"Wrong goal, <0>!", thrower>);
+        ThrowHud(teamColor, IconString(Icon.X));
     }
     else if (throwType == 0)
     {
         BigMessage(AllPlayers(), <"<0> scored a hammer shot!", thrower>);
+        ThrowHud(teamColor, AbilityIconString(Hero.Reinhardt, ButtonValue(Button.PrimaryFire)));
     }
     else if (throwType == 1)
     {
         BigMessage(AllPlayers(), <"<0> scored a bump shot!", thrower>);
+        ThrowHud(teamColor, AbilityIconString(Hero.Doomfist, ButtonValue(Button.Ability1)));
     }
     else if (throwType == 2)
     {
         BigMessage(AllPlayers(), <"<0> scored a charge shot!", thrower>);
+        ThrowHud(teamColor, AbilityIconString(Hero.Reinhardt, ButtonValue(Button.Ability1)));
     }
+    else if (throwType == 3)
+    {
+        BigMessage(AllPlayers(), <"<0> scored a fire shot!", thrower>);
+        ThrowHud(teamColor, AbilityIconString(Hero.Reinhardt, ButtonValue(Button.Ability2)));
+    }
+}
+
+globalvar define scoreboardOrder = 0;
+
+void ThrowHud(Color color, ref define icon)
+{
+    CreateHudText(
+        VisibleTo   : AllPlayers(),
+        Text        : <"<0><1>", icon, thrower>,
+        Location    : Location.Right,
+        SortOrder   : scoreboardOrder,
+        TextColor   : color,
+        Reevaluation: HudTextRev.VisibleTo,
+        Spectators  : Spectators.VisibleAlways
+    );
 }

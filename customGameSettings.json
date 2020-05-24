@@ -8,6 +8,11 @@
                 "Fire Strike Cooldown Time": 50,
                 "Rocket Hammer Knockback Scalar": 400
             },
+            "Sigma": {
+                "Primary Fire": false,
+                "Accretion Cooldown Time": 0,
+                "Kinetic Grasp Cooldown Time": 60
+            },
             "Torbjörn": {
                 "Primary Fire": false
             }

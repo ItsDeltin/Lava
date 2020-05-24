@@ -9,6 +9,10 @@ globalvar define tpTo;
 globalvar define rootBall;
 
 globalvar define thrower = null;
+// 0 = hammer
+// 1 = bump
+// 2 = charge
+// 3 = fire
 globalvar define throwType = 0;
 
 globalvar define blueScoreText !;
@@ -97,7 +101,7 @@ define ballLocation(): tpTo != null ? tpTo + Vector(0, 1, 0) : Midpoint(ball1,ba
 define ballSpeed(): SpeedOf(rootBall);
 
 rule: "Ball: (High Server Loa​d) Link"
-if (ball)
+if (ballReady)
 {
     if (isStunned(ball1))
     {
@@ -141,15 +145,19 @@ if (ball)
 define isStunned(define player): HasStatus(player, Status.Stunned);
 
 rule: "Ball: Respawn ball"
-if (ball)
-if (IsDead(ball1) || IsDead(ball2) || YOf(PositionOf(rootBall)) < 140 || ZOf(PositionOf(rootBall)) > 217)
+if (ballReady)
+if (HasSpawned(ball1))
+if (HasSpawned(ball2))
+if (IsDead(ball1) || IsDead(ball2) || YOf(PositionOf(rootBall)) < 140)
 {
     SmallMessage(AllPlayers(), "Respawning Ball");
-    respawnBall();   
+    respawnBall();
+    MinWait();
+    LoopIfConditionIsTrue();
 }
 
 rule: "Ball: Bounce back ball"
-if (ball)
+if (ballReady)
 if (!ballIsOnStand)
 if (!HasStatus(rootBall, Status.Stunned))
 if (ballSpeed() < 1)
@@ -160,17 +168,26 @@ if (isOnWall(rootBall))
     LoopIfConditionIsTrue();
 }
 
-void respawnBall()
+void respawnBall() "Respawn Ball"
 {
-    Respawn(ball1);
-    Respawn(ball2);
+    ballReady = false;
+
+    // Stop nearby charging reinhardts nearby
+    CancelPrimaryAction(FilteredArray(AllPlayers(), HeroOf(ArrayElement()) == Hero.Reinhardt && IsUsingAbility1(ArrayElement()) && DistanceBetween(ArrayElement(), rootBall) < 3));
     MinWait();
 
-    Teleport(ball1, TopPolePos());
+    Teleport([ball1,ball2], ObjectivePosition(0))
+    Respawn(ball1);
+    Respawn(ball2);
+    Wait(1);
+
+    // SetGravity([ball1, ball2], 0);
+    Teleport(ball1, TopPolePos() - Vector(0, 0.3, 0));
     Teleport(ball2, TopPolePos() + Vector(0, 1, 0));
     MinWait();
 
     ballIsOnStand = true;
+    ballReady = true;
 }
 
 rule: "Ball: On Ball Hit"
@@ -186,12 +203,14 @@ if (!IsInSpawnRoom(ball1) && !IsInSpawnRoom(ball2))
         ApplyImpulse(EventPlayer(), Vector(0, 1, 0), 20, Relative.ToWorld, ContraryMotion.Incorporate);
         thrower = Attacker();
         throwType = 0;
+        OffStand();
     }
     // Charge bump
     else if (EventDamage() == 45)
     {
         thrower = Attacker();
         throwType = 1;
+        OffStand();
     }
 }
 
@@ -202,6 +221,13 @@ Event.OnDamageTaken
 if (isBall)
 if (EventDamage() == 95)
 {
+    if (!ballIsOnStand && !ballOnGround)
+    {
+        ApplyImpulse(rootBall, Attacker().fireStrikeDirection, SpeedOf(rootBall) * 3, Relative.ToWorld, ContraryMotion.Cancel);
+        thrower = Attacker();
+        throwType = 3;
+    }
+
     fuse = 0;
     ChaseVariableOverTime(fuse, 2, 3, TimeChaseReevaluation.None);
 
@@ -219,7 +245,7 @@ if (EventDamage() == 95)
 
     Damage(inExplosionRange, Attacker(), 200);
     inExplosionRange.knockedFrom = ballLocation();
-    inExplosionRange.force = 30;
+    inExplosionRange.force = 20;
     inExplosionRange.heightOffset = 1.5;
 }
 define ExplosionRange(): 10;
@@ -239,6 +265,7 @@ if (HasStatus(EventPlayer(), Status.Stunned))
     {
         thrower = closest;
         throwType = 2;
+        OffStand();
     }
 }
 
@@ -259,13 +286,20 @@ if (ballSpeed() >= 10 || IsInAir(rootBall))
     LoopIfConditionIsTrue();
 }
 
-rule: "Ball: Alternative Knock Off Stand"
-if (ball)
+disabled rule: "Ball: Alternative Knock Off Stand"
+if (ballReady)
 if (ballIsOnStand)
-if (DistanceBetween(ball1, TopPolePos()) > 1 && DistanceBetween(ball2, TopPolePos()) > 1)
+if (DistanceBetween(ball1, TopPolePos()) > 3.5 && DistanceBetween(ball2, TopPolePos()) > 3.5)
 {
-    Wait(0.5, WaitBehavior.AbortWhenFalse);
+    SmallMessage(AllPlayers(), "alt");
+    Wait(0.25, WaitBehavior.AbortWhenFalse);
+    OffStand();
+}
+
+void OffStand()
+{
     ballIsOnStand = false;
+    // SetGravity([ball1, ball2], 100);
 }
 
 globalvar define lastCrutchAction ! = 0;
@@ -304,4 +338,16 @@ if (TotalTimeElapsed() - lastCrutchAction > 10)
     StopFacing(shootingBall);
 
     lastCrutchAction = TotalTimeElapsed();
+}
+
+globalvar define owb = Normalize(CrossProduct(Vector(108.08, 154.88, 213.35).DirectionTowards(Vector(-108.07, 154.88, 214.81)), Up()));
+
+rule: "Outer wall bounce"
+Event.OngoingPlayer
+if (rootBall == EventPlayer())
+if (signedDistance(PositionOf(rootBall), Vector(108.08, 154.88, 213.35), owb) < -8)
+{
+    ApplyImpulse(rootBall, owb, Max(5, SpeedOf(rootBall)), Relative.ToWorld, ContraryMotion.Cancel);
+    Wait(0.5);
+    LoopIfConditionIsTrue();
 }
