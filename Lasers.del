@@ -1,291 +1,291 @@
-import "Lava.del";
+// import "Lava.del";
 
-// rule: "Lasers: Start/Stop"
-// if (IsCommunicating(HostPlayer(), Communication.VoiceLineLeft))
+// // rule: "Lasers: Start/Stop"
+// // if (IsCommunicating(HostPlayer(), Communication.VoiceLineLeft))
+// // {
+// //     if (gamemode != Mode.Lasers)
+// //     {
+// //         gamemode = Mode.Lasers;
+// //         rotateLasers = true;
+// //     }
+// //     else gamemode = Mode.Waiting;
+// // }
+
+// globalvar define lasersReady = false;
+
+// globalvar define rotateLasers = false;
+// globalvar define rotationSpeed = 0; // Number of degrees per second
+// globalvar define laserLength = 0;
+// globalvar define boundaryLength = 50;
+
+// globalvar define midpoint;
+
+// globalvar define laser1Rot;
+// globalvar define laser2Rot;
+// globalvar define laser3Rot;
+
+// globalvar define laser1Effect !;
+// globalvar define laser2Effect !;
+// globalvar define laser3Effect !;
+// globalvar define ringEffectArray !;
+// globalvar define outOfRangeHUD !;
+
+// define isOnLine(define line, define player): AbsoluteValue(cross(line, PositionOf(player))) < 200;
+// define cross(define line, define pos)   : dxc(line, pos) * dyl(line) - dyc(line, pos) * dxl(line);
+// define dxc(define line, define pos)     : XOf(pos) - XOf(line);
+// define dyc(define line, define pos)     : ZOf(pos) - ZOf(line);
+// define dxl(define line)                 : XOf(midpoint) - XOf(line);
+// define dyl(define line)                 : ZOf(midpoint) - ZOf(line);
+
+// rule: "Lasers: Setup laser game"
+// if (gamemode == Mode.Lasers)
 // {
-//     if (gamemode != Mode.Lasers)
+//     LaserDangerLevel = 1;
+
+//     midpoint = PolePos();
+
+//     CreateBeamEffect(
+//         AllPlayers(),
+//         BeamType.BadBeam,
+//         rot(midpoint + Vector(0, 0.5, 0), laser1Rot, laserLength),
+//         inverseRot(midpoint + Vector(0, 0.5, 0), laser1Rot, laserLength),
+//         Color.Red,
+//         EffectRev.VisibleToPositionAndRadius
+//     );
+//     laser1Effect = LastCreatedEntity();
+
+//     CreateBeamEffect(
+//         AllPlayers(),
+//         BeamType.BadBeam,
+//         rot(midpoint + Vector(0, 2, 0), laser2Rot, laserLength),
+//         inverseRot(midpoint + Vector(0, 2, 0), laser2Rot, laserLength),
+//         Color.Red,
+//         EffectRev.VisibleToPositionAndRadius
+//     );
+//     laser2Effect = LastCreatedEntity();
+
+//     CreateBeamEffect(
+//         AllPlayers(),
+//         BeamType.BadBeam,
+//         rot(midpoint + Vector(0, 3.5, 0), laser3Rot, laserLength),
+//         inverseRot(midpoint + Vector(0, 3.5, 0), laser3Rot, laserLength),
+//         Color.Red,
+//         EffectRev.VisibleToPositionAndRadius
+//     );
+//     laser3Effect = LastCreatedEntity();
+
+//     if (rotateLasers)
 //     {
-//         gamemode = Mode.Lasers;
-//         rotateLasers = true;
+//         // Create the boundary ring
+//         ringEffectArray = [];
+//         define fraction = 360 / boundarySubdivisions();
+//         for (define i = 0; i < boundarySubdivisions() - 1; i++)
+//         {
+//             CreateBeamEffect(
+//                 AllPlayers(),
+//                 BeamType.BadBeam,
+//                 rot(midpoint, fraction * i, boundaryLength),
+//                 rot(midpoint, fraction * (i + 1), boundaryLength),
+//                 Color.Blue,
+//                 EffectRev.VisibleTo
+//             );
+
+//             ringEffectArray = Append(ringEffectArray, LastCreatedEntity());
+//         }
+
+//         // Warn players to get inside the ring
+//         outOfRange = AllPlayers();
+//         CreateHudText(
+//             VisibleTo:outOfRange,
+//             Header     : <"<0><1>", IconString(Icon.Warning), IconString(Icon.Halo)>,
+//             Text       : "Get inside the ring!",
+//             HeaderColor: Color.Red,
+//             TextColor  : Color.Yellow,
+//             Location   : Location.Top,
+//             Spectators : Spectators.VisibleNever,
+//             SortOrder  : 1
+//         );
+//         outOfRangeHUD = LastTextID();
 //     }
-//     else gamemode = Mode.Waiting;
+
+//     ChaseVariableOverTime(laserLength, 150, 5, TimeChaseReevaluation.None);
+//     Wait(5);
+//     StopChasingVariable(laserLength);
+//     lasersReady = true;
+
+//     if (rotateLasers)
+//     {
+//         ChaseVariableAtRate(laser1Rot, 360 * 4, rotationSpeed, RateChaseReevaluation.DestinationAndRate);
+//         ChaseVariableAtRate(laser2Rot, -(360 * 4), rotationSpeed * 1.25, RateChaseReevaluation.DestinationAndRate);
+//         ChaseVariableAtRate(laser3Rot, 360 * 3, rotationSpeed * 0.85, RateChaseReevaluation.DestinationAndRate);
+
+//         ChaseVariableOverTime(rotationSpeed, 45, 5, TimeChaseReevaluation.None);
+//         Wait(5);
+//         StopChasingVariable(rotationSpeed);
+//     }
+// }
+// define boundarySubdivisions(): 10;
+
+// rule: "Lasers: Clean up lasers"
+// if (gamemode != 4)
+// if (lasersReady)
+// {
+//     lasersReady = false;
+
+//     if (gamemode != 3)
+//     {
+//         ChaseVariableOverTime(laserLength, 0, 5, TimeChaseReevaluation.None);
+//         Wait(5);
+//     }
+//     StopChasingVariable(laserLength);
+
+//     DestroyEffect(laser1Effect);
+//     DestroyEffect(laser2Effect);
+//     DestroyEffect(laser3Effect);
+//     DestroyEffectArray(ringEffectArray, 2);
+//     DestroyHudText(outOfRangeHUD);
+
+//     StopChasingVariable(laser1Rot);
+//     StopChasingVariable(laser2Rot);
+//     StopChasingVariable(laser3Rot);
+//     laser1Rot = 0;
+//     laser2Rot = 0;
+//     laser3Rot = 0;
+//     rotateLasers = false;
 // }
 
-globalvar define lasersReady = false;
+// define rot(define pos, define angle, define length): Destination(pos, DirectionFromAngles(angle, 0), length);
+// define inverseRot(define pos, define angle, define length): Destination(pos, DirectionFromAngles(angle + 180, 0), length);
 
-globalvar define rotateLasers = false;
-globalvar define rotationSpeed = 0; // Number of degrees per second
-globalvar define laserLength = 0;
-globalvar define boundaryLength = 50;
+// define intersectingFrom(define rotation, define height): RayCastHitPlayer(rotation, midpoint + height, AllLivingPlayers(), null, false);
 
-globalvar define midpoint;
+// define intersectingRot(define rotation, define height)       : intersectingFrom(       rot(midpoint + Vector(0, height, 0), rotation, laserLength), Vector(0, height, 0));
+// define inverseIntersectingRot(define rotation, define height): intersectingFrom(inverseRot(midpoint + Vector(0, height, 0), rotation, laserLength), Vector(0, height, 0));
 
-globalvar define laser1Rot;
-globalvar define laser2Rot;
-globalvar define laser3Rot;
+// playervar define lastDamage;
 
-globalvar define laser1Effect !;
-globalvar define laser2Effect !;
-globalvar define laser3Effect !;
-globalvar define ringEffectArray !;
-globalvar define outOfRangeHUD !;
+// define getOutOfRange(): RemoveFromArray(AllPlayers(), PlayersWithinRadius(midpoint, boundaryLength, Team.All, RadiusLOS.Off));
 
-define isOnLine(define line, define player): AbsoluteValue(cross(line, PositionOf(player))) < 200;
-define cross(define line, define pos)   : dxc(line, pos) * dyl(line) - dyc(line, pos) * dxl(line);
-define dxc(define line, define pos)     : XOf(pos) - XOf(line);
-define dyc(define line, define pos)     : ZOf(pos) - ZOf(line);
-define dxl(define line)                 : XOf(midpoint) - XOf(line);
-define dyl(define line)                 : ZOf(midpoint) - ZOf(line);
+// rule: "Lasers: (High Server Loa​d) Kill intersecting players"
+// if (gamemode == 4)
+// if (lasersReady)
+// {
+//     if (rotateLasers)
+//     {
+//         outOfRange = getOutOfRange();
+//         Damage(outOfRange, null, 10);
+//     }
 
-rule: "Lasers: Setup laser game"
-if (gamemode == Mode.Lasers)
-{
-    LaserDangerLevel = 1;
+//     define intersecting = [];
 
-    midpoint = PolePos();
+//     define line1 = rot(midpoint, laser1Rot, laserLength);
+//     ModifyVariable(intersecting, Operation.AppendToArray,
+//         FilteredArray(AllPlayers(), !IsInAir(ArrayElement()) && isOnLine(line1, ArrayElement())));
 
-    CreateBeamEffect(
-        AllPlayers(),
-        BeamType.BadBeam,
-        rot(midpoint + Vector(0, 0.5, 0), laser1Rot, laserLength),
-        inverseRot(midpoint + Vector(0, 0.5, 0), laser1Rot, laserLength),
-        Color.Red,
-        EffectRev.VisibleToPositionAndRadius
-    );
-    laser1Effect = LastCreatedEntity();
+//     Wait(0.05);
 
-    CreateBeamEffect(
-        AllPlayers(),
-        BeamType.BadBeam,
-        rot(midpoint + Vector(0, 2, 0), laser2Rot, laserLength),
-        inverseRot(midpoint + Vector(0, 2, 0), laser2Rot, laserLength),
-        Color.Red,
-        EffectRev.VisibleToPositionAndRadius
-    );
-    laser2Effect = LastCreatedEntity();
-
-    CreateBeamEffect(
-        AllPlayers(),
-        BeamType.BadBeam,
-        rot(midpoint + Vector(0, 3.5, 0), laser3Rot, laserLength),
-        inverseRot(midpoint + Vector(0, 3.5, 0), laser3Rot, laserLength),
-        Color.Red,
-        EffectRev.VisibleToPositionAndRadius
-    );
-    laser3Effect = LastCreatedEntity();
-
-    if (rotateLasers)
-    {
-        // Create the boundary ring
-        ringEffectArray = [];
-        define fraction = 360 / boundarySubdivisions();
-        for (define i = 0; i < boundarySubdivisions() - 1; i++)
-        {
-            CreateBeamEffect(
-                AllPlayers(),
-                BeamType.BadBeam,
-                rot(midpoint, fraction * i, boundaryLength),
-                rot(midpoint, fraction * (i + 1), boundaryLength),
-                Color.Blue,
-                EffectRev.VisibleTo
-            );
-
-            ringEffectArray = Append(ringEffectArray, LastCreatedEntity());
-        }
-
-        // Warn players to get inside the ring
-        outOfRange = AllPlayers();
-        CreateHudText(
-            VisibleTo:outOfRange,
-            Header     : <"<0><1>", IconString(Icon.Warning), IconString(Icon.Halo)>,
-            Text       : "Get inside the ring!",
-            HeaderColor: Color.Red,
-            TextColor  : Color.Yellow,
-            Location   : Location.Top,
-            Spectators : Spectators.VisibleNever,
-            SortOrder  : 1
-        );
-        outOfRangeHUD = LastTextID();
-    }
-
-    ChaseVariableOverTime(laserLength, 150, 5, TimeChaseReevaluation.None);
-    Wait(5);
-    StopChasingVariable(laserLength);
-    lasersReady = true;
-
-    if (rotateLasers)
-    {
-        ChaseVariableAtRate(laser1Rot, 360 * 4, rotationSpeed, RateChaseReevaluation.DestinationAndRate);
-        ChaseVariableAtRate(laser2Rot, -(360 * 4), rotationSpeed * 1.25, RateChaseReevaluation.DestinationAndRate);
-        ChaseVariableAtRate(laser3Rot, 360 * 3, rotationSpeed * 0.85, RateChaseReevaluation.DestinationAndRate);
-
-        ChaseVariableOverTime(rotationSpeed, 45, 5, TimeChaseReevaluation.None);
-        Wait(5);
-        StopChasingVariable(rotationSpeed);
-    }
-}
-define boundarySubdivisions(): 10;
-
-rule: "Lasers: Clean up lasers"
-if (gamemode != 4)
-if (lasersReady)
-{
-    lasersReady = false;
-
-    if (gamemode != 3)
-    {
-        ChaseVariableOverTime(laserLength, 0, 5, TimeChaseReevaluation.None);
-        Wait(5);
-    }
-    StopChasingVariable(laserLength);
-
-    DestroyEffect(laser1Effect);
-    DestroyEffect(laser2Effect);
-    DestroyEffect(laser3Effect);
-    DestroyEffectArray(ringEffectArray, 2);
-    DestroyHudText(outOfRangeHUD);
-
-    StopChasingVariable(laser1Rot);
-    StopChasingVariable(laser2Rot);
-    StopChasingVariable(laser3Rot);
-    laser1Rot = 0;
-    laser2Rot = 0;
-    laser3Rot = 0;
-    rotateLasers = false;
-}
-
-define rot(define pos, define angle, define length): Destination(pos, DirectionFromAngles(angle, 0), length);
-define inverseRot(define pos, define angle, define length): Destination(pos, DirectionFromAngles(angle + 180, 0), length);
-
-define intersectingFrom(define rotation, define height): RayCastHitPlayer(rotation, midpoint + height, AllLivingPlayers(), null, false);
-
-define intersectingRot(define rotation, define height)       : intersectingFrom(       rot(midpoint + Vector(0, height, 0), rotation, laserLength), Vector(0, height, 0));
-define inverseIntersectingRot(define rotation, define height): intersectingFrom(inverseRot(midpoint + Vector(0, height, 0), rotation, laserLength), Vector(0, height, 0));
-
-playervar define lastDamage;
-
-define getOutOfRange(): RemoveFromArray(AllPlayers(), PlayersWithinRadius(midpoint, boundaryLength, Team.All, RadiusLOS.Off));
-
-rule: "Lasers: (High Server Loa​d) Kill intersecting players"
-if (gamemode == 4)
-if (lasersReady)
-{
-    if (rotateLasers)
-    {
-        outOfRange = getOutOfRange();
-        Damage(outOfRange, null, 10);
-    }
-
-    define intersecting = [];
-
-    define line1 = rot(midpoint, laser1Rot, laserLength);
-    ModifyVariable(intersecting, Operation.AppendToArray,
-        FilteredArray(AllPlayers(), !IsInAir(ArrayElement()) && isOnLine(line1, ArrayElement())));
-
-    Wait(0.05);
-
-    define line2 = rot(midpoint, laser2Rot, laserLength);
-    ModifyVariable(intersecting, Operation.AppendToArray, 
-        FilteredArray(AllPlayers(), !(IsCrouching(ArrayElement()) || (IsOnGround(ArrayElement()) && IsUsingAbility1(ArrayElement()))) && isOnLine(line2, ArrayElement())));
+//     define line2 = rot(midpoint, laser2Rot, laserLength);
+//     ModifyVariable(intersecting, Operation.AppendToArray, 
+//         FilteredArray(AllPlayers(), !(IsCrouching(ArrayElement()) || (IsOnGround(ArrayElement()) && IsUsingAbility1(ArrayElement()))) && isOnLine(line2, ArrayElement())));
     
-    intersecting = FilteredArray(intersecting, TotalTimeElapsed() - ArrayElement().lastDamage > 1);
-    intersecting.lastDamage = TotalTimeElapsed();
-    Damage(intersecting, null, 170);
+//     intersecting = FilteredArray(intersecting, TotalTimeElapsed() - ArrayElement().lastDamage > 1);
+//     intersecting.lastDamage = TotalTimeElapsed();
+//     Damage(intersecting, null, 170);
 
-    Wait(0.05);
-    LoopIfConditionIsTrue();
-}
+//     Wait(0.05);
+//     LoopIfConditionIsTrue();
+// }
 
-rule: "Lasers: Finished rotating"
-if (gamemode == 4)
-if (lasersReady)
-if (rotateLasers)
-if (laser1Rot == 360 * 4)
-if (laser2Rot == -(360 * 4))
-if (laser3Rot == 360 * 3)
-{
-    DestroyHudText(outOfRangeHUD);
-    DestroyEffectArray(ringEffectArray, 2);
-    StopChasingVariable(laser1Rot);
-    StopChasingVariable(laser2Rot);
-    StopChasingVariable(laser3Rot);
-    laser1Rot = 0;
-    laser2Rot = 0;
-    laser3Rot = 0;
-    rotateLasers = false;
+// rule: "Lasers: Finished rotating"
+// if (gamemode == 4)
+// if (lasersReady)
+// if (rotateLasers)
+// if (laser1Rot == 360 * 4)
+// if (laser2Rot == -(360 * 4))
+// if (laser3Rot == 360 * 3)
+// {
+//     DestroyHudText(outOfRangeHUD);
+//     DestroyEffectArray(ringEffectArray, 2);
+//     StopChasingVariable(laser1Rot);
+//     StopChasingVariable(laser2Rot);
+//     StopChasingVariable(laser3Rot);
+//     laser1Rot = 0;
+//     laser2Rot = 0;
+//     laser3Rot = 0;
+//     rotateLasers = false;
 
-    SmallMessage(AllPlayers(), "Finished rotating");
-}
+//     SmallMessage(AllPlayers(), "Finished rotating");
+// }
 
-globalvar define outOfRange;
+// globalvar define outOfRange;
 
-rule: "Lasers: Laser discharge"
-if (gamemode == 4)
-if (lasersReady)
-if (rotateLasers)
-{
-    PlayEffect(AllPlayers(), PlayEffect.RingExplosion, Color.Red, midpoint, 30);
+// rule: "Lasers: Laser discharge"
+// if (gamemode == 4)
+// if (lasersReady)
+// if (rotateLasers)
+// {
+//     PlayEffect(AllPlayers(), PlayEffect.RingExplosion, Color.Red, midpoint, 30);
 
-    define knockPlayers = PlayersWithinRadius(midpoint, 15, Team.All, RadiusLOS.Off);
-    knockPlayers.knockedFrom = midpoint;
-    knockPlayers.force = 40;
-    knockPlayers.heightOffset = 1;
+//     define knockPlayers = PlayersWithinRadius(midpoint, 15, Team.All, RadiusLOS.Off);
+//     knockPlayers.knockedFrom = midpoint;
+//     knockPlayers.force = 40;
+//     knockPlayers.heightOffset = 1;
 
-    Wait(5);
-    LoopIfConditionIsTrue();
-}
+//     Wait(5);
+//     LoopIfConditionIsTrue();
+// }
 
-globalvar define LaserDangerLevel ! = 0;
-globalvar define updateLaserDangerLevel ! = 0;
-globalvar define laserDangerLevelHud !;
+// globalvar define LaserDangerLevel ! = 0;
+// globalvar define updateLaserDangerLevel ! = 0;
+// globalvar define laserDangerLevelHud !;
 
-rule: "Laser Danger Level"
-if (updateLaserDangerLevel != LaserDangerLevel)
-{
-    DestroyHudText(laserDangerLevelHud);
-    updateLaserDangerLevel = LaserDangerLevel;
+// rule: "Laser Danger Level"
+// if (updateLaserDangerLevel != LaserDangerLevel)
+// {
+//     DestroyHudText(laserDangerLevelHud);
+//     updateLaserDangerLevel = LaserDangerLevel;
 
-    if (LaserDangerLevel == 1)
-    {
-        CreateHudText(
-            VisibleTo     : AllPlayers(),
-            Header        : IconString(Icon.Bolt),
-            HeaderColor   : Color.Red,
-            Subheader     : "Laser danger level:",
-            SubheaderColor: Color.Orange,
-            Text          : "Mildly bone-breaking",
-            TextColor     : Color.Yellow,
-            Location      : Location.Left,
-            SortOrder     : 0
-        );
-    }
-    else if (LaserDangerLevel == 2)
-    {
-        CreateHudText(
-            VisibleTo     : AllPlayers(),
-            Header        : IconString(Icon.Bolt),
-            HeaderColor   : Color.Red,
-            Subheader     : "Laser danger level:",
-            SubheaderColor: Color.Orange,
-            Text          : "Spine-snapping",
-            TextColor     : Color.Orange,
-            Location      : Location.Left,
-            SortOrder     : 0
-        );
-    }
-    else if (LaserDangerLevel == 3)
-    {
-        CreateHudText(
-            VisibleTo     : AllPlayers(),
-            Header        : IconString(Icon.Bolt),
-            HeaderColor   : Color.Red,
-            Subheader     : "Laser danger level:",
-            SubheaderColor: Color.Orange,
-            Text          : "Instant annihilation",
-            TextColor     : Color.Red,
-            Location      : Location.Left,
-            SortOrder     : 0
-        );
-    }
-    laserDangerLevelHud = LastTextID();
-}
+//     if (LaserDangerLevel == 1)
+//     {
+//         CreateHudText(
+//             VisibleTo     : AllPlayers(),
+//             Header        : IconString(Icon.Bolt),
+//             HeaderColor   : Color.Red,
+//             Subheader     : "Laser danger level:",
+//             SubheaderColor: Color.Orange,
+//             Text          : "Mildly bone-breaking",
+//             TextColor     : Color.Yellow,
+//             Location      : Location.Left,
+//             SortOrder     : 0
+//         );
+//     }
+//     else if (LaserDangerLevel == 2)
+//     {
+//         CreateHudText(
+//             VisibleTo     : AllPlayers(),
+//             Header        : IconString(Icon.Bolt),
+//             HeaderColor   : Color.Red,
+//             Subheader     : "Laser danger level:",
+//             SubheaderColor: Color.Orange,
+//             Text          : "Spine-snapping",
+//             TextColor     : Color.Orange,
+//             Location      : Location.Left,
+//             SortOrder     : 0
+//         );
+//     }
+//     else if (LaserDangerLevel == 3)
+//     {
+//         CreateHudText(
+//             VisibleTo     : AllPlayers(),
+//             Header        : IconString(Icon.Bolt),
+//             HeaderColor   : Color.Red,
+//             Subheader     : "Laser danger level:",
+//             SubheaderColor: Color.Orange,
+//             Text          : "Instant annihilation",
+//             TextColor     : Color.Red,
+//             Location      : Location.Left,
+//             SortOrder     : 0
+//         );
+//     }
+//     laserDangerLevelHud = LastTextID();
+// }
