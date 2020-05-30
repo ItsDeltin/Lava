@@ -79,7 +79,7 @@ if (IsTrueForAny(
     ApplyImpulse(EventPlayer(), Up(), 15, Relative.ToWorld, ContraryMotion.Incorporate);
 }
 
-rule: "Player: Shield HUD"
+rule: "Player: Shield and brake HUD"
 {
     CreateHudText(
         VisibleTo  : FilteredArray(PlayersOnHero(Hero.Reinhardt), shieldIsOut(ArrayElement()) && VerticalFacingAngleOf(ArrayElement()) > -40),
@@ -99,6 +99,16 @@ rule: "Player: Shield HUD"
         TextColor  : Color.Yellow,
         Location   : Location.Top,
         SortOrder  : 3,
+        Spectators : Spectators.VisibleNever
+    );
+    CreateHudText(
+        VisibleTo  : FilteredArray(PlayersOnHero(Hero.Reinhardt), IsUsingAbility1(ArrayElement()) && IsOnGround(ArrayElement())),
+        Header     : IconString(Icon.ArrowDown),
+        HeaderColor: Color.Orange,
+        Text       : "Crouch to brake!",
+        TextColor  : Color.Yellow,
+        Location   : Location.Top,
+        SortOrder  : 4,
         Spectators : Spectators.VisibleNever
     );
 }
