@@ -46,13 +46,13 @@ if (gamemodeTransition)
     {
         StartCamera(EventPlayer(), PositionOf(rootBall) + Vector(0, 5, 10), PositionOf(rootBall), 7);
         Wait(1);
-        StartCamera(EventPlayer(), TopPolePos() + Vector(0, 5, 10), TopPolePos(), 8.5);
+        StartCamera(EventPlayer(), TopPolePos() + Vector(TeamOf(EventPlayer()) == Team.Team1 ? 10 : -10, 5, 10), TopPolePos(), 8.5);
         Wait(1);
         StartCamera(EventPlayer(), EyePosition(), TopPolePos(), 5);
         Wait(1.75);
         StopCamera(EventPlayer());
     }
-    else
+    else if (gamemode == Mode.Volleyball)
     {
         StartCamera(EventPlayer(), TopPolePos() + Vector(0, 5, 10), TopPolePos(), 8.5);
         Wait(1);

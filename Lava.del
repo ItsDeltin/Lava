@@ -100,10 +100,10 @@ define columnCount(): 28;
 
 globalvar define arenaEffects = [];
 
-define cliffBlue: Vector(107.07, 154.88, 63.61);
-define cliffRed: Vector(-109.08, 154.88, 65.06);
-define towerBlue: Vector(108.08, 154.88, 213.35);
-define towerRed: Vector(-108.07, 154.88, 214.81);
+Vector cliffBlue: Vector(107.07, 154.88, 63.61);
+Vector cliffRed: Vector(-109.08, 154.88, 65.06);
+Vector towerBlue: Vector(108.08, 154.88, 213.35);
+Vector towerRed: Vector(-108.07, 154.88, 214.81);
 
 rule: "Setup Arena (Disable when using Maze)"
 if (CurrentGameMode() == GameMode.Skirmish)

@@ -11,23 +11,12 @@ rule: "Switch gamemode"
 if (totalScore != 0)
 if (totalScore % 5 == 0)
 {
-    if (gamemode == Mode.Soccer)
-    {
-        AllPlayers().gamemodeTransition = true;
-        Wait(1);
-        gamemode = Mode.Volleyball;
-    }
-    else if (gamemode == Mode.Volleyball)
-    {
-        AllPlayers().gamemodeTransition = true;
-        Wait(1);
-        gamemode = Mode.Dodgeball;
-    } else
-    {
-        AllPlayers().gamemodeTransition = true;
-        Wait(1);
-        gamemode = Mode.Soccer;
-    }
+    AllPlayers().gamemodeTransition = true;
+    Wait(1);
+    if (gamemode == Mode.Soccer) gamemode = Mode.Volleyball;
+    else if (gamemode == Mode.Volleyball) gamemode = Mode.Dodgeball;
+    else gamemode = Mode.Soccer;
+    
     SpawnPlayers();
 }
 
