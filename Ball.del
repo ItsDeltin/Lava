@@ -352,15 +352,26 @@ if (TotalTimeElapsed() - lastCrutchAction > 10)
     lastCrutchAction = TotalTimeElapsed();
 }
 
-globalvar define owb = Normalize(CrossProduct(Vector(108.08, 154.88, 213.35).DirectionTowards(Vector(-108.07, 154.88, 214.81)), Up()));
+globalvar define owbTower = Normalize(CrossProduct(towerBlue.DirectionTowards(towerRed), Up()));
+globalvar define owbCliff = Normalize(CrossProduct(cliffRed.DirectionTowards(cliffBlue), Up()));
 
 rule: "Outer wall bounce"
 Event.OngoingPlayer
 if (rootBall == EventPlayer())
-if (signedDistance(PositionOf(rootBall), Vector(108.08, 154.88, 213.35), owb) < -8)
+if (signedDistance(PositionOf(rootBall), towerBlue, owbTower) < -8)
 {
     stopNearbyCharging();
-    ApplyImpulse(rootBall, owb, Max(5, SpeedOf(rootBall)), Relative.ToWorld, ContraryMotion.Cancel);
+    ApplyImpulse(rootBall, owbTower, Max(5, SpeedOf(rootBall)), Relative.ToWorld, ContraryMotion.Cancel);
+    Wait(0.5);
+    LoopIfConditionIsTrue();
+}
+rule: "Outer wall bounce"
+Event.OngoingPlayer
+if (rootBall == EventPlayer())
+if (signedDistance(PositionOf(rootBall), cliffRed, owbCliff) < -8)
+{
+    stopNearbyCharging();
+    ApplyImpulse(rootBall, owbCliff, Max(5, SpeedOf(rootBall)), Relative.ToWorld, ContraryMotion.Cancel);
     Wait(0.5);
     LoopIfConditionIsTrue();
 }
