@@ -18,6 +18,7 @@ globalvar define throwType = 0;
 globalvar define blueScoreText !;
 globalvar define redScoreText !;
 globalvar define ballEffect !;
+globalvar define ballIcon !;
 
 globalvar define ball;
 globalvar define ballReady;
@@ -77,6 +78,9 @@ if (gamemode == Mode.Soccer || gamemode == Mode.Volleyball)
     CreateEffect(AllPlayers(), Effect.Sphere, Color.Turquoise, ballLocation(), 1.25, EffectRev.VisibleToPositionAndRadius);
     ballEffect = LastCreatedEntity();
 
+    CreateIcon(FilteredArray(AllPlayers(), ballReady && !IsInViewAngle(ArrayElement(), rootBall, 30)), ballLocation(), Icon.Circle, IconRev.VisibleToAndPosition, Color.Turquoise, true);
+    ballIcon = LastCreatedEntity();
+
     ballReady = true;
 }
 
@@ -91,6 +95,7 @@ if (gamemode != Mode.Volleyball)
     DestroyEffect(ballEffect);
     DestroyDummyBot(TeamOf(ball1), SlotOf(ball1));
     DestroyDummyBot(TeamOf(ball2), SlotOf(ball2));
+    DestroyIcon(ballIcon);
     tpFrom = null;
     tpTo = null;
     rootBall = null;
