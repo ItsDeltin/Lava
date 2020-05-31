@@ -23,10 +23,9 @@ if (totalScore % 5 == 0)
 void SpawnPlayers() "Spawn Players"
 {
     AllPlayers().inputEnabled = false;
-
     InitSpawns();
-
     respawnBall();
+
     for (define i = 3; i > 0; i--)
     {
         SmallMessage(AllPlayers(), i);
@@ -106,30 +105,46 @@ void MakeBeams(Color color, ref define nearest, ref define normal, ref define si
     goalEffects[effectStart + 3] = MakeBeam(color, g_left(nearest, normal, size), g_up(nearest, normal, size));
 }
 
-void ChaseGoalEffects() "Chase Goal Effects"
+rule: "Football: Blue Diamond"
+if (blueInRange)
 {
-    blueGoalSize = 0;
+    MakeBeams(Color.Team1, redNearest, redNormal, redGoalSize, 4);
     redGoalSize = 0;
-    ChaseVariableAtRate(blueGoalSize, goalMod(blueNearest), 30, RateChaseReevaluation.DestinationAndRate);
     ChaseVariableAtRate(redGoalSize, goalMod(redNearest), 30, RateChaseReevaluation.DestinationAndRate);
 }
-
-rule: "Football: Spawn goals"
-if (gamemode == Mode.Soccer)
+rule: "Football: Destroy Blue Diamond"
+if (!blueInRange)
 {
-    ChaseGoalEffects();
-    MakeBeams(Color.Team2, blueNearest, blueNormal, blueGoalSize, 0);
-    MakeBeams(Color.Team1, redNearest, redNormal, redGoalSize, 4);
-
-    // CreateEffect(AllPlayers(), Effect.Orb, Color.Yellow, blueNearest, 0.5, EffectRev.VisibleToPositionAndRadius); // For debugging
-    // CreateEffect(AllPlayers(), Effect.Orb, Color.Yellow, redNearest, 0.5, EffectRev.VisibleToPositionAndRadius); // For debugging
+    DestroyEffect(goalEffects[4]);
+    DestroyEffect(goalEffects[5]);
+    DestroyEffect(goalEffects[6]);
+    DestroyEffect(goalEffects[7]);
 }
+rule: "Football: Red Diamond"
+if (redInRange)
+{
+    MakeBeams(Color.Team2, blueNearest, blueNormal, blueGoalSize, 0);
+    blueGoalSize = 0;
+    ChaseVariableAtRate(blueGoalSize, goalMod(blueNearest), 30, RateChaseReevaluation.DestinationAndRate);
+}
+rule: "Football: Destroy Red Diamond"
+if (!redInRange)
+{
+    DestroyEffect(goalEffects[0]);
+    DestroyEffect(goalEffects[1]);
+    DestroyEffect(goalEffects[2]);
+    DestroyEffect(goalEffects[3]);
+}
+
+define blueInRange: PositionOf(rootBall).X < -80;
+define redInRange: PositionOf(rootBall).X > 80;
 
 rule: "Football: Destroy goals"
 if (gamemode != Mode.Soccer)
 {
-    foreach (define effect in goalEffects)
-        DestroyEffect(effect);
+    foreach (define effect in goalEffects) DestroyEffect(effect);
+    StopChasingVariable(blueGoalSize);
+    StopChasingVariable(redGoalSize);
 }
 
 rule: "Football: Blue score"
@@ -169,9 +184,6 @@ void Score(Color teamColor, ref define team, define nearest, BlockLambda score)
     SetSlowMotion(25);
     Wait(1);
     SetSlowMotion(100);
-
-    Wait(3);
-    ChaseGoalEffects();
 }
 
 
