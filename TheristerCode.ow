@@ -3,6 +3,7 @@ variables
 	global:
 		4: gamemode
 		5: arenaEffects
+		15: totalScore
 		19: blueScore
 		20: redScore
 		41: rowFraction
@@ -1042,6 +1043,7 @@ rule("dodgeball score increase - team 1")
 	{
 		Global.dodgeball_scoring = True;
 		Global.blueScore += 1;
+		Global.totalScore += 1;
 		Big Message(All Players(All Teams), Custom String("Team 1 wins!"));
 		Play Effect(All Players(Team 1), Buff Impact Sound, Team 1, Vector(0, 161.500, 150), 200);
 		Play Effect(All Players(Team 2), Debuff Impact Sound, Team 2, Vector(0, 161.500, 150), 200);
@@ -1069,6 +1071,7 @@ rule("dodgeball score increase - team 2")
 	{
 		Global.dodgeball_scoring = True;
 		Global.redScore += 1;
+		Global.totalScore += 1;
 		Big Message(All Players(All Teams), Custom String("Team 2 wins!"));
 		Play Effect(All Players(Team 2), Buff Impact Sound, Team 2, Vector(0, 161.500, 150), 200);
 		Play Effect(All Players(Team 1), Debuff Impact Sound, Team 2, Vector(0, 161.500, 150), 200);
