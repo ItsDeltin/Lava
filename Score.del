@@ -74,22 +74,22 @@ globalvar define redGoalSize;
 define considerBallPos: PositionOf(rootBall);
 define goalMod(define goalPos): Max(1 - (DistanceBetween(rootBall, goalPos) / 15), 0) * 10;
 Vector nearestPlanePoint(define pointPosition, define planePosition, define planeNormal): pointPosition + (-DotProduct(planeNormal, pointPosition - planePosition) / DotProduct(planeNormal, planeNormal)) * planeNormal;
-Vector rightOf(Vector dir): Normalize(dir.CrossProduct(Up()));
-Vector upOf(Vector dir): Normalize(dir.CrossProduct(dir.CrossProduct(Up())));
 Vector signedDistance(define pointPosition, define planePoint, define planeNormal): DotProduct(planeNormal, (pointPosition - planePoint));
 // blue
 Vector blueNearest: nearestPlanePoint(considerBallPos, bluePos, blueNormal);
-Vector bluePos: Vector(115.69, 156.68, 148.52);
-Vector blueNormal: Vector(-0.90, 0.43, 0);
+globalvar Vector bluePos! = Vector(115.69, 156.68, 148.52);
+globalvar Vector blueNormal! = Vector(-0.90, 0.43, 0);
+globalvar Vector blueRight! = CrossProduct(blueNormal, Up()).Normalize();
+globalvar Vector blueUp! = CrossProduct(blueNormal, Normalize(blueNormal.CrossProduct(Up()))).Normalize();
+
 // red
 Vector redNearest: nearestPlanePoint(considerBallPos, redPos, redNormal);
-Vector redPos: Vector(-118.45, 156.68, 148.52);
-Vector redNormal: Vector(0.90, 0.43, 0);
+globalvar Vector redPos! = Vector(-118.45, 156.68, 148.52);
+globalvar Vector redNormal! = Vector(0.90, 0.43, 0);
+globalvar Vector redRight! = CrossProduct(redNormal, Up()).Normalize();
+globalvar Vector redUp! = CrossProduct(redNormal, Normalize(redNormal.CrossProduct(Up())));
 
-define g_down(define p, define d, define size): p + upOf(d) * size;
-define g_right(define p, define d, define size): p - rightOf(d) * size;
-define g_up(define p, define d, define size): p - upOf(d) * size;
-define g_left(define p, define d, define size): p + rightOf(d) * size;
+define g_o(define p, define d, define size): p + d * size;
 
 define MakeBeam(Color color, ref define s, ref define e)
 {
@@ -97,43 +97,41 @@ define MakeBeam(Color color, ref define s, ref define e)
     return LastCreatedEntity();
 }
 
-void MakeBeams(Color color, ref define nearest, ref define normal, ref define size, ref define effectStart)
+void MakeBeams(Color color, ref define nearest, ref define up, ref define right, ref define size, ref define effectStart)
 {
-    goalEffects[effectStart]     = MakeBeam(color, g_up(nearest, normal, size), g_right(nearest, normal, size));
-    goalEffects[effectStart + 1] = MakeBeam(color, g_right(nearest, normal, size), g_down(nearest, normal, size));
-    goalEffects[effectStart + 2] = MakeBeam(color, g_down(nearest, normal, size), g_left(nearest, normal, size));
-    goalEffects[effectStart + 3] = MakeBeam(color, g_left(nearest, normal, size), g_up(nearest, normal, size));
+    goalEffects[effectStart]     = MakeBeam(color, g_o(nearest, up, size), g_o(nearest, right, size));
+    goalEffects[effectStart + 1] = MakeBeam(color, g_o(nearest, right, size), g_o(nearest, -up, size));
+    goalEffects[effectStart + 2] = MakeBeam(color, g_o(nearest, -up, size), g_o(nearest, -right, size));
+    goalEffects[effectStart + 3] = MakeBeam(color, g_o(nearest, -right, size), g_o(nearest, up, size));
 }
 
 rule: "Football: Blue Diamond"
+if (ballReady)
 if (blueInRange)
 {
-    MakeBeams(Color.Team1, redNearest, redNormal, redGoalSize, 4);
+    DestroyGoalEffects();
+    MakeBeams(Color.Team1, redNearest, redUp, redRight, redGoalSize, 4);
     redGoalSize = 0;
     ChaseVariableAtRate(redGoalSize, goalMod(redNearest), 30, RateChaseReevaluation.DestinationAndRate);
 }
-rule: "Football: Destroy Blue Diamond"
-if (!blueInRange)
-{
-    DestroyEffect(goalEffects[4]);
-    DestroyEffect(goalEffects[5]);
-    DestroyEffect(goalEffects[6]);
-    DestroyEffect(goalEffects[7]);
-}
 rule: "Football: Red Diamond"
+if (ballReady)
 if (redInRange)
 {
-    MakeBeams(Color.Team2, blueNearest, blueNormal, blueGoalSize, 0);
+    DestroyGoalEffects();
+    MakeBeams(Color.Team2, blueNearest, blueUp, blueRight, blueGoalSize, 0);
     blueGoalSize = 0;
     ChaseVariableAtRate(blueGoalSize, goalMod(blueNearest), 30, RateChaseReevaluation.DestinationAndRate);
 }
-rule: "Football: Destroy Red Diamond"
-if (!redInRange)
+rule: "Football: Destroy Diamond"
+if (!redInRange && !blueInRange)
 {
-    DestroyEffect(goalEffects[0]);
-    DestroyEffect(goalEffects[1]);
-    DestroyEffect(goalEffects[2]);
-    DestroyEffect(goalEffects[3]);
+    DestroyGoalEffects();
+}
+
+void DestroyGoalEffects() "Destroy Goal Effects"
+{
+    foreach (define effect in goalEffects) DestroyEffect(effect);
 }
 
 define blueInRange: PositionOf(rootBall).X < -80;
@@ -142,7 +140,7 @@ define redInRange: PositionOf(rootBall).X > 80;
 rule: "Football: Destroy goals"
 if (gamemode != Mode.Soccer)
 {
-    foreach (define effect in goalEffects) DestroyEffect(effect);
+    DestroyGoalEffects();
     StopChasingVariable(blueGoalSize);
     StopChasingVariable(redGoalSize);
 }
