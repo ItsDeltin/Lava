@@ -145,6 +145,30 @@ if (gamemode != Mode.Soccer)
     StopChasingVariable(redGoalSize);
 }
 
+rule: "Football: Setup"
+if (gamemode == Mode.Soccer)
+{
+    DestroyTutorialText();
+    CreateHudText(
+        VisibleTo      : AllPlayers(),
+        Text           : "Hit the ball over the blue wall",
+        TextColor      : Color.Blue,
+        Location       : Location.Top,
+        SortOrder      : 2,
+        Spectators     : Spectators.VisibleAlways
+    );
+    tutorialText[0] = LastTextID();
+    CreateHudText(
+        VisibleTo      : AllPlayers(),
+        Subheader      : "Keep the ball away from the red wall",
+        SubheaderColor : Color.Orange,
+        Location       : Location.Top,
+        SortOrder      : 2.1,
+        Spectators     : Spectators.VisibleAlways
+    );
+    tutorialText[1] = LastTextID();
+}
+
 rule: "Football: Blue score"
 if (ballReady)
 if (gamemode == Mode.Soccer)

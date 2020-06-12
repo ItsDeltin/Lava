@@ -263,6 +263,14 @@ if (IsTrueForAll(AllPlayers(), HasSpawned(ArrayElement()) || IsDead(ArrayElement
     SpawnPlayers();
 }
 
+globalvar define tutorialText = [];
+
+void DestroyTutorialText() "Destroy Tutorial Text"
+{
+    foreach (define text in tutorialText)
+        DestroyHudText(text);
+}
+
 // globalvar define currentHeroIndex! = 0;
 // globalvar define currentHeroHud! = null;
 // rule: "Next hero index"
