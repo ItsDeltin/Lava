@@ -100,8 +100,11 @@ define MakeBeam(Color color, ref define s, ref define e)
 void MakeBeams(Color color, ref define nearest, ref define up, ref define right, ref define size, ref define effectStart)
 {
     goalEffects[effectStart]     = MakeBeam(color, g_o(nearest, up, size), g_o(nearest, right, size));
+    Wait(0.016, WaitBehavior.AbortWhenFalse);
     goalEffects[effectStart + 1] = MakeBeam(color, g_o(nearest, right, size), g_o(nearest, -up, size));
+    Wait(0.016, WaitBehavior.AbortWhenFalse);
     goalEffects[effectStart + 2] = MakeBeam(color, g_o(nearest, -up, size), g_o(nearest, -right, size));
+    Wait(0.016, WaitBehavior.AbortWhenFalse);
     goalEffects[effectStart + 3] = MakeBeam(color, g_o(nearest, -right, size), g_o(nearest, up, size));
 }
 
