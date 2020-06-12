@@ -80,7 +80,6 @@ if (gamemode != Mode.Volleyball)
     DestroyEffect(laser2Effect);
     DestroyEffect(laser3Effect);
     DestroyCounterText();
-    DestroyHudText(tutorialText);
     StopChasingVariable(detonationCounter);
 }
 
