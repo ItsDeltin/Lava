@@ -109,42 +109,11 @@ rule: "Setup Arena (Disable when using Maze)"
 if (CurrentGameMode() == GameMode.Skirmish)
 {
     OuterWalls();
-
-    define rowFraction = 1/rowCount();
-    define columnFraction = 1/columnCount();
-
-    for (define x = 0; x <= rowCount(); x++)
-    {
-        define a = LinearInterpolate(cliffBlue, cliffRed, x*rowFraction);
-        define b = LinearInterpolate(towerBlue, towerRed, x*rowFraction);
-        CreateBeamEffect(
-            AllPlayers(),
-            BeamType.GoodBeam,
-            a,
-            b,
-            Color.Purple,
-            EffectRev.VisibleTo
-        );
-        ModifyVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
-    }
-    for (define z = 0; z <= columnCount(); z++)
-    {
-        define a = LinearInterpolate(cliffBlue, towerBlue, z*columnFraction);
-        define b = LinearInterpolate(cliffRed, towerRed, z*columnFraction);
-        CreateBeamEffect(
-            AllPlayers(),
-            BeamType.GoodBeam,
-            a,
-            b,
-            Color.Purple,
-            EffectRev.VisibleTo
-        );
-        ModifyVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
-    }
+    MakeFloor();
 
     // Pole flair
     CreateEffect(AllPlayers(), Effect.Orb, Color.Orange, TopPolePos(), 0.25, EffectRev.VisibleTo);
-    // // ModifyGlobalVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
+    // ModifyGlobalVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
     // CreateBeamEffect(
     //     AllPlayers(),
     //     BeamType.GoodBeam,
@@ -152,11 +121,11 @@ if (CurrentGameMode() == GameMode.Skirmish)
     //     TopPolePos(),
     //     Color.Red
     // );
-    // // ModifyGlobalVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
-    // ChaseGlobalVariableAtRate(killzoneRot, 180, 25, RateChaseReevaluation.DestinationAndRate);
+    // ModifyGlobalVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
+    // ChaseVariableAtRate(killzoneRot, 180, 25, RateChaseReevaluation.DestinationAndRate);
 }
 
-// define flairPos(): Destination(xyPolePos(136.42), DirectionFromAngles(killzoneRot, 0), 11);
+// define flairPos(): Destination(PolePos() * Vector(1,0,1) + Vector(0, 136.42, 0), DirectionFromAngles(killzoneRot, 0), 11);
 
 // rule: "Reset killzone rot"
 // if (killzoneRot == 180)
@@ -170,7 +139,72 @@ if (CurrentGameMode() == GameMode.Skirmish)
 //     PlayEffect(AllPlayers(), PlayEffect.GoodExplosion, Color.Red, flairPos(), 1);
 // }
 
-// define globalvar killzoneRot = -180;
+// globalvar define killzoneRot = -180;
+
+globalvar define arenaType! = 0;
+globalvar define arenaColor! = 0;
+
+void MakeFloor() "Arena: Make Floor"
+{
+    for (define i! = 0; i < CountOf(arenaEffects); i++) {
+        DestroyEffect(arenaEffects[i]);
+        MinWait();
+    }
+    arenaEffects = [];
+    MinWait();
+
+    if (arenaType == 0)
+    {
+        define rowFraction! = 1/rowCount();
+        define columnFraction! = 1/columnCount();
+
+        for (define x! = 0; x <= rowCount(); x++)
+        {
+            define a! = LinearInterpolate(cliffBlue, cliffRed, x*rowFraction);
+            define b! = LinearInterpolate(towerBlue, towerRed, x*rowFraction);
+            ArenaBeam(a, b);
+            MinWait();
+        }
+        for (define z! = 0; z <= columnCount(); z++)
+        {
+            define a! = LinearInterpolate(cliffBlue, towerBlue, z*columnFraction);
+            define b! = LinearInterpolate(cliffRed, towerRed, z*columnFraction);
+            ArenaBeam(a, b);
+            MinWait();
+        }
+    }
+    else if (arenaType == 1)
+    {
+        ArenaBeam(cliffBlue, towerBlue);
+        ArenaBeam(towerBlue, towerRed);
+        ArenaBeam(towerRed, cliffRed);
+        ArenaBeam(cliffRed, cliffBlue);
+        ArenaBeam((towerBlue + towerRed) / 2, (cliffBlue + cliffRed) / 2);
+        ArenaBeam((towerBlue + cliffBlue) / 2, (towerRed + cliffRed) / 2);
+    }
+}
+
+void ArenaBeam(Vector a, Vector b) "Arena: Make Beam"
+{
+    if (arenaColor == 0) ArenaBeam(a, b, BeamType.GrappleBeam, Color.White);
+    else if (arenaColor == 1) ArenaBeam(a, b, BeamType.GoodBeam, Color.White);
+    else if (arenaColor == 2) ArenaBeam(a, b, BeamType.GoodBeam, Color.Orange);
+    else if (arenaColor == 3) ArenaBeam(a, b, BeamType.GoodBeam, Color.Green);
+    else if (arenaColor == 4) ArenaBeam(a, b, BeamType.GoodBeam, Color.Aqua);
+    ModifyVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
+}
+
+void ArenaBeam(ref Vector a, ref Vector b, BeamType type, Color color)
+{
+    CreateBeamEffect(
+        AllPlayers(),
+        type,
+        a,
+        b,
+        color,
+        EffectRev.VisibleTo
+    );
+}
 
 void OuterWalls()
 {
@@ -183,7 +217,6 @@ void OuterWalls()
         Color.Orange,
         EffectRev.VisibleTo
     );
-    ModifyVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
     // Tower side
     CreateBeamEffect(
         AllPlayers(),
@@ -193,7 +226,6 @@ void OuterWalls()
         Color.Orange,
         EffectRev.VisibleTo
     );
-    ModifyVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
     // Team 1 side
     // inner
     CreateBeamEffect(
@@ -204,7 +236,6 @@ void OuterWalls()
         Color.Team2,
         EffectRev.VisibleTo
     );
-    ModifyVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
     // Outer
     CreateBeamEffect(
         AllPlayers(),
@@ -214,7 +245,6 @@ void OuterWalls()
         Color.Team2,
         EffectRev.VisibleTo
     );
-    ModifyVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
     // Team 2 side
     // Inner
     CreateBeamEffect(
@@ -225,7 +255,6 @@ void OuterWalls()
         Color.Team1,
         EffectRev.VisibleTo
     );
-    ModifyVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
     //Outer
     CreateBeamEffect(
         AllPlayers(),
@@ -235,7 +264,6 @@ void OuterWalls()
         Color.Team1,
         EffectRev.VisibleTo
     );
-    ModifyVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
 }
 
 define PolePos()   : Vector(0, 154.88, 150);

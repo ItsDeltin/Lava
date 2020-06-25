@@ -1,0 +1,156 @@
+import "Lava.del";
+
+globalvar define hostMenuOpened! = false;
+globalvar define hostMenuHuds!;
+globalvar define currentMenuHuds!;
+globalvar define currentMenu!;
+globalvar define hostMenuCategory = 0;
+globalvar define hostMenuSelected = 0;
+globalvar HostMenuOption[][] options = [[
+    new ArenaTypeOption(),
+    new ArenaColorOption()
+]];
+
+rule: "Host Menu: Toggle Host Menu"
+if (IsButtonHeld(HostPlayer(), Button.Interact))
+{
+    if (!hostMenuOpened)
+    {
+        MakeHostHud(text: " \n\n\n\n\n\n", sortOrder: 5);
+        MakeHostHud(subheader: "Host Settings", sortOrder: 6);
+        MakeHostHud(text: <"<1> <0> <2>", ["Arena", "Sports", "Player"][currentMenu], hostMenuSelected == 0 ? "◀" : "", hostMenuSelected == 0 ? "▶" : "">, sortOrder: 7);
+        RenderOptions();
+    }
+    else
+    {
+        foreach (define hud in hostMenuHuds) DestroyHudText(hud);
+        foreach (define hud in currentMenuHuds) DestroyHudText(hud);
+        hostMenuHuds = [];
+    }
+
+    hostMenuOpened = !hostMenuOpened;
+}
+
+void RenderOptions() "Host Menu: Render Options"
+{
+    foreach (define hud in currentMenuHuds) DestroyHudText(hud);
+
+    for (define i = 0; i < options[hostMenuCategory].Length; i++)
+    {
+        CreateHudText(HostPlayer(), Subheader:options[hostMenuCategory][i].RenderedLine(i == hostMenuSelected - 1), SortOrder: i + 8, Location: Location.Top, Reevaluation: HudTextRev.VisibleTo);
+        ModifyVariable(currentMenuHuds, Operation.AppendToArray, LastTextID());
+    }
+}
+
+void MakeHostHud(ref define visibleTo = HostPlayer(), ref define text = null, ref define subheader = null, ref define sortOrder = 0)
+{
+    CreateHudText(HostPlayer(), Text:text, Subheader: subheader, Location: Location.Top, SortOrder: sortOrder);
+    ModifyVariable(hostMenuHuds, Operation.AppendToArray, LastTextID());
+}
+
+rule: "Host Menu: Previous Option"
+if (hostMenuOpened)
+if (ThrottleOf(HostPlayer()).Z > 0)
+{
+    hostMenuSelected--;
+    if (hostMenuSelected < 0) hostMenuSelected = options[hostMenuCategory].Length;
+    RenderOptions();
+}
+
+rule: "Host Menu: Next Option"
+if (hostMenuOpened)
+if (ThrottleOf(HostPlayer()).Z < 0)
+{
+    hostMenuSelected++;
+    if (hostMenuSelected > options[hostMenuCategory].Length) hostMenuSelected = 0;
+    RenderOptions();
+}
+
+rule: "Host Menu: Select Previous"
+if (hostMenuOpened)
+if (ThrottleOf(HostPlayer()).X > 0)
+{
+    if (hostMenuSelected == 0)
+    {
+        hostMenuCategory--;
+        if (hostMenuCategory < 0)
+            hostMenuCategory = options.Length - 1;
+    }
+    else
+        options[hostMenuCategory][hostMenuSelected - 1].OnLeft();
+}
+
+rule: "Host Menu: Select Next"
+if (hostMenuOpened)
+if (ThrottleOf(HostPlayer()).X < 0)
+{
+    if (hostMenuSelected == 0)
+    {
+        hostMenuCategory++;
+        if (hostMenuCategory >= options.Length)
+            hostMenuCategory = 0;
+    }
+    else
+        options[hostMenuCategory][hostMenuSelected - 1].OnRight();
+}
+
+class HostMenuOption
+{
+    public define Name;
+    public virtual define RenderedLine(define selected): "";
+    public virtual void OnLeft() {}
+    public virtual void OnRight() {}
+    public virtual void OnSelect() {}
+}
+class SelectOption : HostMenuOption
+{
+    protected define[] Options;
+    protected define Selected = 0;
+    public override define RenderedLine(define selected): selected ? <"◀ <0>: <1> ▶", Name, Options[Selected]> : <"<0>: <1>", Name, Options[Selected]>;
+
+    public override void OnLeft()
+    {
+        Selected++;
+        if (Selected >= Options.Length) Selected = 0;
+        root.RenderOptions();
+        Update();
+    }
+
+    public override void OnRight()
+    {
+        Selected--;
+        if (Selected < 0) Selected = Options.Length - 1;
+        root.RenderOptions();
+        Update();
+    }
+
+    protected virtual void Update() "Host Menu: Update Select Option" {}
+}
+class ArenaTypeOption : SelectOption
+{
+    public ArenaTypeOption()
+    {
+        Name = "Arena Type";
+        Options = ["Grid", "Minimal"];
+    }
+
+    protected override void Update()
+    {
+        root.arenaType = Selected;
+        root.MakeFloor();
+    }
+}
+class ArenaColorOption : SelectOption
+{
+    public ArenaColorOption()
+    {
+        Name = "Arena Color";
+        Options = ["Grapple", "White", "Orange", "Green", "Aqua"];
+    }
+
+    protected override void Update()
+    {
+        root.arenaColor = Selected;
+        root.MakeFloor();
+    }
+}
