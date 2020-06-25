@@ -105,6 +105,7 @@ define ballLocation(): tpTo != null ? tpTo + Vector(0, 1, 0) : Midpoint(ball1,ba
 define ballSpeed(): SpeedOf(rootBall);
 
 rule: "Ball: (High Server Loa​d) Link"
+if (ball)
 if (ballReady)
 {
     if (isStunned(ball1))
