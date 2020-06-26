@@ -17,10 +17,20 @@ globalvar HostMenuOption[][] options = [
         new ArenaColorOption()
     ],
     [
+        new ActionButton("Switch To Football", 0),
+        new ActionButton("Switch To Volleyball", 1),
+        new ActionButton("Switch To Dodgeball", 2)
+    ],
+    [
         PointSwitch,
         FootballEnabled,
         VolleyballEnabled,
         DodgeballEnabled
+    ],
+    [
+        new NumberOption("Move Speed", 0, 1000, 150, 20, 1),
+        new NumberOption("Charge Speed", 0, 1000, 200, 20, 2),
+        new NumberOption("Fire strike speed", 0, 1000, 100, 20, 3)
     ]
 ];
 
@@ -31,7 +41,7 @@ if (IsButtonHeld(HostPlayer(), Button.Interact))
     {
         MakeHostHud(text: " \n\n\n\n\n\n", sortOrder: 5);
         MakeHostHud(subheader: "Host Settings", sortOrder: 6);
-        MakeHostHud(text: <"<1> <0> <2>", ["Arena", "Sports", "Player"][hostMenuCategory], hostMenuSelected == 0 ? "◀" : "", hostMenuSelected == 0 ? "▶" : "">, sortOrder: 7);
+        MakeHostHud(text: <"<1> <0> <2>", ["Arena", "Sports", "Cycle", "Player"][hostMenuCategory], hostMenuSelected == 0 ? "◀" : "", hostMenuSelected == 0 ? "▶" : "">, sortOrder: 7);
         RenderOptions();
     }
     else
@@ -52,7 +62,7 @@ void RenderOptions() "Host Menu: Render Options"
 
     for (define i = 0; i < options[hostMenuCategory].Length; i++)
     {
-        CreateHudText(HostPlayer(), Subheader:options[hostMenuCategory][i].RenderedLine(i == hostMenuSelected - 1), SortOrder: i + 8, Location: Location.Top, Reevaluation: HudTextRev.VisibleTo);
+        CreateHudText(HostPlayer(), Text:options[hostMenuCategory][i].RenderedLine(i == hostMenuSelected - 1), TextColor: Color.SkyBlue, SortOrder: i + 8, Location: Location.Top, Reevaluation: HudTextRev.VisibleTo);
         ModifyVariable(currentMenuHuds, Operation.AppendToArray, LastTextID());
         MinWait();
     }
@@ -112,12 +122,20 @@ if (ThrottleOf(HostPlayer()).X < 0)
         options[hostMenuCategory][hostMenuSelected - 1].OnRight();
 }
 
+rule: "Host Menu: Press"
+if (hostMenuOpened)
+if (IsButtonHeld(HostPlayer(), Button.Jump))
+{
+    if (hostMenuSelected > 0)
+        options[hostMenuCategory][hostMenuSelected - 1].OnSelect();
+}
+
 class HostMenuOption
 {
     public define Name;
     public define Value;
     protected virtual define ValueString: Value;
-    public define RenderedLine(define selected): selected ? <"• <0>: <1> •", Name, ValueString> : <"<0>: <1>", Name, ValueString>;
+    public virtual define RenderedLine(define selected): selected ? <"• <0>: <1> •", Name, ValueString> : <"<0>: <1>", Name, ValueString>;
     public virtual void OnLeft() {}
     public virtual void OnRight() {}
     public virtual void OnSelect() {}
@@ -204,5 +222,100 @@ class BooleanOption : HostMenuOption
     {
         Value = !Value;
         root.RenderOptions();
+    }
+}
+class ActionButton : HostMenuOption
+{
+    private define Action;
+
+    public ActionButton(ref define name, ref define action)
+    {
+        Name = name;
+        Action = action;
+    }
+
+    public override define RenderedLine(define selected): selected ? <"• <0> •", Name> : Name;
+
+    public override void OnSelect()
+    {
+        if (Action == 0)
+        {
+            root.gamemode = Mode.Soccer;
+            root.SpawnPlayers();
+        }
+        else if (Action == 1)
+        {
+            root.gamemode = Mode.Volleyball;
+            root.SpawnPlayers();
+        }
+        else if (Action == 2)
+        {
+            root.gamemode = Mode.Dodgeball;
+            root.SpawnPlayers();
+        }
+    }
+}
+class NumberOption : HostMenuOption
+{
+    private define Min;
+    private define Max;
+    private define DefaultValue;
+    private define Step;
+    private define Action;
+
+    public NumberOption(ref define name, ref define min, ref define max, ref define defaultValue, ref define step, ref define action)
+    {
+        Name = name;
+        Min = min;
+        Max = max;
+        Value = defaultValue;
+        DefaultValue = defaultValue;
+        Step = step;
+        Action = action;
+    }
+
+    public override void OnSelect()
+    {
+        Value = DefaultValue;
+        root.RenderOptions();
+        Action();
+    }
+
+    public override void OnLeft()
+    {
+        Value = Max(Value - Step, Min);
+        root.RenderOptions();
+        Action();
+
+        Wait(0.25, WaitBehavior.AbortWhenFalse);
+        Loop();
+    }
+
+    public override void OnRight()
+    {
+        Value = Min(Value + Step, Max);
+        root.RenderOptions();
+        Action();
+
+        Wait(0.25, WaitBehavior.AbortWhenFalse);
+        Loop();
+    }
+
+    private void Action() "Host Menu: Number Action"
+    {
+        if (Action == 1)
+        {
+            root.defaultMoveSpeed = Value;
+            SetMoveSpeed(FilteredArray(AllPlayers(), HeroOf(ArrayElement()) == Hero.Reinhardt && !IsUsingAbility1(ArrayElement())), Value);
+        }
+        else if (Action == 2)
+        {
+            root.chargeSpeed = Value;
+        }
+        else if (Action == 3)
+        {
+            root.fireStrikeSpeed = Value;
+            SetProjectileSpeed(FilteredArray(AllPlayers(), HeroOf(ArrayElement()) == Hero.Reinhardt), root.fireStrikeSpeed);
+        }
     }
 }

@@ -3,13 +3,15 @@ import "Lava.del";
 playervar define chargeStart = null;
 
 globalvar define defaultMoveSpeed ! = 150;
+globalvar define fireStrikeSpeed ! = 100;
+globalvar define chargeSpeed ! = 200;
 
 rule: "Player: Setup"
 Event.OngoingPlayer
 Player.Reinhardt
 {
     SetMoveSpeed(EventPlayer(), defaultMoveSpeed);
-    DisallowButton(EventPlayer(), Button.Ultimate);
+    SetProjectileSpeed(EventPlayer(), fireStrikeSpeed);
 }
 
 rule: "Player: Charge Speed Boost"
@@ -18,7 +20,7 @@ Player.Reinhardt
 if (IsUsingAbility1())
 {
     chargeStart = TotalTimeElapsed();
-    SetMoveSpeed(EventPlayer(), 200);
+    SetMoveSpeed(EventPlayer(), chargeSpeed);
 }
 
 rule: "Player: Charge Speed Boost Revert"
