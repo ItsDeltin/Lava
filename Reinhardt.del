@@ -352,6 +352,65 @@ Player.Reinhardt
 
 playervar define fireStrikeDirection!;
 
+rule: "Ultimate"
+Event.OngoingPlayer
+Player.Reinhardt
+if (!PowerHammerMode.Value)
+if (IsUsingUltimate())
+{
+    UltimateHandler();
+}
+
+rule: "Power Hammer"
+Event.OngoingPlayer
+Player.Reinhardt
+if (PowerHammerMode.Value)
+if (IsButtonHeld(EventPlayer(), Button.PrimaryFire))
+if (!IsUsingAbility1())
+if (!IsUsingAbility2())
+if (!isUsingPowerHammer)
+{
+    SetUltimateCharge(EventPlayer(), 100);
+    PressButton(EventPlayer(), Button.Ultimate);
+    ApplyImpulse(EventPlayer(), Up(), 8, Relative.ToWorld, ContraryMotion.Incorporate);
+    isUsingPowerHammer = true;
+}
+
+rule: "Reset Power Hammer"
+Event.OngoingPlayer
+Player.Reinhardt
+if (isUsingPowerHammer)
+if (IsOnGround())
+{
+    Wait(0.25, WaitBehavior.AbortWhenFalse);
+    UltimateHandler();
+    Wait(0.20);
+    isUsingPowerHammer = false;
+}
+
+playervar define isUsingPowerHammer! = false;
+
+void UltimateHandler() "Reinhardt Ultimate Handler"
+{
+    define hitPos = PositionOf() + DirectionFromAngles(HorizontalFacingAngleOf(), 0) * 2.75;
+
+    define affectPlayers = FilteredArray(AllPlayers(OppositeTeamOf(TeamOf(EventPlayer()))), !ArrayElement().isWorkingDummy);
+    foreach (define dmg in affectPlayers)
+    {
+        define damage = 300 * Min(-DistanceBetween(dmg, hitPos) + 3.5, 1);
+        Damage(dmg, EventPlayer(), damage);
+    }
+
+    ModifyVariable(affectPlayers, Operation.AppendToArray, [ball1, ball2]);
+    foreach (define dmg in affectPlayers)
+    {
+        define impulse = (dmg.isBall ? 70 : 50) * Min(-DistanceBetween(dmg, hitPos) + 4, 1);
+        define direction = DirectionTowards(hitPos * Vector(1,0,1), PositionOf(dmg) * Vector(1,0,1)) + Vector(0,0.25,0);
+        if (impulse > 0)
+            ApplyImpulse(dmg, direction, impulse, Relative.ToWorld, ContraryMotion.Cancel);
+    }
+}
+
 rule: "Fire strike direction"
 Player.Reinhardt
 if (IsUsingAbility2())

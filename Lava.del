@@ -272,11 +272,11 @@ define TopPolePos(): Vector(0, 161.5,  150);
 
 define isOnWall(define player): IsOnGround(player) && AbsoluteValue(YOf(PositionOf(player)) - 158.44) < 0.2;
 
-disabled rule: "I want to die"
-if (IsButtonHeld(HostPlayer(), Button.Ultimate))
+rule: "I want to die"
+if (IsButtonHeld(HostPlayer(), Button.Reload))
 {
     CreateDummyBot(Hero.Reinhardt, NumberOfPlayers(Team.Team1) < 6 ? Team.Team1 : Team.Team2, -1, PositionOf(HostPlayer()), FacingDirectionOf(HostPlayer()));
-    LastCreatedEntity().isWorkingDummy = true;
+    //LastCreatedEntity().isWorkingDummy = true;
     StartHoldingButton(LastCreatedEntity(), Button.SecondaryFire);
     MinWait();
     SetFacing(LastCreatedEntity(), FacingDirectionOf(HostPlayer()), Relative.ToWorld);

@@ -10,6 +10,7 @@ globalvar BooleanOption FootballEnabled = new BooleanOption("Football Enabled", 
 globalvar BooleanOption VolleyballEnabled = new BooleanOption("Volleyball Enabled", true);
 globalvar BooleanOption DodgeballEnabled = new BooleanOption("Dodgeball Enabled", true);
 globalvar SelectOption PointSwitch = new SelectOption("Switch gamemode when number of points is reached", ["Off", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"], 5);
+globalvar BooleanOption PowerHammerMode = new BooleanOption("Power Hammer Mode", false);
 
 globalvar HostMenuOption[][] options = [
     [
@@ -28,9 +29,9 @@ globalvar HostMenuOption[][] options = [
         DodgeballEnabled
     ],
     [
+        PowerHammerMode,
         new NumberOption("Move Speed", 0, 1000, 150, 20, 1),
-        new NumberOption("Charge Speed", 0, 1000, 200, 20, 2),
-        new NumberOption("Fire strike speed", 0, 1000, 100, 20, 3)
+        new NumberOption("Charge Speed", 0, 1000, 200, 20, 2)
     ]
 ];
 
