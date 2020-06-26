@@ -31,7 +31,11 @@ globalvar HostMenuOption[][] options = [
     [
         PowerHammerMode,
         new NumberOption("Move Speed", 0, 1000, 150, 20, 1),
-        new NumberOption("Charge Speed", 0, 1000, 200, 20, 2)
+        new NumberOption("Charge Speed", 0, 1000, 200, 20, 2),
+        new NumberOption("Fire Strike Speed", 0, 1000, 100, 20, 3),
+        new NumberOption("Health", 0, 1000, 100, 20, 4, "%"),
+        new NumberOption("Regenerate health after", 0, 15, 10, 2.5, 5, " seconds"),
+        new NumberOption("Regeneration rate", 0, 1000, 100, 20, 6, " health per second")
     ]
 ];
 
@@ -136,7 +140,8 @@ class HostMenuOption
     public define Name;
     public define Value;
     protected virtual define ValueString: Value;
-    public virtual define RenderedLine(define selected): selected ? <"• <0>: <1> •", Name, ValueString> : <"<0>: <1>", Name, ValueString>;
+    public virtual define RenderedLine(define selected): selected ? <"• <0>: <1><2> •", Name, ValueString, ValueTag> : <"<0>: <1><2>", Name, ValueString, ValueTag>;
+    public define ValueTag = "";
     public virtual void OnLeft() {}
     public virtual void OnRight() {}
     public virtual void OnSelect() {}
@@ -264,7 +269,7 @@ class NumberOption : HostMenuOption
     private define Step;
     private define Action;
 
-    public NumberOption(ref define name, ref define min, ref define max, ref define defaultValue, ref define step, ref define action)
+    public NumberOption(ref define name, ref define min, ref define max, ref define defaultValue, ref define step, ref define action, ref define valueTag = "")
     {
         Name = name;
         Min = min;
@@ -273,6 +278,7 @@ class NumberOption : HostMenuOption
         DefaultValue = defaultValue;
         Step = step;
         Action = action;
+        ValueTag = valueTag;
     }
 
     public override void OnSelect()
@@ -317,6 +323,19 @@ class NumberOption : HostMenuOption
         {
             root.fireStrikeSpeed = Value;
             SetProjectileSpeed(FilteredArray(AllPlayers(), HeroOf(ArrayElement()) == Hero.Reinhardt), root.fireStrikeSpeed);
+        }
+        else if (Action == 4)
+        {
+            SetMaxHealth(PlayersOnHero(Hero.Reinhardt), Value);
+            root.maxHealth = Value;
+        }
+        else if (Action == 5)
+        {
+            root.healWait = Value;
+        }
+        else if (Action == 6)
+        {
+            root.healRate = Value;
         }
     }
 }

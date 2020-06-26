@@ -5,6 +5,7 @@ playervar define chargeStart = null;
 globalvar define defaultMoveSpeed ! = 150;
 globalvar define fireStrikeSpeed ! = 100;
 globalvar define chargeSpeed ! = 200;
+globalvar define maxHealth ! = 100;
 
 rule: "Player: Setup"
 Event.OngoingPlayer
@@ -12,6 +13,7 @@ Player.Reinhardt
 {
     SetMoveSpeed(EventPlayer(), defaultMoveSpeed);
     SetProjectileSpeed(EventPlayer(), fireStrikeSpeed);
+    SetMaxHealth(EventPlayer(), maxHealth);
 }
 
 rule: "Player: Charge Speed Boost"
@@ -339,14 +341,16 @@ if (!isWorkingDummy)
 }
 
 playervar define healOverTime;
+globalvar define healWait = 10;
+globalvar define healRate = 100;
 
 rule: "Heal"
 Event.OnDamageTaken
 Player.Reinhardt
 {
     StopHealOverTime(healOverTime);
-    Wait(10, WaitBehavior.RestartWhenTrue);
-    StartHealOverTime(EventPlayer(), null, 9999, 100);
+    Wait(healWait, WaitBehavior.RestartWhenTrue);
+    StartHealOverTime(EventPlayer(), null, 9999, healRate);
     healOverTime = LastHealOverTime();
 }
 
@@ -356,9 +360,13 @@ rule: "Ultimate"
 Event.OngoingPlayer
 Player.Reinhardt
 if (!PowerHammerMode.Value)
-if (IsUsingUltimate())
+if (IsButtonHeld(EventPlayer(), Button.Ultimate))
+if (!IsUsingAbility1())
+if (!IsUsingAbility2())
+if (!isUsingPowerHammer)
 {
-    UltimateHandler();
+    ApplyImpulse(EventPlayer(), Up(), 8, Relative.ToWorld, ContraryMotion.Incorporate);
+    isUsingPowerHammer = true;
 }
 
 rule: "Power Hammer"
