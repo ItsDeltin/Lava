@@ -206,7 +206,7 @@ if (!ballIsGettingCharged)
     BigMessage(AllPlayers(OppositeTeamOf(onTeam)), <"<0> Your team scores! <0>", IconString(Icon.Fire)>);
     BigMessage(AllPlayers(onTeam), <"<0> The enemy team scores! <0>", IconString(Icon.Recycle)>);
     
-    totalScore++;
+    async! PointScored();
     // Team 1 scores
     if (onTeam == Team.Team2)
     {

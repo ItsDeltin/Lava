@@ -7,17 +7,36 @@ globalvar define blueScore = 0;
 globalvar define redScore = 0;
 globalvar define totalScore = 0;
 
-rule: "Switch gamemode"
-if (totalScore != 0)
-if (totalScore % 5 == 0)
+void PointScored() "Point Scored"
 {
-    AllPlayers().gamemodeTransition = true;
-    Wait(1);
-    if (gamemode == Mode.Soccer) gamemode = Mode.Volleyball;
-    else if (gamemode == Mode.Volleyball) gamemode = Mode.Dodgeball;
-    else gamemode = Mode.Soccer;
+    totalScore++;
+    if (totalScore % PointSwitch.Value != 0 || PointSwitch.Value == 0) return;
     
-    SpawnPlayers();
+    Mode nextMode = null;
+
+    if (gamemode == Mode.Soccer)
+    {
+        if (VolleyballEnabled.Value) nextMode = Mode.Volleyball;
+        else if (DodgeballEnabled.Value) nextMode = Mode.Dodgeball;
+    }
+    else if (gamemode == Mode.Volleyball)
+    {
+        if (DodgeballEnabled.Value) nextMode = Mode.Dodgeball;
+        else if (FootballEnabled.Value) nextMode = Mode.Soccer;
+    }
+    else if (gamemode == Mode.Dodgeball)
+    {
+        if (FootballEnabled.Value) nextMode = Mode.Soccer;
+        else if (VolleyballEnabled.Value) nextMode = Mode.Volleyball;
+    }
+
+    if (nextMode != null)
+    {
+        AllPlayers().gamemodeTransition = true;
+        Wait(1);
+        gamemode = nextMode;
+        SpawnPlayers();
+    }
 }
 
 void SpawnPlayers() "Spawn Players"
@@ -196,7 +215,7 @@ if (signedDistance(considerBallPos, bluePos, blueNormal) < 0)
 
 void Score(Color teamColor, ref define team, define nearest, BlockLambda score)
 {
-    totalScore++;
+    async! PointScored();
     score.Invoke();
 
     Wait(0.35);

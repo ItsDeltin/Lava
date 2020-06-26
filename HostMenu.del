@@ -3,13 +3,26 @@ import "Lava.del";
 globalvar define hostMenuOpened! = false;
 globalvar define hostMenuHuds!;
 globalvar define currentMenuHuds!;
-globalvar define currentMenu!;
 globalvar define hostMenuCategory = 0;
 globalvar define hostMenuSelected = 0;
-globalvar HostMenuOption[][] options = [[
-    new ArenaTypeOption(),
-    new ArenaColorOption()
-]];
+
+globalvar BooleanOption FootballEnabled = new BooleanOption("Football Enabled", true);
+globalvar BooleanOption VolleyballEnabled = new BooleanOption("Volleyball Enabled", true);
+globalvar BooleanOption DodgeballEnabled = new BooleanOption("Dodgeball Enabled", true);
+globalvar SelectOption PointSwitch = new SelectOption("Switch gamemode when number of points is reached", ["Off", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"], 5);
+
+globalvar HostMenuOption[][] options = [
+    [
+        new ArenaTypeOption(),
+        new ArenaColorOption()
+    ],
+    [
+        PointSwitch,
+        FootballEnabled,
+        VolleyballEnabled,
+        DodgeballEnabled
+    ]
+];
 
 rule: "Host Menu: Toggle Host Menu"
 if (IsButtonHeld(HostPlayer(), Button.Interact))
@@ -18,13 +31,14 @@ if (IsButtonHeld(HostPlayer(), Button.Interact))
     {
         MakeHostHud(text: " \n\n\n\n\n\n", sortOrder: 5);
         MakeHostHud(subheader: "Host Settings", sortOrder: 6);
-        MakeHostHud(text: <"<1> <0> <2>", ["Arena", "Sports", "Player"][currentMenu], hostMenuSelected == 0 ? "◀" : "", hostMenuSelected == 0 ? "▶" : "">, sortOrder: 7);
+        MakeHostHud(text: <"<1> <0> <2>", ["Arena", "Sports", "Player"][hostMenuCategory], hostMenuSelected == 0 ? "◀" : "", hostMenuSelected == 0 ? "▶" : "">, sortOrder: 7);
         RenderOptions();
     }
     else
     {
         foreach (define hud in hostMenuHuds) DestroyHudText(hud);
         foreach (define hud in currentMenuHuds) DestroyHudText(hud);
+        currentMenuHuds = [];
         hostMenuHuds = [];
     }
 
@@ -34,11 +48,13 @@ if (IsButtonHeld(HostPlayer(), Button.Interact))
 void RenderOptions() "Host Menu: Render Options"
 {
     foreach (define hud in currentMenuHuds) DestroyHudText(hud);
+    currentMenuHuds = [];
 
     for (define i = 0; i < options[hostMenuCategory].Length; i++)
     {
         CreateHudText(HostPlayer(), Subheader:options[hostMenuCategory][i].RenderedLine(i == hostMenuSelected - 1), SortOrder: i + 8, Location: Location.Top, Reevaluation: HudTextRev.VisibleTo);
         ModifyVariable(currentMenuHuds, Operation.AppendToArray, LastTextID());
+        MinWait();
     }
 }
 
@@ -75,6 +91,7 @@ if (ThrottleOf(HostPlayer()).X > 0)
         hostMenuCategory--;
         if (hostMenuCategory < 0)
             hostMenuCategory = options.Length - 1;
+        RenderOptions();
     }
     else
         options[hostMenuCategory][hostMenuSelected - 1].OnLeft();
@@ -89,6 +106,7 @@ if (ThrottleOf(HostPlayer()).X < 0)
         hostMenuCategory++;
         if (hostMenuCategory >= options.Length)
             hostMenuCategory = 0;
+        RenderOptions();
     }
     else
         options[hostMenuCategory][hostMenuSelected - 1].OnRight();
@@ -97,7 +115,9 @@ if (ThrottleOf(HostPlayer()).X < 0)
 class HostMenuOption
 {
     public define Name;
-    public virtual define RenderedLine(define selected): "";
+    public define Value;
+    protected virtual define ValueString: Value;
+    public define RenderedLine(define selected): selected ? <"• <0>: <1> •", Name, ValueString> : <"<0>: <1>", Name, ValueString>;
     public virtual void OnLeft() {}
     public virtual void OnRight() {}
     public virtual void OnSelect() {}
@@ -105,21 +125,27 @@ class HostMenuOption
 class SelectOption : HostMenuOption
 {
     protected define[] Options;
-    protected define Selected = 0;
-    public override define RenderedLine(define selected): selected ? <"◀ <0>: <1> ▶", Name, Options[Selected]> : <"<0>: <1>", Name, Options[Selected]>;
+    protected override define ValueString: Options[Value];
+
+    public SelectOption(ref define name, ref define[] options, ref define defaultSelected = 0)
+    {
+        Name = name;
+        Options = options;
+        Value = defaultSelected;
+    }
 
     public override void OnLeft()
     {
-        Selected++;
-        if (Selected >= Options.Length) Selected = 0;
+        Value--;
+        if (Value < 0) Value = Options.Length - 1;
         root.RenderOptions();
         Update();
     }
 
     public override void OnRight()
     {
-        Selected--;
-        if (Selected < 0) Selected = Options.Length - 1;
+        Value++;
+        if (Value >= Options.Length) Value = 0;
         root.RenderOptions();
         Update();
     }
@@ -136,7 +162,7 @@ class ArenaTypeOption : SelectOption
 
     protected override void Update()
     {
-        root.arenaType = Selected;
+        root.arenaType = Value;
         root.MakeFloor();
     }
 }
@@ -150,7 +176,33 @@ class ArenaColorOption : SelectOption
 
     protected override void Update()
     {
-        root.arenaColor = Selected;
+        root.arenaColor = Value;
         root.MakeFloor();
+    }
+}
+class BooleanOption : HostMenuOption
+{
+    protected override define ValueString: Value ? "On" : "Off";
+
+    public BooleanOption(ref define name, ref define defaultValue)
+    {
+        Name = name;
+        Value = defaultValue;
+    }
+
+    protected override void OnLeft()
+    {
+        Value = !Value;
+        root.RenderOptions();
+    }
+    protected override void OnRight()
+    {
+        Value = !Value;
+        root.RenderOptions();
+    }
+    protected override void OnSelect()
+    {
+        Value = !Value;
+        root.RenderOptions();
     }
 }
