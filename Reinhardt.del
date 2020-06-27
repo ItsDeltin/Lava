@@ -58,11 +58,7 @@ if (DistanceBetween(EventPlayer(), PolePos()) < 3)
     }
 }
 
-define shieldIsOut(define player): IsButtonHeld(player, Button.SecondaryFire)
-    && !HasStatus(player, Status.Stunned)
-    && !IsUsingAbility1(player)
-    && !IsUsingAbility2(player)
-    && HeroOf(player) == Hero.Reinhardt;
+define shieldIsOut(define player): IsFiringSecondary(player) && HeroOf(player) == Hero.Reinhardt;
 
 define isRamp(define player): shieldIsOut(player) && VerticalFacingAngleOf(player) < -40;
 
@@ -276,7 +272,7 @@ if (!IsUsingAbility1())
 if (!IsUsingAbility2())
 if (!isUsingPowerHammer)
 {
-    ApplyImpulse(EventPlayer(), Up(), 8, Relative.ToWorld, ContraryMotion.Incorporate);
+    SlamImpulse();
     isUsingPowerHammer = true;
 }
 
@@ -285,14 +281,20 @@ Event.OngoingPlayer
 Player.Reinhardt
 if (PowerHammerMode.Value)
 if (IsButtonHeld(EventPlayer(), Button.PrimaryFire))
+if (!IsFiringSecondary())
 if (!IsUsingAbility1())
 if (!IsUsingAbility2())
 if (!isUsingPowerHammer)
 {
     SetUltimateCharge(EventPlayer(), 100);
     PressButton(EventPlayer(), Button.Ultimate);
-    ApplyImpulse(EventPlayer(), Up(), 8, Relative.ToWorld, ContraryMotion.Incorporate);
+    SlamImpulse();
     isUsingPowerHammer = true;
+}
+
+void SlamImpulse()
+{
+    ApplyImpulse(EventPlayer(), Up(), IsInAir() ? 5 : 8, Relative.ToWorld, ContraryMotion.Incorporate);
 }
 
 rule: "Reset Power Hammer"
