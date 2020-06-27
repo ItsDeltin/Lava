@@ -13,7 +13,6 @@ import "TheristerCode.ow";
 
 
 globalvar define started = false;
-globalvar define origin = Vector(-0.18, 154.88, 60);
 playervar define isWorkingDummy;
 globalvar Mode gamemode = Mode.Waiting;
 

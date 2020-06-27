@@ -2,10 +2,11 @@ import "Lava.del";
 
 playervar define chargeStart = null;
 
-globalvar define defaultMoveSpeed ! = 150;
-globalvar define fireStrikeSpeed ! = 100;
-globalvar define chargeSpeed ! = 200;
-globalvar define maxHealth ! = 100;
+globalvar define defaultMoveSpeed! = 150;
+globalvar define fireStrikeSpeed! = 100;
+globalvar define chargeSpeed! = 200;
+globalvar define maxHealth! = 100;
+globalvar define gravity! = 100;
 
 rule: "Player: Setup"
 Event.OngoingPlayer
@@ -14,6 +15,7 @@ Player.Reinhardt
     SetMoveSpeed(EventPlayer(), defaultMoveSpeed);
     SetProjectileSpeed(EventPlayer(), fireStrikeSpeed);
     SetMaxHealth(EventPlayer(), maxHealth);
+    SetGravity(EventPlayer(), gravity);
 }
 
 rule: "Player: Charge Speed Boost"

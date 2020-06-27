@@ -35,7 +35,8 @@ globalvar HostMenuOption[][] options = [
         new NumberOption("Fire Strike Speed", 0, 1000, 100, 10, 3, "%"),
         new NumberOption("Health", 0, 1000, 100, 10, 4, "%"),
         new NumberOption("Regenerate health after", 0, 15, 10, 1, 5, " seconds"),
-        new NumberOption("Regeneration rate", 0, 1000, 100, 10, 6, " health per second")
+        new NumberOption("Regeneration rate", 0, 1000, 100, 10, 6, " health per second"),
+        new NumberOption("Gravity", 10, 1000, 100, 10, 7, "%")
     ]
 ];
 
@@ -357,6 +358,11 @@ class NumberOption : HostMenuOption
         else if (Action == 6)
         {
             root.healRate = Value;
+        }
+        else if (Action == 7)
+        {
+            root.gravity = Value;
+            SetGravity(FilteredArray(AllPlayers(), !ArrayElement().isWorkingDummy), root.gravity);
         }
     }
 }
