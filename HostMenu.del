@@ -52,7 +52,7 @@ if (IsButtonHeld(HostPlayer(), Button.Interact))
         MakeHostHud(subheader: "Host Settings", sortOrder: 6);
         MakeHostHud(text: <"<1> <0> <2>", ["Arena", "Sports", "Cycle", "Player"][hostMenuCategory], hostMenuSelected == 0 ? "◀" : "", hostMenuSelected == 0 ? "▶" : "">, sortOrder: 7);
         MakeHostHud(header: renderedHostMenu, sortOrder: 8);
-        MakeHostHud(text: hostMenuSelected == 0 ? "Walk left or right to choose a category." : options[hostMenuCategory][hostMenuSelected - 1].Controls, sortOrder: 9);
+        MakeHostHud(text: hostMenuSelected == 0 ? "Walk left or right to choose a category." : options[hostMenuCategory][hostMenuSelected - 1].Controls, subheader: "Walk up and down to choose an option.", sortOrder: 9);
         RenderOptions();
     }
     else
@@ -327,14 +327,14 @@ class NumberOption : HostMenuOption
         Loop();
     }
 
-    private define Scalar: IsButtonHeld(HostPlayer(), Button.Ability1) ? 2 : 1;
+    private define Scalar: IsButtonHeld(HostPlayer(), Button.Ability1) ? 3 : 1;
 
     private void Action() "Host Menu: Number Action"
     {
         if (Action == 1)
         {
             root.defaultMoveSpeed = Value;
-            SetMoveSpeed(FilteredArray(AllPlayers(), HeroOf(ArrayElement()) == Hero.Reinhardt && !IsUsingAbility1(ArrayElement())), Value);
+            SetMoveSpeed(FilteredArray(PlayersOnHero(Hero.Reinhardt), HostPlayer() != ArrayElement() && !IsUsingAbility1(ArrayElement())), Value);
         }
         else if (Action == 2)
         {
@@ -343,7 +343,7 @@ class NumberOption : HostMenuOption
         else if (Action == 3)
         {
             root.fireStrikeSpeed = Value;
-            SetProjectileSpeed(FilteredArray(AllPlayers(), HeroOf(ArrayElement()) == Hero.Reinhardt), root.fireStrikeSpeed);
+            SetProjectileSpeed(PlayersOnHero(Hero.Reinhardt), root.fireStrikeSpeed);
         }
         else if (Action == 4)
         {
