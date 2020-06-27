@@ -2,9 +2,9 @@ import "Lava.del";
 
 globalvar define hostMenuOpened! = false;
 globalvar define hostMenuHuds!;
-globalvar define currentMenuHuds!;
 globalvar define hostMenuCategory = 0;
 globalvar define hostMenuSelected = 0;
+globalvar define renderedHostMenu! = "";
 
 globalvar BooleanOption FootballEnabled = new BooleanOption("Football Enabled", true);
 globalvar BooleanOption VolleyballEnabled = new BooleanOption("Volleyball Enabled", true);
@@ -30,12 +30,12 @@ globalvar HostMenuOption[][] options = [
     ],
     [
         PowerHammerMode,
-        new NumberOption("Move Speed", 0, 1000, 150, 20, 1),
-        new NumberOption("Charge Speed", 0, 1000, 200, 20, 2),
-        new NumberOption("Fire Strike Speed", 0, 1000, 100, 20, 3),
-        new NumberOption("Health", 0, 1000, 100, 20, 4, "%"),
-        new NumberOption("Regenerate health after", 0, 15, 10, 2.5, 5, " seconds"),
-        new NumberOption("Regeneration rate", 0, 1000, 100, 20, 6, " health per second")
+        new NumberOption("Move Speed", 0, 1000, 150, 10, 1),
+        new NumberOption("Charge Speed", 0, 1000, 200, 10, 2),
+        new NumberOption("Fire Strike Speed", 0, 1000, 100, 10, 3, "%"),
+        new NumberOption("Health", 0, 1000, 100, 10, 4, "%"),
+        new NumberOption("Regenerate health after", 0, 15, 10, 1, 5, " seconds"),
+        new NumberOption("Regeneration rate", 0, 1000, 100, 10, 6, " health per second")
     ]
 ];
 
@@ -44,16 +44,24 @@ if (IsButtonHeld(HostPlayer(), Button.Interact))
 {
     if (!hostMenuOpened)
     {
+        SetMoveSpeed(HostPlayer(), 0);
+        DisallowButton(HostPlayer(), Button.Ability1);
+        DisallowButton(HostPlayer(), Button.Jump);
+
         MakeHostHud(text: " \n\n\n\n\n\n", sortOrder: 5);
         MakeHostHud(subheader: "Host Settings", sortOrder: 6);
         MakeHostHud(text: <"<1> <0> <2>", ["Arena", "Sports", "Cycle", "Player"][hostMenuCategory], hostMenuSelected == 0 ? "◀" : "", hostMenuSelected == 0 ? "▶" : "">, sortOrder: 7);
+        MakeHostHud(header: renderedHostMenu, sortOrder: 8);
+        MakeHostHud(text: hostMenuSelected == 0 ? "Walk left or right to choose a category." : options[hostMenuCategory][hostMenuSelected - 1].Controls, sortOrder: 9);
         RenderOptions();
     }
     else
     {
+        SetMoveSpeed(HostPlayer(), defaultMoveSpeed);
+        AllowButton(HostPlayer(), Button.Ability1);
+        AllowButton(HostPlayer(), Button.Jump);
+
         foreach (define hud in hostMenuHuds) DestroyHudText(hud);
-        foreach (define hud in currentMenuHuds) DestroyHudText(hud);
-        currentMenuHuds = [];
         hostMenuHuds = [];
     }
 
@@ -62,20 +70,26 @@ if (IsButtonHeld(HostPlayer(), Button.Interact))
 
 void RenderOptions() "Host Menu: Render Options"
 {
-    foreach (define hud in currentMenuHuds) DestroyHudText(hud);
-    currentMenuHuds = [];
+    // foreach (define hud in currentMenuHuds) DestroyHudText(hud);
+    // currentMenuHuds = [];
 
+    // for (define i = 0; i < options[hostMenuCategory].Length; i++)
+    // {
+    //     CreateHudText(HostPlayer(), Text:options[hostMenuCategory][i].RenderedLine(i == hostMenuSelected - 1), TextColor: Color.SkyBlue, SortOrder: i + 8, Location: Location.Top, Reevaluation: HudTextRev.VisibleTo);
+    //     ModifyVariable(currentMenuHuds, Operation.AppendToArray, LastTextID());
+    //     MinWait();
+    // }
+
+    renderedHostMenu = "";
     for (define i = 0; i < options[hostMenuCategory].Length; i++)
     {
-        CreateHudText(HostPlayer(), Text:options[hostMenuCategory][i].RenderedLine(i == hostMenuSelected - 1), TextColor: Color.SkyBlue, SortOrder: i + 8, Location: Location.Top, Reevaluation: HudTextRev.VisibleTo);
-        ModifyVariable(currentMenuHuds, Operation.AppendToArray, LastTextID());
-        MinWait();
+        renderedHostMenu = <"<0><1><2>", renderedHostMenu, options[hostMenuCategory][i].RenderedLine(i == hostMenuSelected - 1), i < options[hostMenuCategory].Length - 1 ? "\n" : "">
     }
 }
 
-void MakeHostHud(ref define visibleTo = HostPlayer(), ref define text = null, ref define subheader = null, ref define sortOrder = 0)
+void MakeHostHud(ref define visibleTo = HostPlayer(), ref define header = null, ref define text = null, ref define subheader = null, ref define sortOrder = 0)
 {
-    CreateHudText(HostPlayer(), Text:text, Subheader: subheader, Location: Location.Top, SortOrder: sortOrder);
+    CreateHudText(HostPlayer(), Header:header, Text:text, Subheader: subheader, Location: Location.Top, SortOrder: sortOrder);
     ModifyVariable(hostMenuHuds, Operation.AppendToArray, LastTextID());
 }
 
@@ -140,8 +154,9 @@ class HostMenuOption
     public define Name;
     public define Value;
     protected virtual define ValueString: Value;
-    public virtual define RenderedLine(define selected): selected ? <"• <0>: <1><2> •", Name, ValueString, ValueTag> : <"<0>: <1><2>", Name, ValueString, ValueTag>;
+    public virtual define RenderedLine(define selected): <"<3><0>: <1><2>", Name, ValueString, ValueTag, selected ? "▶" : "▷">;
     public define ValueTag = "";
+    public virtual define Controls: "";
     public virtual void OnLeft() {}
     public virtual void OnRight() {}
     public virtual void OnSelect() {}
@@ -150,6 +165,7 @@ class SelectOption : HostMenuOption
 {
     protected define[] Options;
     protected override define ValueString: Options[Value];
+    public override define Controls: "Walk left or right to choose an option for the currently selected setting.";
 
     public SelectOption(ref define name, ref define[] options, ref define defaultSelected = 0)
     {
@@ -207,6 +223,7 @@ class ArenaColorOption : SelectOption
 class BooleanOption : HostMenuOption
 {
     protected override define ValueString: Value ? "On" : "Off";
+    public override define Controls: "Walk left, right, or jump to switch the currently selected setting.";
 
     public BooleanOption(ref define name, ref define defaultValue)
     {
@@ -233,6 +250,7 @@ class BooleanOption : HostMenuOption
 class ActionButton : HostMenuOption
 {
     private define Action;
+    public override define Controls: "Jump to activate the currently selected option.";
 
     public ActionButton(ref define name, ref define action)
     {
@@ -240,7 +258,7 @@ class ActionButton : HostMenuOption
         Action = action;
     }
 
-    public override define RenderedLine(define selected): selected ? <"• <0> •", Name> : Name;
+    public override define RenderedLine(define selected): <"<1><0>", Name, selected ? "▶" : "▷">;
 
     public override void OnSelect()
     {
@@ -263,6 +281,7 @@ class ActionButton : HostMenuOption
 }
 class NumberOption : HostMenuOption
 {
+    public override define Controls: "Walk left or right to decrease or increase the currently selected option.\nHold shift to double the amount the value is changed.\nPress jump to reset.";
     private define Min;
     private define Max;
     private define DefaultValue;
@@ -290,7 +309,7 @@ class NumberOption : HostMenuOption
 
     public override void OnLeft()
     {
-        Value = Max(Value - Step, Min);
+        Value = Max(Value - Step * Scalar, Min);
         root.RenderOptions();
         Action();
 
@@ -300,13 +319,15 @@ class NumberOption : HostMenuOption
 
     public override void OnRight()
     {
-        Value = Min(Value + Step, Max);
+        Value = Min(Value + Step * Scalar, Max);
         root.RenderOptions();
         Action();
 
         Wait(0.25, WaitBehavior.AbortWhenFalse);
         Loop();
     }
+
+    private define Scalar: IsButtonHeld(HostPlayer(), Button.Ability1) ? 2 : 1;
 
     private void Action() "Host Menu: Number Action"
     {
