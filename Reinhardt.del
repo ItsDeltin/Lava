@@ -415,7 +415,14 @@ void UltimateHandler() "Reinhardt Ultimate Handler"
         define impulse = (dmg.isBall ? 70 : 50) * Min(-DistanceBetween(dmg, hitPos) + 4, 1);
         define direction = DirectionTowards(hitPos * Vector(1,0,1), PositionOf(dmg) * Vector(1,0,1)) + Vector(0,0.25,0);
         if (impulse > 0)
+        {
             ApplyImpulse(dmg, direction, impulse, Relative.ToWorld, ContraryMotion.Cancel);
+            if (rootBall == dmg)
+            {
+                thrower = EventPlayer();
+                throwType = 4;
+            }
+        }
     }
 }
 

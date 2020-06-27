@@ -30,8 +30,8 @@ globalvar HostMenuOption[][] options = [
     ],
     [
         PowerHammerMode,
-        new NumberOption("Move Speed", 0, 1000, 150, 10, 1),
-        new NumberOption("Charge Speed", 0, 1000, 200, 10, 2),
+        new NumberOption("Move Speed", 0, 1000, 150, 10, 1, "%"),
+        new NumberOption("Charge Speed", 0, 1000, 200, 10, 2, "%"),
         new NumberOption("Fire Strike Speed", 0, 1000, 100, 10, 3, "%"),
         new NumberOption("Health", 0, 1000, 100, 10, 4, "%"),
         new NumberOption("Regenerate health after", 0, 15, 10, 1, 5, " seconds"),
@@ -281,7 +281,7 @@ class ActionButton : HostMenuOption
 }
 class NumberOption : HostMenuOption
 {
-    public override define Controls: "Walk left or right to decrease or increase the currently selected option.\nHold shift to double the amount the value is changed.\nPress jump to reset.";
+    public override define Controls: <"Walk left or right to change the currently selected option.\nHold <0> to double the amount the value is changed. Jump to reset.", AbilityIconString(HeroOf(HostPlayer()), ButtonValue(Button.Ability1))>;
     private define Min;
     private define Max;
     private define DefaultValue;

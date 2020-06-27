@@ -82,6 +82,7 @@ Event.OngoingPlayer
         "Hitting the ball with your hammer immediately after charging it will\ncause it to be launched further.",
         "In volleyball, the ball will only explode when the ball is on the ground.\nWhen the timer runs out, keep it in the air!",
         "In volleyball, the amount of time until the ball explodes decreases each\ntime the ball switches sides.",
+        "The host player can press interact to open game settings.",
         "The source code is available at https://github.com/ItsDeltin/Lava"
     ][tipIndex], Subheader: "Press reload for the next tip.", SubheaderColor: Color.Aqua, Location: Location.Left, SortOrder: -98);
 }
@@ -91,7 +92,7 @@ Event.OngoingPlayer
 if (IsButtonHeld(EventPlayer(), Button.Reload))
 {
     tipIndex++;
-    if (tipIndex > 9) tipIndex = 0;
+    if (tipIndex > 10) tipIndex = 0;
 }
 
 playervar define tipIndex = 0;

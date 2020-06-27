@@ -13,6 +13,7 @@ globalvar define thrower = null;
 // 1 = bump
 // 2 = charge
 // 3 = fire
+// 4 = power hammer
 globalvar define throwType = 0;
 
 globalvar define blueScoreText !;
