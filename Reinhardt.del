@@ -211,100 +211,13 @@ if (!isWorkingDummy)
     knockedFrom = null;
 }
 
-/*
-globalvar define FloorPoint = Vector(0, 154.88, 0);
-globalvar define FloorNormal = Vector(0, 1, 0);
-
-playervar define usingWallAbility ! = false;
-playervar define wallMarker ! = false;
-playervar define wallBuilder ! = null;
-
-// Wall Powerup
-rule: "Ability: Wall: Marker"
-Event.OngoingPlayer
-Player.Reinhardt
-if (IsButtonHeld(EventPlayer(), Button.Interact))
-// if (UltimateChargePercent() == 100)
-if (!usingWallAbility)
-{
-    // DestroyEffect(wallMarker);
-    CreateEffect(
-        EventPlayer(),
-        Effect.LightShaft,
-        Color.SkyBlue,
-        LineIntersectingPlane(EyePosition(), FacingDirectionOf(), FloorNormal, FloorPoint),
-        0.75
-    );
-    wallMarker = LastCreatedEntity();
-    usingWallAbility = true;
-}
-
-rule: "Ability: Wall: Input"
-Event.OngoingPlayer
-Player.Reinhardt
-if (!IsButtonHeld(EventPlayer(), Button.Interact))
-if (usingWallAbility)
-{
-    // Create the Mei dummy bot
-    CreateDummyBot(
-        Hero.Mei,
-        TeamWithAvailableSlots(TeamOf()),
-        -1,
-        LineIntersectingPlane(EyePosition(), FacingDirectionOf(), FloorNormal, FloorPoint) + Vector(0, 10, 0),
-        Vector()
-    );
-    wallBuilder = LastCreatedEntity(); // Store the dummy bot as a variable.
-    wallBuilder.isWorkingDummy = true; // Make the dummy bot as a working dummy so other systems don't interact with it.
-    SetInvisible(wallBuilder, InvisibleTo.All); // Make the dummy invisible.
-    MinWait(); // Wait for the game to process.
-    SetFacing(wallBuilder, DirectionFromAngles(HorizontalFacingAngleOf(), 89), Relative.ToWorld); // Force the mei to face the ground in the same direction as the event player.
-    PressButton(wallBuilder, Button.Ability2); // Use wall.
-    PressButton(wallBuilder, Button.PrimaryFire); // Place wall.
-    DestroyEffect(wallMarker);
-    Wait(0.05); // Wait for the game to process.
-    Teleport(wallBuilder, ObjectivePosition(0)); // Teleport the mei away.
-    Wait(5, WaitBehavior.AbortWhenFalse); // Wait for the wall.
-    DestroyDummyBot(TeamOf(wallBuilder), SlotOf(wallBuilder)); // Destroy the mei.
-    wallBuilder = null;
-    usingWallAbility = false;
-}
-
-rule: "Ability: Wall: Destroy"
-Event.OngoingPlayer
-Player.Reinhardt
-if (IsButtonHeld(EventPlayer(), Button.Interact))
-if (usingWallAbility)
-if (wallBuilder != null)
-{
-    DestroyDummyBot(TeamOf(wallBuilder), SlotOf(wallBuilder)); // Destroy the mei.
-    wallBuilder = null;
-    usingWallAbility = false;
-}
-
-define LineIntersectingPlane(define pos, define dir, define planeNormal, define planePos):
-    pos + Normalize(dir) * ((DotProduct(planeNormal, planePos) - DotProduct(planeNormal, pos)) / DotProduct(planeNormal, Normalize(dir)));
-define TeamWithAvailableSlots(define preferTeam): NumberOfPlayers(preferTeam) < 6 ? preferTeam : OppositeTeamOf(preferTeam);
-*/
-
-// rule: "Ability: Ball Shield"
-// Event.OngoingPlayer
-// Player.Reinhardt
-// if (ball)
-// if (IsButtonHeld(EventPlayer(), Button.SecondaryFire))
-// if (IsInAir(rootBall))
-// if (DistanceBetween(EyePosition(), rootBall) < 3)
-// if (IsInViewAngle(EventPlayer(), PositionOf(rootBall), 50))
-// {
-//     define a ! = [ball1,ball2];
-//     ApplyImpulse(a, FacingDirectionOf(), 20, Relative.ToWorld, ContraryMotion.Cancel);
-// }
-
-// rule: "Ability: Throw ball"
+// disabled rule: "Ability: Throw ball"
 // Event.OngoingPlayer
 // Player.Reinhardt
 // if (ball)
 // if (IsButtonHeld(EventPlayer(), Button.Jump))
 // if (DistanceBetween(EventPlayer(), rootBall) < 3)
+// if (IsOnGround(rootBall))
 // {
 //     define a ! = [ball1,ball2];
 //     ApplyImpulse(a, Up(), 15, Relative.ToWorld, ContraryMotion.Cancel);
@@ -353,8 +266,6 @@ Player.Reinhardt
     StartHealOverTime(EventPlayer(), null, 9999, healRate);
     healOverTime = LastHealOverTime();
 }
-
-playervar define fireStrikeDirection!;
 
 rule: "Ultimate"
 Event.OngoingPlayer
@@ -426,9 +337,12 @@ void UltimateHandler() "Reinhardt Ultimate Handler"
     }
 }
 
+playervar define fireStrikeDirection!;
+
 rule: "Fire strike direction"
 Player.Reinhardt
 if (IsUsingAbility2())
 {
+    Wait(0.48);
     fireStrikeDirection = FacingDirectionOf();
 }
