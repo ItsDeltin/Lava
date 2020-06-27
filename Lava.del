@@ -28,7 +28,7 @@ enum Mode
     Dodgeball
 }
 
-rule: "OSTW"
+rule: "Setup"
 {
     CreateHudText(
         VisibleTo     : AllPlayers(),
@@ -46,13 +46,15 @@ rule: "OSTW"
         Spectators: Spectators.VisibleAlways,
         SortOrder: -100
     );
+    CreateHudText(AllPlayers(), Text: " \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", Location: Location.Left, SortOrder: -99);
+
     CreateHudText(
         VisibleTo : AllPlayers(),
         Text      : "Synthwave Olympics",
         TextColor : Color.Turquoise,
         Location  : Location.Top,
         SortOrder : -1,
-        Spectators:Spectators.VisibleAlways
+        Spectators: Spectators.VisibleAlways
     );
     CreateHudText(
         VisibleTo     : AllPlayers(),
@@ -60,12 +62,39 @@ rule: "OSTW"
         SubheaderColor: Color.Green,
         Location  : Location.Top,
         SortOrder : -0.9,
-        Spectators:Spectators.VisibleAlways
+        Spectators: Spectators.VisibleAlways
     );
     SetObjectiveDescription(AllPlayers(), "♥", ObjectiveRev.VisibleToSortOrderAndString);
     DisableCompletion();
     SetMatchTime(0);
 }
+
+rule: "Player Setup"
+Event.OngoingPlayer
+{
+    CreateHudText(EventPlayer(), Text: [
+        "Charge into the center pole to knock the ball off.",
+        "Hold out your shield and look up to become a ramp.\nCharge into a ramp to fly up into the air.",
+        "Hold crouch while charging to brake.",
+        "Hit the ball with a fire strike to ignite it.",
+        "Charging the ball while it is exploding will launch it and you into the air.",
+        "Striking the ball with a fire strike while it is in midair will cause\nit to launch into the direction it was hit.",
+        "Hitting the ball with your hammer immediately after charging it will\ncause it to be launched further.",
+        "In volleyball, the ball will only explode when the ball is on the ground.\nWhen the timer runs out, keep it in the air!",
+        "In volleyball, the amount of time until the ball explodes decreases each\ntime the ball switches sides.",
+        "The source code is available at https://github.com/ItsDeltin/Lava"
+    ][tipIndex], Subheader: "Press reload for the next tip.", SubheaderColor: Color.Aqua, Location: Location.Left, SortOrder: -98);
+}
+
+rule: "Next tip"
+Event.OngoingPlayer
+if (IsButtonHeld(EventPlayer(), Button.Reload))
+{
+    tipIndex++;
+    if (tipIndex > 9) tipIndex = 0;
+}
+
+playervar define tipIndex = 0;
 
 rule: "Generic Respawn"
 Event.OngoingPlayer

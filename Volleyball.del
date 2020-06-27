@@ -1,12 +1,5 @@
 import "Lava.del";
 
-rule: "Volleyball: Start/Stop"
-if (IsCommunicating(HostPlayer(), Communication.VoiceLineRight))
-{
-    if (gamemode != Mode.Volleyball) gamemode = Mode.Volleyball;
-    else gamemode = Mode.Waiting;
-}
-
 globalvar define volleyball;
 globalvar define detonationCounter;
 globalvar define detonationTime;

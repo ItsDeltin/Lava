@@ -80,14 +80,6 @@ if (setFacing)
     SetFacing(EventPlayer(), DirectionTowards(EyePosition(EventPlayer()), TopPolePos()), Relative.ToWorld);
 }
 
-rule: "Football: Start/Stop"
-if (IsCommunicating(HostPlayer(), Communication.VoiceLineUp))
-{
-    if (gamemode != Mode.Soccer) gamemode = Mode.Soccer;
-    else gamemode = Mode.Waiting;
-}
-
-
 globalvar define blueGoalSize;
 globalvar define redGoalSize;
 define considerBallPos: PositionOf(rootBall);
