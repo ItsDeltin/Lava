@@ -47,22 +47,9 @@ rule: "Setup"
     );
     CreateHudText(AllPlayers(), Text: " \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", Location: Location.Left, SortOrder: -99);
 
-    CreateHudText(
-        VisibleTo : AllPlayers(),
-        Text      : "Synthwave Olympics",
-        TextColor : Color.Turquoise,
-        Location  : Location.Top,
-        SortOrder : -1,
-        Spectators: Spectators.VisibleAlways
-    );
-    CreateHudText(
-        VisibleTo     : AllPlayers(),
-        Subheader     : <"C-A-P: <0>-<1>-<2>", ServerLoad(), ServerLoadAverage(), ServerLoadPeak()>,
-        SubheaderColor: Color.Green,
-        Location  : Location.Top,
-        SortOrder : -0.9,
-        Spectators: Spectators.VisibleAlways
-    );
+    CreateHudText(VisibleTo: AllPlayers(), Text: "Synthball - N69CC", TextColor: Color.Turquoise, Location: Location.Top, SortOrder: -1, Spectators: Spectators.VisibleAlways);
+    CreateHudText(AllPlayers(), Subheader: "You are the host player. Press interact to open the host settings.", SubheaderColor: Color.Turquoise, Location: Location.Top, SortOrder: -0.9, Spectators: Spectators.VisibleNever);
+    CreateHudText(HostPlayer(), Subheader: <"C-A-P: <0>-<1>-<2>", ServerLoad(), ServerLoadAverage(), ServerLoadPeak()>, SubheaderColor: Color.Green, Location: Location.Top, SortOrder: -0.8, Spectators: Spectators.VisibleAlways);
     SetObjectiveDescription(AllPlayers(), "♥", ObjectiveRev.VisibleToSortOrderAndString);
     DisableCompletion();
     SetMatchTime(0);
