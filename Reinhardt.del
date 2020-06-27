@@ -349,4 +349,6 @@ if (IsUsingAbility2())
 {
     Wait(0.48);
     fireStrikeDirection = FacingDirectionOf();
+    Wait(0.64);
+    SetAbilityCooldown(EventPlayer(), ButtonValue(Button.Ability2), FireStrikeCooldownTime.Value);
 }
