@@ -117,10 +117,10 @@ define columnCount(): 28;
 
 globalvar define arenaEffects = [];
 
-globalvar Vector cliffBlue = Vector(107.07, 154.88, 63.61);
-globalvar Vector cliffRed = Vector(-109.08, 154.88, 65.06);
-globalvar Vector towerBlue = Vector(108.08, 154.88, 213.35);
-globalvar Vector towerRed = Vector(-108.07, 154.88, 214.81);
+globalvar Vector cliffBlue! = Vector(107.07, 154.88, 63.61);
+globalvar Vector cliffRed! = Vector(-109.08, 154.88, 65.06);
+globalvar Vector towerBlue! = Vector(108.08, 154.88, 213.35);
+globalvar Vector towerRed! = Vector(-108.07, 154.88, 214.81);
 
 rule: "Setup Arena (Disable when using Maze)"
 if (CurrentGameMode() == GameMode.Skirmish)
@@ -199,15 +199,27 @@ void MakeFloor() "Arena: Make Floor"
         ArenaBeam((towerBlue + towerRed) / 2, (cliffBlue + cliffRed) / 2);
         ArenaBeam((towerBlue + cliffBlue) / 2, (towerRed + cliffRed) / 2);
     }
+    else if (arenaType == 2)
+    {
+        define columnFraction! = 1/columnCount();
+        for (define z! = 0; z <= columnCount(); z++)
+        {
+            define a! = LinearInterpolate(cliffBlue, towerBlue, z*columnFraction);
+            define b! = LinearInterpolate(cliffRed, towerRed, z*columnFraction);
+            ArenaBeam(a, b);
+            MinWait();
+        }
+    }
 }
 
 void ArenaBeam(Vector a, Vector b) "Arena: Make Beam"
 {
     if (arenaColor == 0) ArenaBeam(a, b, BeamType.GrappleBeam, Color.White);
-    else if (arenaColor == 1) ArenaBeam(a, b, BeamType.GoodBeam, Color.White);
-    else if (arenaColor == 2) ArenaBeam(a, b, BeamType.GoodBeam, Color.Orange);
-    else if (arenaColor == 3) ArenaBeam(a, b, BeamType.GoodBeam, Color.Green);
-    else if (arenaColor == 4) ArenaBeam(a, b, BeamType.GoodBeam, Color.Aqua);
+    else if (arenaColor == 1) ArenaBeam(a, b, BeamType.GoodBeam, Color.Purple);
+    else if (arenaColor == 2) ArenaBeam(a, b, BeamType.GoodBeam, Color.White);
+    else if (arenaColor == 3) ArenaBeam(a, b, BeamType.GoodBeam, Color.Orange);
+    else if (arenaColor == 4) ArenaBeam(a, b, BeamType.GoodBeam, Color.Green);
+    else if (arenaColor == 5) ArenaBeam(a, b, BeamType.GoodBeam, Color.Aqua);
     ModifyVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
 }
 

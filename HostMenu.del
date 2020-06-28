@@ -200,7 +200,7 @@ class ArenaTypeOption : SelectOption
     public ArenaTypeOption()
     {
         Name = "Arena Type";
-        Options = ["Grid", "Minimal"];
+        Options = ["Grid", "Minimal", "Striped"];
     }
 
     protected override void Update()
@@ -214,7 +214,7 @@ class ArenaColorOption : SelectOption
     public ArenaColorOption()
     {
         Name = "Arena Color";
-        Options = ["Grapple", "White", "Orange", "Green", "Aqua"];
+        Options = ["Grapple", "Purple", "White", "Orange", "Green", "Aqua"];
     }
 
     protected override void Update()
