@@ -160,32 +160,36 @@ define Local(Vector pos, Vector dir, define forward, define right, define up): p
     + Normalize(dir.CrossProduct(Up())) * right
     + -Normalize(dir.CrossProduct(CrossProduct(dir, Up()))) * up;
 
-rule: "Reset arrow"
+rule: "Player: Reset arrow"
 Event.OngoingPlayer
 if (arrowAnimation == arrowDestination)
 {
     arrowAnimation = 0;
 }
-rule: "Reset arrow 2"
+rule: "Player: Reset arrow 2"
 Event.OngoingPlayer
 if (arrowAnimation2 == arrowDestination)
 {
     arrowAnimation2 = 0;
 }
 
-rule: "Player: Start braking"
+rule: "Player: Charge brake"
 Event.OngoingPlayer
 Player.Reinhardt
 if (IsUsingAbility1())
 if (IsButtonHeld(EventPlayer(), Button.Crouch))
-if (IsOnGround())
 {
-    StartAccelerating(EventPlayer(), Backward(), 750, 90, Relative.ToPlayer);
-    PlayEffect(AllPlayers(), PlayEffect.BadExplosion, Color.White, PositionOf(), 0.5);
-    PlayEffect(EventPlayer(), PlayEffect.DebuffImpactSound, Color.White, EyePosition(), 100);
-    Wait(0.8);
-    CancelPrimaryAction(EventPlayer());
-    StopAccelerating(EventPlayer());
+    SetMoveSpeed(EventPlayer(), 0);
+    ApplyImpulse(EventPlayer(), Backward(), 10, Relative.ToPlayer, ContraryMotion.Cancel);
+}
+
+rule: "Player: Charge brake stop"
+Event.OngoingPlayer
+Player.Reinhardt
+if (IsUsingAbility1())
+if (!IsButtonHeld(EventPlayer(), Button.Crouch))
+{
+    SetMoveSpeed(EventPlayer(), chargeSpeed);
 }
 
 define chargingPlayer(define player):
@@ -223,7 +227,7 @@ if (!isWorkingDummy)
 
 playervar define inputEnabled ! = true;
 
-rule: "Disable Input"
+rule: "Player: Disable Input"
 Event.OngoingPlayer
 if (!inputEnabled)
 if (!isWorkingDummy)
@@ -237,7 +241,7 @@ if (!isWorkingDummy)
     DisallowButton(EventPlayer(), Button.Ultimate);
 }
 
-rule: "Enable Input"
+rule: "Player: Enable Input"
 Event.OngoingPlayer
 if (inputEnabled)
 if (!isWorkingDummy)
@@ -255,7 +259,7 @@ playervar define healOverTime;
 globalvar define healWait = 10;
 globalvar define healRate = 100;
 
-rule: "Heal"
+rule: "Player: Heal"
 Event.OnDamageTaken
 Player.Reinhardt
 {
@@ -265,7 +269,7 @@ Player.Reinhardt
     healOverTime = LastHealOverTime();
 }
 
-rule: "Ultimate"
+rule: "Player: Ultimate"
 Event.OngoingPlayer
 Player.Reinhardt
 if (!PowerHammerMode.Value)
@@ -278,7 +282,7 @@ if (!isUsingPowerHammer)
     isUsingPowerHammer = true;
 }
 
-rule: "Power Hammer"
+rule: "Player: Power Hammer"
 Event.OngoingPlayer
 Player.Reinhardt
 if (PowerHammerMode.Value)
@@ -299,7 +303,7 @@ void SlamImpulse()
     ApplyImpulse(EventPlayer(), Up(), IsInAir() ? 5 : 8, Relative.ToWorld, ContraryMotion.Incorporate);
 }
 
-rule: "Reset Power Hammer"
+rule: "Player: Reset Power Hammer"
 Event.OngoingPlayer
 Player.Reinhardt
 if (isUsingPowerHammer)
@@ -313,7 +317,7 @@ if (IsOnGround())
 
 playervar define isUsingPowerHammer! = false;
 
-void UltimateHandler() "Reinhardt Ultimate Handler"
+void UltimateHandler() "Player: Reinhardt Ultimate Handler"
 {
     define hitPos = PositionOf() + DirectionFromAngles(HorizontalFacingAngleOf(), 0) * 2.75;
 
@@ -343,7 +347,7 @@ void UltimateHandler() "Reinhardt Ultimate Handler"
 
 playervar define fireStrikeDirection!;
 
-rule: "Fire strike direction"
+rule: "Player: Fire strike direction"
 Player.Reinhardt
 if (IsUsingAbility2())
 {
