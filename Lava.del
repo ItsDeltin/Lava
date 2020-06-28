@@ -45,7 +45,7 @@ rule: "Setup"
         Spectators: Spectators.VisibleAlways,
         SortOrder: -100
     );
-    CreateHudText(AllPlayers(), Text: " \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", Location: Location.Left, SortOrder: -99);
+    CreateHudText(AllPlayers(), Text: " \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", Location: Location.Left, SortOrder: -99);
 
     CreateHudText(VisibleTo: AllPlayers(), Text: "Synthball - N69CC", TextColor: Color.Turquoise, Location: Location.Top, SortOrder: -1, Spectators: Spectators.VisibleAlways);
     CreateHudText(HostPlayer(), Subheader: "You are the host player. Press interact to open the host settings.", SubheaderColor: Color.Turquoise, Location: Location.Top, SortOrder: -0.9, Spectators: Spectators.VisibleNever);
@@ -69,7 +69,7 @@ Event.OngoingPlayer
         "In volleyball, the ball will only explode when the ball is on the ground.\nWhen the timer runs out, keep it in the air!",
         "In volleyball, the amount of time until the ball explodes decreases each\ntime the ball switches sides.",
         "The host player can press interact to open game settings.",
-        "The source code is available at https://github.com/ItsDeltin/Lava"
+        "The source code is available at https://github.com/ItsDeltin/Lava\nYou can report bugs there, too!"
     ][tipIndex], Subheader: "Press reload for the next tip.", SubheaderColor: Color.Aqua, Location: Location.Left, SortOrder: -98);
 }
 

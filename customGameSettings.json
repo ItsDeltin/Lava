@@ -6,7 +6,8 @@
                 "Charge Cooldown Time": 0,
                 "Charge Knockback Scalar": 200,
                 "Fire Strike Cooldown Time": 50,
-                "Rocket Hammer Knockback Scalar": 400
+                "Rocket Hammer Knockback Scalar": 400,
+                "Ultimate Generation (Earthshatter)": 200
             },
             "Sigma": {
                 "Primary Fire": false,

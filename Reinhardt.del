@@ -49,7 +49,7 @@ if (DistanceBetween(EventPlayer(), PolePos()) < 3)
     PlayEffect(AllPlayers(), PlayEffect.RingExplosion, Color.SkyBlue, PolePos(), 50);
 
     // Apply momentum to the player who hit the pole
-    ApplyImpulse(EventPlayer(), DirectionTowards(PolePos(), PositionOf() + Vector(0, 0.5, 0)), 30, Relative.ToWorld, ContraryMotion.Cancel);
+    ApplyImpulse(EventPlayer(), DirectionTowards(PolePos() * Vector(1,0,1), PositionOf() * Vector(1,0,1) + Vector(0, 0.5, 0)), 30, Relative.ToWorld, ContraryMotion.Cancel);
 
     // Apply momentum to the ball
     if (ballIsOnStand)
