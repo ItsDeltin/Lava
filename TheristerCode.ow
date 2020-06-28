@@ -3,62 +3,167 @@ variables
 	global:
 		4: gamemode
 		5: arenaEffects
-		15: totalScore
 		19: blueScore
 		20: redScore
-		41: rowFraction
-		42: columnFraction
-		43: x
-		44: a
-		45: b
-		46: z
-		47: a_0
-		48: b_0
-		76: cliffBlue
-		77: cliffRed
-		78: towerBlue
-		79: towerRed
-		98: dodgeball_huds
-		99: dodgeball_blue_kills
-		100: dodgeball_red_kills
-		101: dodgeball_scoring
-		102: dodgeball_score_buffer
-		103: dodgeball_static_check
-		104: dodgeball_static_timer
+		52: beamId
+		53: cliffBlue
+		54: cliffRed
+		55: towerBlue
+		56: towerRed
+		57: rowFraction
+		58: columnFraction
+		59: x
+		60: a
+		61: b
+		62: z
+		63: a_0
+		64: b_0
+		90: dodgeball_huds
+		91: dodgeball_blue_kills
+		92: dodgeball_red_kills
+		93: dodgeball_scoring
+		94: dodgeball_score_buffer
+		95: dodgeball_static_check
+		96: dodgeball_static_timer
 
 	player:
 		10: isBall
-		28: dodgeball_charge
-		29: dodgeball_holder
-		30: dodgeball_pos
-		31: dodgeball_velocity
-		32: sigma_pos
-		33: sigma_pickup_buffer
-		34: is_charging
-		35: dodgeball_thrown
-		36: dodgeball_held
-		37: dodgeball_effect
-		38: dodgeball_bounce_normal
-		39: dodgeball_victim
-		40: dodgeball_bounce
-		41: dodgeball_catcher
-		42: dodgeball_in_motion
-		43: sigma_x_comp
-		44: sigma_z_comp
-		45: dodgeball_x_comp
-		46: is_holding
-		47: dodgeball_z_comp
-		48: dodgeball_y_comp
-		49: dodgeball_in_world_text
-		50: sigma_normal
-		51: dodgeball_activate
+		20: dodgeball_charge
+		21: dodgeball_holder
+		22: dodgeball_pos
+		23: dodgeball_velocity
+		24: sigma_pos
+		25: sigma_pickup_buffer
+		26: is_charging
+		27: dodgeball_thrown
+		28: dodgeball_held
+		29: dodgeball_effect
+		30: dodgeball_bounce_normal
+		31: dodgeball_victim
+		32: dodgeball_bounce
+		33: dodgeball_catcher
+		34: dodgeball_in_motion
+		35: sigma_x_comp
+		36: sigma_z_comp
+		37: dodgeball_x_comp
+		38: is_holding
+		39: dodgeball_z_comp
+		40: dodgeball_y_comp
+		41: dodgeball_in_world_text
+		42: sigma_normal
+		43: dodgeball_activate
 }
 
 subroutines
 {
-	8: dodgeball_drop
-	9: dodgeball_reset
-	10: dodgeball_clamp_in_range
+	3: dodgeball_drop
+	4: dodgeball_reset
+	5: dodgeball_clamp_in_range
+}
+
+rule("Dodgeball: Team1 Boundary")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Global.gamemode == 6;
+		Team Of(Event Player) == Team 1;
+		X Component Of(Position Of(Event Player)) < 0;
+		Y Component Of(Position Of(Event Player)) < 200;
+	}
+
+	actions
+	{
+		Wait(0.016, Ignore Condition);
+		Abort If Condition Is False;
+		Apply Impulse(Event Player, Left, 5 + Distance Between(Vector(Empty Array, Empty Array, Empty Array), Velocity Of(Event Player)),
+			To World, Cancel Contrary Motion);
+		Wait(0.016, Ignore Condition);
+		Loop If Condition Is True;
+		disabled Play Effect(Event Player, Debuff Impact Sound, White, Event Player, 100);
+	}
+}
+
+rule("Dodgeball: Team2 Boundary")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Global.gamemode == 6;
+		Team Of(Event Player) == Team 2;
+		X Component Of(Position Of(Event Player)) > 0;
+		Y Component Of(Position Of(Event Player)) < 200;
+	}
+
+	actions
+	{
+		Wait(0.016, Ignore Condition);
+		Abort If Condition Is False;
+		Apply Impulse(Event Player, Right, 5 + Distance Between(Vector(Empty Array, Empty Array, Empty Array), Velocity Of(Event Player)),
+			To World, Cancel Contrary Motion);
+		Wait(0.016, Ignore Condition);
+		Loop If Condition Is True;
+		disabled Play Effect(Event Player, Debuff Impact Sound, White, Event Player, 100);
+	}
+}
+
+rule("Dodgeball: Draw Boundary")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Global.gamemode == 6;
+	}
+
+	actions
+	{
+		Create Beam Effect(All Players(All Teams), Bad Beam, Vector(Empty Array, 154.880, 150) - Vector(Empty Array, Empty Array, 20),
+			Vector(Empty Array, 154.880, 150) + Vector(Empty Array, Empty Array, 20), Aqua, Visible To);
+		Modify Global Variable(beamId, Append To Array, Last Created Entity);
+		Create Beam Effect(All Players(All Teams), Bad Beam, Vector(0, 154.880, 130), Vector(0, 171, 130.001), Aqua, Visible To);
+		Modify Global Variable(beamId, Append To Array, Last Created Entity);
+		Create Beam Effect(All Players(All Teams), Bad Beam, Vector(0, 154.880, 170), Vector(0, 171, 170.001), Aqua, Visible To);
+		Modify Global Variable(beamId, Append To Array, Last Created Entity);
+		Create Beam Effect(All Players(All Teams), Bad Beam, Vector(0, 171, 130), Vector(0, 171, 170), Aqua, Visible To);
+		Modify Global Variable(beamId, Append To Array, Last Created Entity);
+	}
+}
+
+rule("Dodgeball: Destroy Boundary")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Global.gamemode != 6;
+	}
+
+	actions
+	{
+		While(Global.beamId != Empty Array);
+			Destroy Effect(First Of(Global.beamId));
+			Modify Global Variable(beamId, Remove From Array By Index, 0);
+		End;
+	}
 }
 
 rule("dodgeball force start")
@@ -573,98 +678,6 @@ rule("sigma shorter succ")
 	}
 }
 
-rule("dodgeball effect - neutral")
-{
-	event
-	{
-		Ongoing - Each Player;
-		All;
-		Sigma;
-	}
-
-	conditions
-	{
-		Event Player.dodgeball_holder == False;
-	}
-
-	actions
-	{
-		While(Event Player.dodgeball_effect != Empty Array);
-			Destroy Icon(First Of(Event Player.dodgeball_effect));
-			Destroy Effect(First Of(Event Player.dodgeball_effect));
-			Modify Player Variable(Event Player, dodgeball_effect, Remove From Array By Index, 0);
-		End;
-		Create Effect(All Players(All Teams), Sphere, White, Event Player.dodgeball_pos, 1.250, Visible To Position and Radius);
-		Modify Player Variable(Event Player, dodgeball_effect, Append To Array, Last Created Entity);
-		Create Effect(All Players(All Teams), Bad Aura, White, Event Player.dodgeball_pos, 1, Visible To Position and Radius);
-		Modify Player Variable(Event Player, dodgeball_effect, Append To Array, Last Created Entity);
-		Create Icon(All Players(All Teams), Event Player.dodgeball_pos, Circle, Visible To and Position, White, True);
-		Modify Player Variable(Event Player, dodgeball_effect, Append To Array, Last Created Entity);
-	}
-}
-
-rule("dodgeball effect - active team 1")
-{
-	event
-	{
-		Ongoing - Each Player;
-		All;
-		Sigma;
-	}
-
-	conditions
-	{
-		Event Player.dodgeball_holder != False;
-		Team Of(Event Player.dodgeball_holder) == Team 1;
-	}
-
-	actions
-	{
-		While(Event Player.dodgeball_effect != Empty Array);
-			Destroy Icon(First Of(Event Player.dodgeball_effect));
-			Destroy Effect(First Of(Event Player.dodgeball_effect));
-			Modify Player Variable(Event Player, dodgeball_effect, Remove From Array By Index, 0);
-		End;
-		Create Effect(All Players(All Teams), Sphere, Team 1, Event Player.dodgeball_pos, 1.250, Visible To Position and Radius);
-		Modify Player Variable(Event Player, dodgeball_effect, Append To Array, Last Created Entity);
-		Create Effect(All Players(All Teams), Bad Aura, Team 1, Event Player.dodgeball_pos, 1, Visible To Position and Radius);
-		Modify Player Variable(Event Player, dodgeball_effect, Append To Array, Last Created Entity);
-		Create Icon(All Players(All Teams), Event Player.dodgeball_pos, Warning, Visible To and Position, Team 1, True);
-		Modify Player Variable(Event Player, dodgeball_effect, Append To Array, Last Created Entity);
-	}
-}
-
-rule("dodgeball effect - active team 2")
-{
-	event
-	{
-		Ongoing - Each Player;
-		All;
-		Sigma;
-	}
-
-	conditions
-	{
-		Event Player.dodgeball_holder != False;
-		Team Of(Event Player.dodgeball_holder) == Team 2;
-	}
-
-	actions
-	{
-		While(Event Player.dodgeball_effect != Empty Array);
-			Destroy Icon(First Of(Event Player.dodgeball_effect));
-			Destroy Effect(First Of(Event Player.dodgeball_effect));
-			Modify Player Variable(Event Player, dodgeball_effect, Remove From Array By Index, 0);
-		End;
-		Create Effect(All Players(All Teams), Sphere, Team 2, Event Player.dodgeball_pos, 1.250, Visible To Position and Radius);
-		Modify Player Variable(Event Player, dodgeball_effect, Append To Array, Last Created Entity);
-		Create Effect(All Players(All Teams), Bad Aura, Team 2, Event Player.dodgeball_pos, 1, Visible To Position and Radius);
-		Modify Player Variable(Event Player, dodgeball_effect, Append To Array, Last Created Entity);
-		Create Icon(All Players(All Teams), Event Player.dodgeball_pos, Warning, Visible To and Position, Team 2, True);
-		Modify Player Variable(Event Player, dodgeball_effect, Append To Array, Last Created Entity);
-	}
-}
-
 rule("dodgeball player collide")
 {
 	event
@@ -738,50 +751,6 @@ rule("dodgeball catch")
 		Event Player.dodgeball_thrown = False;
 		Wait(0.100, Ignore Condition);
 		Event Player.dodgeball_holder = False;
-	}
-}
-
-rule("debug")
-{
-	event
-	{
-		Ongoing - Each Player;
-		All;
-		All;
-	}
-
-	conditions
-	{
-		disabled Is Button Held(Event Player, Interact) == True;
-		Event Player == Host Player;
-		Is Button Held(Event Player, Reload) == True;
-	}
-
-	actions
-	{
-		Create Dummy Bot(Hero(Sigma), Opposite Team Of(Team Of(Event Player)), -1, Event Player, Vector(0, 0, 0));
-	}
-}
-
-rule("debug")
-{
-	event
-	{
-		Ongoing - Each Player;
-		All;
-		Sigma;
-	}
-
-	conditions
-	{
-		Is Dummy Bot(Event Player) == True;
-	}
-
-	actions
-	{
-		Press Button(Event Player, Ability 1);
-		Wait(0.250, Ignore Condition);
-		Loop If Condition Is True;
 	}
 }
 
@@ -1043,7 +1012,6 @@ rule("dodgeball score increase - team 1")
 	{
 		Global.dodgeball_scoring = True;
 		Global.blueScore += 1;
-		Global.totalScore += 1;
 		Big Message(All Players(All Teams), Custom String("Team 1 wins!"));
 		Play Effect(All Players(Team 1), Buff Impact Sound, Team 1, Vector(0, 161.500, 150), 200);
 		Play Effect(All Players(Team 2), Debuff Impact Sound, Team 2, Vector(0, 161.500, 150), 200);
@@ -1071,7 +1039,6 @@ rule("dodgeball score increase - team 2")
 	{
 		Global.dodgeball_scoring = True;
 		Global.redScore += 1;
-		Global.totalScore += 1;
 		Big Message(All Players(All Teams), Custom String("Team 2 wins!"));
 		Play Effect(All Players(Team 2), Buff Impact Sound, Team 2, Vector(0, 161.500, 150), 200);
 		Play Effect(All Players(Team 1), Debuff Impact Sound, Team 2, Vector(0, 161.500, 150), 200);
@@ -1219,5 +1186,37 @@ rule("dodgeball ball hogging check")
 		Global.dodgeball_static_check = Count Of(Filtered Array(All Players(All Teams), Current Array Element.dodgeball_activate && (
 			Current Array Element.dodgeball_held ? Team Of(Current Array Element.dodgeball_holder) == Team 1 : X Component Of(
 			Current Array Element.dodgeball_pos) > 0) && True));
+	}
+}
+
+rule("dodgeball ball hogging restart")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	conditions
+	{
+		Global.dodgeball_static_timer <= 5;
+		Global.gamemode == 6;
+	}
+
+	actions
+	{
+		Small Message(All Players(All Teams), Custom String("too inactive! dodgeballs resetting in 5..."));
+		Wait(1, Abort When False);
+		Small Message(All Players(All Teams), Custom String("4..."));
+		Wait(1, Abort When False);
+		Small Message(All Players(All Teams), Custom String("3..."));
+		Wait(1, Abort When False);
+		Small Message(All Players(All Teams), Custom String("2..."));
+		Wait(1, Abort When False);
+		Small Message(All Players(All Teams), Custom String("1..."));
+		Wait(1, Abort When False);
+		Small Message(All Players(All Teams), Custom String("all dodgeballs reset!"));
+		Global.dodgeball_score_buffer = True;
+		Wait(0.250, Ignore Condition);
+		Global.dodgeball_score_buffer = False;
 	}
 }
