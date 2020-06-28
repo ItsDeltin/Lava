@@ -360,7 +360,7 @@ globalvar define owbCliff = Normalize(CrossProduct(cliffRed.DirectionTowards(cli
 rule: "Outer wall bounce"
 Event.OngoingPlayer
 if (rootBall == EventPlayer())
-if (signedDistance(PositionOf(rootBall), towerBlue, owbTower) < -8)
+if (signedDistance(PositionOf(rootBall), towerBlue, owbTower) < -4)
 {
     stopNearbyCharging();
     ApplyImpulse(rootBall, owbTower, Max(5, SpeedOf(rootBall)), Relative.ToWorld, ContraryMotion.Cancel);
@@ -370,7 +370,7 @@ if (signedDistance(PositionOf(rootBall), towerBlue, owbTower) < -8)
 rule: "Outer wall bounce"
 Event.OngoingPlayer
 if (rootBall == EventPlayer())
-if (signedDistance(PositionOf(rootBall), cliffRed, owbCliff) < -8)
+if (signedDistance(PositionOf(rootBall), cliffRed, owbCliff) < -4)
 {
     stopNearbyCharging();
     ApplyImpulse(rootBall, owbCliff, Max(5, SpeedOf(rootBall)), Relative.ToWorld, ContraryMotion.Cancel);
