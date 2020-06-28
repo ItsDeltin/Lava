@@ -48,7 +48,7 @@ rule: "Setup"
     CreateHudText(AllPlayers(), Text: " \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", Location: Location.Left, SortOrder: -99);
 
     CreateHudText(VisibleTo: AllPlayers(), Text: "Synthball - N69CC", TextColor: Color.Turquoise, Location: Location.Top, SortOrder: -1, Spectators: Spectators.VisibleAlways);
-    CreateHudText(AllPlayers(), Subheader: "You are the host player. Press interact to open the host settings.", SubheaderColor: Color.Turquoise, Location: Location.Top, SortOrder: -0.9, Spectators: Spectators.VisibleNever);
+    CreateHudText(HostPlayer(), Subheader: "You are the host player. Press interact to open the host settings.", SubheaderColor: Color.Turquoise, Location: Location.Top, SortOrder: -0.9, Spectators: Spectators.VisibleNever);
     CreateHudText(HostPlayer(), Subheader: <"C-A-P: <0>-<1>-<2>", ServerLoad(), ServerLoadAverage(), ServerLoadPeak()>, SubheaderColor: Color.Green, Location: Location.Top, SortOrder: -0.8, Spectators: Spectators.VisibleAlways);
     SetObjectiveDescription(AllPlayers(), "♥", ObjectiveRev.VisibleToSortOrderAndString);
     DisableCompletion();
@@ -117,10 +117,10 @@ define columnCount(): 28;
 
 globalvar define arenaEffects = [];
 
-Vector cliffBlue: Vector(107.07, 154.88, 63.61);
-Vector cliffRed: Vector(-109.08, 154.88, 65.06);
-Vector towerBlue: Vector(108.08, 154.88, 213.35);
-Vector towerRed: Vector(-108.07, 154.88, 214.81);
+globalvar Vector cliffBlue = Vector(107.07, 154.88, 63.61);
+globalvar Vector cliffRed = Vector(-109.08, 154.88, 65.06);
+globalvar Vector towerBlue = Vector(108.08, 154.88, 213.35);
+globalvar Vector towerRed = Vector(-108.07, 154.88, 214.81);
 
 rule: "Setup Arena (Disable when using Maze)"
 if (CurrentGameMode() == GameMode.Skirmish)
