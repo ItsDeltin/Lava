@@ -5,7 +5,6 @@ playervar Vector dodgeball_pos;
 playervar define dodgeball_velocity;
 playervar define dodgeball_thrown;
 playervar define dodgeball_in_motion;
-playervar define dodgeball_gravity_enabled = true;
 playervar define dodgeball_ultimate_used_on_ball;
 
 rule: "Dodgeball Ultimate"
@@ -20,7 +19,6 @@ if (IsButtonHeld(EventPlayer(), Button.PrimaryFire))
     define entity = LastCreatedEntity();
 
     define affected = FilteredArray(AllPlayers(), DistanceBetween(ArrayElement().dodgeball_pos * Vector(1,0,1), lookingAtPlanePoint * Vector(1, 0, 1)) < 10);
-    affected.dodgeball_gravity_enabled = false;
     affected.dodgeball_in_motion = false;
     affected.dodgeball_ultimate_used_on_ball = true;
     affected.dodgeball_holder = EventPlayer();
@@ -32,7 +30,6 @@ if (IsButtonHeld(EventPlayer(), Button.PrimaryFire))
 
     for (define i = 0; CountOf(affected); 1)
         affected[i].dodgeball_velocity = affected[i].dodgeball_pos.DirectionTowards(shootAt) * 100;
-    affected.dodgeball_gravity_enabled = true;
     affected.dodgeball_ultimate_used_on_ball = false;
     affected.dodgeball_in_motion = true;
 
