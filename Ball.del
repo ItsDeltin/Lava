@@ -108,6 +108,7 @@ define ballSpeed(): SpeedOf(rootBall);
 rule: "Ball: (High Server Loa​d) Link"
 if (ball)
 if (ballReady)
+if (!ballIsOnStand)
 {
     if (isStunned(ball1))
     {
@@ -176,6 +177,7 @@ if (isOnWall(rootBall))
 
 void respawnBall() "Respawn Ball"
 {
+    tpTo = null;
     ballReady = false;    
 
     stopNearbyCharging();
