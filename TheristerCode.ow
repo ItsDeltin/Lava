@@ -591,8 +591,8 @@ rule("dodgeball motion")
 	{
 		If (Event Player.dodgeball_gravity_enabled);
 			Event Player.dodgeball_velocity += Down * 20 * 0.016;
+			Event Player.dodgeball_pos += Event Player.dodgeball_velocity * 0.016;
 		End;
-		Event Player.dodgeball_pos += Event Player.dodgeball_velocity * 0.016;
 		Wait(0.016, Ignore Condition);
 		Loop If Condition Is True;
 	}
