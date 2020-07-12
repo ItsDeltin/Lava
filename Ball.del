@@ -188,7 +188,7 @@ void respawnBall() "Respawn Ball"
     Wait(1);
 
     // SetGravity([ball1, ball2], 0);
-    Teleport(ball1, TopPolePos() - Vector(0, 0.3, 0));
+    Teleport(ball1, TopPolePos());
     Teleport(ball2, TopPolePos() + Vector(0, 1, 0));
     MinWait();
 

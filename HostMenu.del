@@ -6,9 +6,9 @@ globalvar define hostMenuCategory = 0;
 globalvar define hostMenuSelected = 0;
 globalvar define renderedHostMenu! = "";
 
-globalvar BooleanOption FootballEnabled = new BooleanOption("Football Enabled", true);
-globalvar BooleanOption VolleyballEnabled = new BooleanOption("Volleyball Enabled", true);
-globalvar BooleanOption DodgeballEnabled = new BooleanOption("Dodgeball Enabled", true);
+globalvar BooleanOption FootballEnabled = new BooleanOption("Cycle Football", true);
+globalvar BooleanOption VolleyballEnabled = new BooleanOption("Cycle Volleyball", true);
+globalvar BooleanOption DodgeballEnabled = new BooleanOption("Cycle Dodgeball", true);
 globalvar SelectOption PointSwitch = new SelectOption("Switch gamemode when number of points is reached", ["Off", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"], 5);
 globalvar BooleanOption PowerHammerMode = new BooleanOption("Power Hammer Mode", false);
 globalvar NumberOption FireStrikeCooldownTime = new NumberOption("Fire Strike cooldown time", 0, 10, 3, 1, 0, " seconds");
@@ -21,9 +21,7 @@ globalvar HostMenuOption[][] options = [
     [
         new ActionButton("Switch To Football", 0),
         new ActionButton("Switch To Volleyball", 1),
-        new ActionButton("Switch To Dodgeball", 2)
-    ],
-    [
+        new ActionButton("Switch To Dodgeball", 2),
         PointSwitch,
         FootballEnabled,
         VolleyballEnabled,
@@ -53,7 +51,7 @@ if (IsButtonHeld(HostPlayer(), Button.Interact))
 
         MakeHostHud(text: " \n\n\n\n\n\n", sortOrder: 5);
         MakeHostHud(subheader: "Host Settings", sortOrder: 6);
-        MakeHostHud(text: <"<1> <0> <2>", ["Arena", "Sports", "Cycle", "Player"][hostMenuCategory], hostMenuSelected == 0 ? "◀" : "", hostMenuSelected == 0 ? "▶" : "">, sortOrder: 7);
+        MakeHostHud(text: <"<1> <0> <2>", ["Arena", "Sports", "Player"][hostMenuCategory], hostMenuSelected == 0 ? "◀" : "", hostMenuSelected == 0 ? "▶" : "">, sortOrder: 7);
         MakeHostHud(header: renderedHostMenu, sortOrder: 8);
         MakeHostHud(text: hostMenuSelected == 0 ? "Walk left or right to choose a category." : options[hostMenuCategory][hostMenuSelected - 1].Controls, subheader: "Walk up and down to choose an option.", sortOrder: 9);
         RenderOptions();
