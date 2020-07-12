@@ -18,6 +18,7 @@ globalvar NumberOption Bonus_Hammer = new NumberOption("Score Bonus: Hammer", 0,
 globalvar NumberOption Bonus_Firestrike = new NumberOption("Score Bonus: Fire Strike", 0, 100, 50, 5, 0, "% charge");
 globalvar NumberOption Bonus_Bump = new NumberOption("Score Bonus: Bump", 0, 100, 40, 5, 0, "% charge");
 globalvar NumberOption Bonus_Charge = new NumberOption("Score Bonus: Charge", 0, 100, 100, 5, 0, "% charge");
+globalvar SelectOption Ball_Color = new SelectOption("Ball Color", ["Blue", "Green", "Lime Green", "Orange", "Purple", "Red", "Sky Blue", "Turquoise", "White", "Yellow"], 7, 1);
 
 globalvar HostMenuOption[][] options = [
     [
@@ -51,6 +52,9 @@ globalvar HostMenuOption[][] options = [
         Bonus_Firestrike,
         Bonus_Bump,
         Bonus_Charge
+    ],
+    [
+        Ball_Color
     ]
 ];
 
@@ -181,12 +185,14 @@ class SelectOption : HostMenuOption
     protected define[] Options;
     protected override define ValueString: Options[Value];
     public override define Controls: "Walk left or right to choose an option for the currently selected setting.";
+    private define _action;
 
-    public SelectOption(ref define name, ref define[] options, ref define defaultSelected = 0)
+    public SelectOption(ref define name, ref define[] options, ref define defaultSelected = 0, define action = 0)
     {
         Name = name;
         Options = options;
         Value = defaultSelected;
+        _action = action;
     }
 
     public override void OnLeft()
@@ -205,7 +211,11 @@ class SelectOption : HostMenuOption
         Update();
     }
 
-    protected virtual void Update() "Host Menu: Update Select Option" {}
+    protected virtual void Update() "Host Menu: Update Select Option"
+    {
+        if (_action == 1)
+            root.RenderBall();
+    }
 }
 class ArenaTypeOption : SelectOption
 {

@@ -76,8 +76,7 @@ if (gamemode == Mode.Soccer || gamemode == Mode.Volleyball)
     SetInvisible(ball1, InvisibleTo.All);
     SetInvisible(ball2, InvisibleTo.All);
 
-    CreateEffect(AllPlayers(), Effect.Sphere, Color.Turquoise, ballLocation(), 1.25, EffectRev.VisibleToPositionAndRadius);
-    ballEffect = LastCreatedEntity();
+    RenderBall();
 
     CreateIcon(FilteredArray(AllPlayers(), ballReady && !IsInViewAngle(ArrayElement(), rootBall, 30)), ballLocation(), Icon.Circle, IconRev.VisibleToAndPosition, Color.Turquoise, true);
     ballIcon = LastCreatedEntity();
@@ -100,6 +99,30 @@ if (gamemode != Mode.Volleyball)
     tpFrom = null;
     tpTo = null;
     rootBall = null;
+}
+
+void RenderBall() "Ball: Render"
+{
+    DestroyEffect(ballEffect);
+    switch (Ball_Color.Value)
+    {
+        case 0: RenderBall(Color.Blue); break;
+        case 1: RenderBall(Color.Green); break;
+        case 2: RenderBall(Color.LimeGreen); break;
+        case 3: RenderBall(Color.Orange); break;
+        case 4: RenderBall(Color.Purple); break;
+        case 5: RenderBall(Color.Red); break;
+        case 6: RenderBall(Color.SkyBlue); break;
+        case 7: RenderBall(Color.Turquoise); break;
+        case 8: RenderBall(Color.White); break;
+        case 9: RenderBall(Color.Yellow); break;
+    }
+    ballEffect = LastCreatedEntity();
+}
+
+void RenderBall(Color color)
+{
+    CreateEffect(AllPlayers(), Effect.Sphere, color, ballLocation(), 1.25, EffectRev.VisibleToPositionAndRadius);
 }
 
 define ballLocation(): tpTo != null ? tpTo + Vector(0, 1, 0) : Midpoint(ball1,ball2) + Vector(0, 0.5, 0);
