@@ -6,10 +6,10 @@ import "Volleyball.del";
 // import "!Debug Camera.del";
 import "Death Boundary.del";
 import "Camera.del";
-import "customGameSettings.json";
 import "HostMenu.del";
+import "dodgeball.del";
+import "customGameSettings.json";
 import "TheristerCode.ow";
-
 
 globalvar define started = false;
 playervar define isWorkingDummy;
@@ -17,13 +17,10 @@ globalvar Mode gamemode = Mode.Waiting;
 
 enum Mode
 {
-    Waiting,
-    Soccer,
-    Volleyball,
-    Fake,
-    AlsoFake,
-    TripleFake,
-    Dodgeball
+    Waiting = 0,
+    Soccer = 1,
+    Volleyball = 2,
+    Dodgeball = 6
 }
 
 rule: "Setup"
@@ -34,7 +31,7 @@ rule: "Setup"
         SubheaderColor: Color.Orange,
         Location      : Location.Left,
         Spectators    : Spectators.VisibleAlways,
-        SortOrder       : -101
+        SortOrder     : -101
     );
     CreateHudText(
         VisibleTo: AllPlayers(),
@@ -122,11 +119,9 @@ globalvar Vector towerBlue! = Vector(108.08, 154.88, 213.35);
 globalvar Vector towerRed! = Vector(-108.07, 154.88, 214.81);
 Vector planePos: Vector(0, 154.88, 0);
 
-rule: "Setup Arena (Disable when using Maze)"
-if (CurrentGameMode() == GameMode.Skirmish)
+rule: "Setup Arena"
 {
     OuterWalls();
-    MakeFloor();
 
     // Pole flair
     CreateEffect(AllPlayers(), Effect.Orb, Color.Orange, TopPolePos(), 0.25, EffectRev.VisibleTo);
@@ -140,6 +135,12 @@ if (CurrentGameMode() == GameMode.Skirmish)
     // );
     // ModifyGlobalVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
     // ChaseVariableAtRate(killzoneRot, 180, 25, RateChaseReevaluation.DestinationAndRate);
+}
+
+rule: "Setup Arena: Floor"
+if (gamemode == Mode.Soccer || gamemode == Mode.Volleyball || gamemode == Mode.Waiting)
+{
+    MakeFloor();
 }
 
 // define flairPos(): Destination(PolePos() * Vector(1,0,1) + Vector(0, 136.42, 0), DirectionFromAngles(killzoneRot, 0), 11);
@@ -163,6 +164,8 @@ globalvar define arenaColor! = 0;
 
 void MakeFloor() "Arena: Make Floor"
 {
+    if (!ArrayContains([Mode.Waiting, Mode.Soccer, Mode.Volleyball], gamemode)) return;
+
     for (define i! = 0; i < CountOf(arenaEffects); i++) {
         DestroyEffect(arenaEffects[i]);
         MinWait();

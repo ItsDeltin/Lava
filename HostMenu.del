@@ -282,7 +282,7 @@ class ActionButton : HostMenuOption
 }
 class NumberOption : HostMenuOption
 {
-    public override define Controls: <"Walk left or right to change the currently selected option.\nHold <0> to double the amount the value is changed. Jump to reset.", AbilityIconString(HeroOf(HostPlayer()), ButtonValue(Button.Ability1))>;
+    public override define Controls: <"Walk left or right to change the currently selected option.\nHold <0> to increase the amount the value is changed. Jump to reset.", AbilityIconString(HeroOf(HostPlayer()), ButtonValue(Button.Ability1))>;
     private define Min;
     private define Max;
     private define DefaultValue;
