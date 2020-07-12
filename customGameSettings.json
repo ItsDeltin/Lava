@@ -16,6 +16,10 @@
             },
             "Torbjörn": {
                 "Primary Fire": false
+            },
+            "General": {
+                "Ultimate Generation - Passive": 0,
+                "Ultimate Generation - Combat": 0
             }
         }
     },

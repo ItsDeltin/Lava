@@ -252,21 +252,25 @@ void messageThrower(define team, Color teamColor)
     {
         BigMessage(AllPlayers(), <"<0> scored a hammer shot!", thrower>);
         ThrowHud(teamColor, AbilityIconString(Hero.Reinhardt, ButtonValue(Button.PrimaryFire)));
+        SetUltimateCharge(thrower, UltimateChargePercent(thrower) + Bonus_Hammer.Value);
     }
     else if (throwType == 1)
     {
         BigMessage(AllPlayers(), <"<0> scored a bump shot!", thrower>);
         ThrowHud(teamColor, AbilityIconString(Hero.Doomfist, ButtonValue(Button.Ability1)));
+        SetUltimateCharge(thrower, UltimateChargePercent(thrower) + Bonus_Bump.Value);
     }
     else if (throwType == 2)
     {
         BigMessage(AllPlayers(), <"<0> scored a charge shot!", thrower>);
         ThrowHud(teamColor, AbilityIconString(Hero.Reinhardt, ButtonValue(Button.Ability1)));
+        SetUltimateCharge(thrower, UltimateChargePercent(thrower) + Bonus_Charge.Value);
     }
     else if (throwType == 3)
     {
         BigMessage(AllPlayers(), <"<0> scored a fire shot!", thrower>);
         ThrowHud(teamColor, AbilityIconString(Hero.Reinhardt, ButtonValue(Button.Ability2)));
+        SetUltimateCharge(thrower, UltimateChargePercent(thrower) + Bonus_Firestrike.Value);
     }
     else if (throwType == 4)
     {

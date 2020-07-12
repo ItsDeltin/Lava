@@ -12,6 +12,12 @@ globalvar BooleanOption DodgeballEnabled = new BooleanOption("Cycle Dodgeball", 
 globalvar SelectOption PointSwitch = new SelectOption("Switch gamemode when number of points is reached", ["Off", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"], 5);
 globalvar BooleanOption PowerHammerMode = new BooleanOption("Power Hammer Mode", false);
 globalvar NumberOption FireStrikeCooldownTime = new NumberOption("Fire Strike cooldown time", 0, 10, 3, 1, 0, " seconds");
+globalvar NumberOption CPS = new NumberOption("Ult", 0, 100, 2, 1, 0, "% per 2 seconds");
+globalvar NumberOption CPS_Dodgeball = new NumberOption("Dodgeball Ult", 0, 100, 5, 1, 0, "% per 2 seconds");
+globalvar NumberOption Bonus_Hammer = new NumberOption("Score Bonus: Hammer", 0, 100, 20, 5, 0, "% charge");
+globalvar NumberOption Bonus_Firestrike = new NumberOption("Score Bonus: Fire Strike", 0, 100, 50, 5, 0, "% charge");
+globalvar NumberOption Bonus_Bump = new NumberOption("Score Bonus: Bump", 0, 100, 40, 5, 0, "% charge");
+globalvar NumberOption Bonus_Charge = new NumberOption("Score Bonus: Charge", 0, 100, 100, 5, 0, "% charge");
 
 globalvar HostMenuOption[][] options = [
     [
@@ -37,6 +43,14 @@ globalvar HostMenuOption[][] options = [
         new NumberOption("Regenerate health after", 0, 15, 10, 1, 5, " seconds"),
         new NumberOption("Regeneration rate", 0, 1000, 100, 10, 6, " health per second"),
         new NumberOption("Gravity", 10, 1000, 100, 10, 7, "%")
+    ],
+    [
+        CPS,
+        CPS_Dodgeball,
+        Bonus_Hammer,
+        Bonus_Firestrike,
+        Bonus_Bump,
+        Bonus_Charge
     ]
 ];
 
@@ -51,7 +65,7 @@ if (IsButtonHeld(HostPlayer(), Button.Interact))
 
         MakeHostHud(text: " \n\n\n\n\n\n", sortOrder: 5);
         MakeHostHud(subheader: "Host Settings", sortOrder: 6);
-        MakeHostHud(text: <"<1> <0> <2>", ["Arena", "Sports", "Player"][hostMenuCategory], hostMenuSelected == 0 ? "◀" : "", hostMenuSelected == 0 ? "▶" : "">, sortOrder: 7);
+        MakeHostHud(text: <"<1> <0> <2>", ["Arena", "Sports", "Player", "Ultimate"][hostMenuCategory], hostMenuSelected == 0 ? "◀" : "", hostMenuSelected == 0 ? "▶" : "">, sortOrder: 7);
         MakeHostHud(header: renderedHostMenu, sortOrder: 8);
         MakeHostHud(text: hostMenuSelected == 0 ? "Walk left or right to choose a category." : options[hostMenuCategory][hostMenuSelected - 1].Controls, subheader: "Walk up and down to choose an option.", sortOrder: 9);
         RenderOptions();

@@ -18,6 +18,16 @@ Player.Reinhardt
     SetGravity(EventPlayer(), gravity);
 }
 
+rule: "Player: Ultimate Charge"
+Event.OngoingPlayer
+if (IsAlive())
+if (gamemode != Mode.Waiting)
+{
+    SetUltimateCharge(EventPlayer(), UltimateChargePercent() + (gamemode == Mode.Dodgeball ? CPS_Dodgeball.Value : CPS.Value));
+    Wait(2);
+    LoopIfConditionIsTrue();
+}
+
 rule: "Player: Charge Speed Boost"
 Event.OngoingPlayer
 Player.Reinhardt
