@@ -43,7 +43,8 @@ globalvar HostMenuOption[][] options = [
         new NumberOption("Health", 0, 1000, 100, 10, 4, "%"),
         new NumberOption("Regenerate health after", 0, 15, 10, 1, 5, " seconds"),
         new NumberOption("Regeneration rate", 0, 1000, 100, 10, 6, " health per second"),
-        new NumberOption("Gravity", 10, 1000, 100, 10, 7, "%")
+        new NumberOption("Gravity", 0, 1000, 100, 10, 7, "%"),
+        new NumberOption("Size", 10, 2000, 100, 10, 8, "%")
     ],
     [
         CPS,
@@ -387,6 +388,10 @@ class NumberOption : HostMenuOption
         {
             root.gravity = Value;
             SetGravity(FilteredArray(AllPlayers(), !ArrayElement().isWorkingDummy), root.gravity);
+        }
+        else if (Action == 8)
+        {
+            StartScalingPlayer(FilteredArray(AllPlayers(), !ArrayElement().isWorkingDummy), Value / 100, false);
         }
     }
 }

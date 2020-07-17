@@ -379,26 +379,48 @@ if (TotalTimeElapsed() - lastCrutchAction > 10)
     lastCrutchAction = TotalTimeElapsed();
 }
 
-globalvar define owbTower = Normalize(CrossProduct(towerBlue.DirectionTowards(towerRed), Up()));
-globalvar define owbCliff = Normalize(CrossProduct(cliffRed.DirectionTowards(cliffBlue), Up()));
+globalvar BallBoundary[] BallBoundaries = [
+    new BallBoundary(towerBlue, towerRed),
+    new BallBoundary(cliffRed, cliffBlue),
+    new BallBoundary(Vector(21.18, 154.88, 213.74), Vector(16.51, 154.88, 202.31), 0, true),
+    new BallBoundary(Vector(-16.51, 154.88, 202.31), Vector(-21.18, 154.88, 213.74), 0, true)
+];
 
-rule: "Outer wall bounce"
-Event.OngoingPlayer
-if (rootBall == EventPlayer())
-if (signedDistance(PositionOf(rootBall), towerBlue, owbTower) < -4)
+class BallBoundary
 {
-    stopNearbyCharging();
-    ApplyImpulse(rootBall, owbTower, Max(5, SpeedOf(rootBall)), Relative.ToWorld, ContraryMotion.Cancel);
-    Wait(0.5);
-    LoopIfConditionIsTrue();
+    public Vector Pos1;
+    public Vector Pos2;
+    public define Distance;
+    private Vector Direction;
+    private define _limitDistance;
+
+    public BallBoundary(ref Vector pos1, ref Vector pos2, ref define distance = -4, ref define limitDistance = false)
+    {
+        Pos1 = pos1;
+        Pos2 = pos2;
+        Distance = distance;
+        Direction = Normalize(CrossProduct(pos1.DirectionTowards(pos2), Up()));
+        _limitDistance = limitDistance;
+    }
+
+    public void Pulse()
+    {
+        // if (IsInRange) + (IsOnGround(root.rootBall) ? Up() * 10 : Vector.Zero)
+        ApplyImpulse([root.ball1, root.ball2], Direction, Max(5, SpeedOf(root.rootBall)), Relative.ToWorld, ContraryMotion.Cancel);
+    }
+
+    define IsInRange: (!_limitDistance || (PositionOf(root.rootBall).DistanceTo((Pos1 + Pos2) / 2) < DistanceBetween(Pos1, Pos2))) && root.signedDistance(PositionOf(root.rootBall), Pos1, Direction) < Distance;
 }
-rule: "Outer wall bounce"
-Event.OngoingPlayer
-if (rootBall == EventPlayer())
-if (signedDistance(PositionOf(rootBall), cliffRed, owbCliff) < -4)
+
+rule: "Ball boundary pulse"
+if (ball)
+if (ballReady)
+if (!ballIsOnStand)
+if (BallBoundaries.IsTrueForAny(BallBoundary boundary => boundary.IsInRange))
 {
+    BallBoundary inRange = BallBoundaries.FilteredArray(BallBoundary boundary => boundary.IsInRange);
+    inRange.Pulse();
     stopNearbyCharging();
-    ApplyImpulse(rootBall, owbCliff, Max(5, SpeedOf(rootBall)), Relative.ToWorld, ContraryMotion.Cancel);
-    Wait(0.5);
+    Wait(0.3);
     LoopIfConditionIsTrue();
 }
