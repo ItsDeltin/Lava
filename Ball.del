@@ -77,10 +77,6 @@ if (gamemode == Mode.Soccer || gamemode == Mode.Volleyball)
     SetInvisible(ball2, InvisibleTo.All);
 
     RenderBall();
-
-    CreateIcon(FilteredArray(AllPlayers(), ballReady && !IsInViewAngle(ArrayElement(), rootBall, 30)), ballLocation(), Icon.Circle, IconRev.VisibleToAndPosition, Color.Turquoise, true);
-    ballIcon = LastCreatedEntity();
-
     ballReady = true;
 }
 
@@ -103,27 +99,23 @@ if (gamemode != Mode.Volleyball)
 
 void RenderBall() "Ball: Render"
 {
+    // Destroy the effect and icon.
     DestroyEffect(ballEffect);
-    switch (Ball_Color.Value)
-    {
-        case 0: RenderBall(Color.Blue); break;
-        case 1: RenderBall(Color.Green); break;
-        case 2: RenderBall(Color.LimeGreen); break;
-        case 3: RenderBall(Color.Orange); break;
-        case 4: RenderBall(Color.Purple); break;
-        case 5: RenderBall(Color.Red); break;
-        case 6: RenderBall(Color.SkyBlue); break;
-        case 7: RenderBall(Color.Turquoise); break;
-        case 8: RenderBall(Color.White); break;
-        case 9: RenderBall(Color.Yellow); break;
-    }
-    ballEffect = LastCreatedEntity();
+    DestroyIcon(ballIcon);
+
+    // Convert the color.
+    ConvertColorToConstant(Ball_Color.Value, Color color => {
+        // Create and store the effect.
+        CreateEffect(AllPlayers(), Effect.Sphere, color, ballLocation(), 1.25 * ballScale, EffectRev.VisibleToPositionAndRadius);
+        ballEffect = LastCreatedEntity();
+
+        // Create the icon
+        CreateIcon(FilteredArray(AllPlayers(), ballReady && !IsInViewAngle(ArrayElement(), rootBall, 30)), ballLocation(), Icon.Circle, IconRev.VisibleToAndPosition, color, true);
+    });
+    ballIcon = LastCreatedEntity();
 }
 
-void RenderBall(Color color)
-{
-    CreateEffect(AllPlayers(), Effect.Sphere, color, ballLocation(), 1.25, EffectRev.VisibleToPositionAndRadius);
-}
+globalvar define ballScale = 1;
 
 define ballLocation(): tpTo != null ? tpTo + Vector(0, 1, 0) : Midpoint(ball1,ball2) + Vector(0, 0.5, 0);
 define ballSpeed(): SpeedOf(rootBall);
@@ -167,7 +159,8 @@ if (!ballIsOnStand)
 
     if (tpTo != null) rootBall = tpTo;
 
-    Teleport(tpFrom, PositionOf(tpTo) + Vector(0, 1 + Max(YOf(VelocityOf(tpTo)) * 0.025, 0), 0));
+    if (PositionOf(rootBall) < 171)
+        Teleport(tpFrom, PositionOf(tpTo) + Vector(0, 1 * ballScale + Max(YOf(VelocityOf(tpTo)) * 0.025, 0), 0));
 
     Wait(0.1);
     LoopIfConditionIsTrue();
@@ -312,7 +305,9 @@ rule: "Ball: Effect when ball hits ground"
 if (ball)
 if (IsOnGround(rootBall))
 {
-    PlayEffect(AllPlayers(), PlayEffect.RingExplosion, Color.Turquoise, PositionOf(rootBall), 5);
+    ConvertColorToConstant(Ball_Trail_Color.Value, Color color => {
+        PlayEffect(AllPlayers(), PlayEffect.RingExplosion, color, PositionOf(rootBall), 5);
+    });
 }
 
 rule: "Ball: Fast ball effect"
@@ -320,19 +315,11 @@ if (ball)
 if (!ballIsOnStand)
 if (ballSpeed() >= 10 || IsInAir(rootBall))
 {
-    PlayEffect(FilteredArray(AllPlayers(), DistanceBetween(ArrayElement(), rootBall) > 6), PlayEffect.BadExplosion, Color.Turquoise, ballLocation(), 0.3);
+    ConvertColorToConstant(Ball_Trail_Color.Value, Color color => {
+        PlayEffect(FilteredArray(AllPlayers(), DistanceBetween(ArrayElement(), rootBall) > 6), PlayEffect.BadExplosion, color, ballLocation(), 0.3);
+    });
     MinWait();
     LoopIfConditionIsTrue();
-}
-
-disabled rule: "Ball: Alternative Knock Off Stand"
-if (ballReady)
-if (ballIsOnStand)
-if (DistanceBetween(ball1, TopPolePos()) > 3.5 && DistanceBetween(ball2, TopPolePos()) > 3.5)
-{
-    SmallMessage(AllPlayers(), "alt");
-    Wait(0.25, WaitBehavior.AbortWhenFalse);
-    OffStand();
 }
 
 void OffStand()
@@ -405,7 +392,6 @@ class BallBoundary
 
     public void Pulse()
     {
-        // if (IsInRange) + (IsOnGround(root.rootBall) ? Up() * 10 : Vector.Zero)
         ApplyImpulse([root.ball1, root.ball2], Direction, Max(5, SpeedOf(root.rootBall)), Relative.ToWorld, ContraryMotion.Cancel);
     }
 
@@ -423,4 +409,21 @@ if (BallBoundaries.IsTrueForAny(BallBoundary boundary => boundary.IsInRange))
     stopNearbyCharging();
     Wait(0.3);
     LoopIfConditionIsTrue();
+}
+
+void ConvertColorToConstant(ref define color, BlockLambda<Color> convert)
+{
+    switch (color)
+    {
+        case 0: convert.Invoke(Color.Blue); break;
+        case 1: convert.Invoke(Color.Green); break;
+        case 2: convert.Invoke(Color.LimeGreen); break;
+        case 3: convert.Invoke(Color.Orange); break;
+        case 4: convert.Invoke(Color.Purple); break;
+        case 5: convert.Invoke(Color.Red); break;
+        case 6: convert.Invoke(Color.SkyBlue); break;
+        case 7: convert.Invoke(Color.Turquoise); break;
+        case 8: convert.Invoke(Color.White); break;
+        case 9: convert.Invoke(Color.Yellow); break;
+    }
 }

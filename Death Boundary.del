@@ -1,35 +1,15 @@
 import "Lava.del";
 
-rule: "Ceiling Bounce"
+rule: "Ceiling"
 Event.OngoingPlayer
-if (PositionOf(EventPlayer()).Y > 173)
-if (PositionOf(EventPlayer()).Y < 176)
 if (HasSpawned())
 if (IsAlive())
 if (!IsInSpawnRoom())
-if (HeroOf(EventPlayer()) != Hero.Sigma)
-if (!isBall)
+if (SpeedOfInDirection(EventPlayer(), Up()) > 0)
+if (PositionOf(EventPlayer()).Y + SpeedOfInDirection(EventPlayer(), Up()) / 4 > 173)
 {
-    Teleport(EventPlayer(), PositionOf(EventPlayer()) * Vector(1, 0, 1) + Vector(0, 169.5, 0));
-    ApplyImpulse(EventPlayer(), Down(), 0.001, Relative.ToWorld, ContraryMotion.Cancel);
-
-    MinWait();
-    LoopIfConditionIsTrue();
-}
-
-rule: "Ceiling Bounce"
-Event.OngoingPlayer
-if (ballReady)
-if (rootBall == EventPlayer())
-if (HasSpawned())
-if (IsAlive())
-if (!IsInSpawnRoom())
-if (PositionOf(EventPlayer()).Y > 171)
-if (PositionOf(EventPlayer()).Y < 176)
-{
-    Teleport(EventPlayer(), PositionOf(EventPlayer()) * Vector(1, 0, 1) + Vector(0, 169, 0));
-    ApplyImpulse(EventPlayer(), Down(), 0.001, Relative.ToWorld, ContraryMotion.Cancel);
-
-    MinWait();
+    SmallMessage(AllPlayers(), "interesting");
+    ApplyImpulse(EventPlayer(), Down(), SpeedOfInDirection(EventPlayer(), Up()), Relative.ToWorld, ContraryMotion.Cancel);
+    Wait(0.07);
     LoopIfConditionIsTrue();
 }

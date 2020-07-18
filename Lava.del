@@ -41,6 +41,10 @@ rule: "Setup"
         Spectators: Spectators.VisibleAlways,
         SortOrder: -100
     );
+    CreateHudText(AllPlayers(), Text: "Created By", TextColor: Color.LimeGreen, Location: Location.Left, SortOrder: -99.9);
+    CreateHudText(AllPlayers(), Subheader: "   Deltin", SubheaderColor: Color.Orange, Location: Location.Left, SortOrder: -99.9);
+    CreateHudText(AllPlayers(), Subheader: "   Protowalker", SubheaderColor: Color.LimeGreen, Location: Location.Left, SortOrder: -99.8);
+    CreateHudText(AllPlayers(), Subheader: "   Therister", SubheaderColor: Color.Aqua, Location: Location.Left, SortOrder: -99.7);
     CreateHudText(AllPlayers(), Text: " \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", Location: Location.Left, SortOrder: -99);
 
     CreateHudText(VisibleTo: AllPlayers(), Text: "Synthball - N69CC", TextColor: Color.Turquoise, Location: Location.Top, SortOrder: -1, Spectators: Spectators.VisibleAlways);

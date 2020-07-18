@@ -19,6 +19,8 @@ globalvar NumberOption Bonus_Firestrike = new NumberOption("Score Bonus: Fire St
 globalvar NumberOption Bonus_Bump = new NumberOption("Score Bonus: Bump", 0, 100, 40, 5, 0, "% charge");
 globalvar NumberOption Bonus_Charge = new NumberOption("Score Bonus: Charge", 0, 100, 100, 5, 0, "% charge");
 globalvar SelectOption Ball_Color = new SelectOption("Ball Color", ["Blue", "Green", "Lime Green", "Orange", "Purple", "Red", "Sky Blue", "Turquoise", "White", "Yellow"], 7, 1);
+globalvar SelectOption Ball_Trail_Color = new SelectOption("Trail Color", ["Blue", "Green", "Lime Green", "Orange", "Purple", "Red", "Sky Blue", "Turquoise", "White", "Yellow"], 7);
+globalvar NumberOption Ball_Size = new NumberOption("Ball Size", 10, 500, 100, 10, 9, "%");
 
 globalvar HostMenuOption[][] options = [
     [
@@ -55,7 +57,9 @@ globalvar HostMenuOption[][] options = [
         Bonus_Charge
     ],
     [
-        Ball_Color
+        Ball_Color,
+        Ball_Trail_Color,
+        Ball_Size
     ]
 ];
 
@@ -70,7 +74,7 @@ if (IsButtonHeld(HostPlayer(), Button.Interact))
 
         MakeHostHud(text: " \n\n\n\n\n\n", sortOrder: 5);
         MakeHostHud(subheader: "Host Settings", sortOrder: 6);
-        MakeHostHud(text: <"<1> <0> <2>", ["Arena", "Sports", "Player", "Ultimate"][hostMenuCategory], hostMenuSelected == 0 ? "◀" : "", hostMenuSelected == 0 ? "▶" : "">, sortOrder: 7);
+        MakeHostHud(text: <"<1> <0> <2>", ["Arena", "Sports", "Player", "Ultimate", "Ball"][hostMenuCategory], hostMenuSelected == 0 ? "◀" : "", hostMenuSelected == 0 ? "▶" : "">, sortOrder: 7);
         MakeHostHud(header: renderedHostMenu, sortOrder: 8);
         MakeHostHud(text: hostMenuSelected == 0 ? "Walk left or right to choose a category." : options[hostMenuCategory][hostMenuSelected - 1].Controls, subheader: "Walk up and down to choose an option.", sortOrder: 9);
         RenderOptions();
@@ -392,6 +396,11 @@ class NumberOption : HostMenuOption
         else if (Action == 8)
         {
             StartScalingPlayer(FilteredArray(AllPlayers(), !ArrayElement().isWorkingDummy), Value / 100, false);
+        }
+        else if (Action == 9)
+        {
+            root.ballScale = Value / 100;
+            StartScalingPlayer([root.ball1, root.ball2], Value / 100, false);
         }
     }
 }
