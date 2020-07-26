@@ -219,12 +219,6 @@ rule("dodgeball global init")
 			Ability Icon String(Hero(Sigma), Button(Ability 1))), Right, -0.600, Aqua, White, Aqua, Visible To and String,
 			Default Visibility);
 		Modify Global Variable(dodgeball_huds, Append To Array, Last Text ID);
-		Create HUD Text(All Players(Team 1), Icon String(Dizzy), Custom String("Enemy score: {0}", Global.redScore), Custom String(
-			"Your team's score: {0}", Global.blueScore), Top, 1, Sky Blue, Red, Sky Blue, Visible To and String, Visible Always);
-		Modify Global Variable(dodgeball_huds, Append To Array, Last Text ID);
-		Create HUD Text(All Players(Team 2), Icon String(Dizzy), Custom String("Enemy score: {0}", Global.blueScore), Custom String(
-			"Your team's score: {0}", Global.redScore), Top, 1, Sky Blue, Red, Sky Blue, Visible To and String, Visible Always);
-		Modify Global Variable(dodgeball_huds, Append To Array, Last Text ID);
 		Global.dodgeball_blue_kills = 0;
 		Global.dodgeball_red_kills = 0;
 		Create HUD Text(All Players(Team 1), Ability Icon String(Hero(Sigma), Button(Ability 2)), Custom String("Enemy kills: {0}",
