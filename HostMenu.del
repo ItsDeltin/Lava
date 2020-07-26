@@ -21,6 +21,7 @@ globalvar NumberOption Bonus_Charge = new NumberOption("Score Bonus: Charge", 0,
 globalvar SelectOption Ball_Color = new SelectOption("Ball Color", ["Blue", "Green", "Lime Green", "Orange", "Purple", "Red", "Sky Blue", "Turquoise", "White", "Yellow"], 7, 1);
 globalvar SelectOption Ball_Trail_Color = new SelectOption("Trail Color", ["Blue", "Green", "Lime Green", "Orange", "Purple", "Red", "Sky Blue", "Turquoise", "White", "Yellow"], 7);
 globalvar NumberOption Ball_Size = new NumberOption("Ball Size", 10, 500, 100, 10, 9, "%");
+globalvar BooleanOption Ball_Explosion = new BooleanOption("Explode ball when ignited", true);
 
 globalvar HostMenuOption[][] options = [
     [
@@ -59,7 +60,8 @@ globalvar HostMenuOption[][] options = [
     [
         Ball_Color,
         Ball_Trail_Color,
-        Ball_Size
+        Ball_Size,
+        Ball_Explosion
     ]
 ];
 

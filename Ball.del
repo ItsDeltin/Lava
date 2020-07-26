@@ -259,6 +259,7 @@ if (EventDamage() == 95)
         thrower = Attacker();
         throwType = 3;
     }
+    if (!Ball_Explosion.Value) return;
 
     fuse = 0;
     ChaseVariableOverTime(fuse, 2, 3, TimeChaseReevaluation.None);
