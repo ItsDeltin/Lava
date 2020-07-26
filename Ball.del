@@ -16,8 +16,6 @@ globalvar define thrower = null;
 // 4 = power hammer
 globalvar define throwType = 0;
 
-globalvar define blueScoreText !;
-globalvar define redScoreText !;
 globalvar define ballEffect !;
 globalvar define ballIcon !;
 
@@ -30,35 +28,6 @@ rule: "Ball: Setup"
 if (gamemode == Mode.Soccer || gamemode == Mode.Volleyball)
 {
     ball = true;
-    // Blue's score text
-    CreateHudText(
-        VisibleTo      : AllPlayers(Team.Team1),
-        Header         : IconString(Icon.Dizzy),
-        HeaderColor    : Color.SkyBlue,
-        Subheader      : <"Enemy score: <0>", redScore>,
-        SubheaderColor : Color.Red,
-        Text           : <"Your team's score: <0>", blueScore>,
-        TextColor      : Color.SkyBlue,
-        Location       : Location.Top,
-        SortOrder      : 1,
-        Spectators     : Spectators.VisibleAlways
-    );
-    blueScoreText = LastTextID();
-
-    // Red's score text
-    CreateHudText(
-        VisibleTo      : AllPlayers(Team.Team2),
-        Header         : IconString(Icon.Dizzy),
-        HeaderColor    : Color.SkyBlue,
-        Subheader      : <"Enemy score: <0>", blueScore>,
-        SubheaderColor : Color.Red,
-        Text           : <"Your team's score: <0>", redScore>,
-        TextColor      : Color.SkyBlue,
-        Location       : Location.Top,
-        SortOrder      : 1,
-        Spectators     : Spectators.VisibleAlways
-    );
-    redScoreText = LastTextID();
 
     CreateDummyBot(Hero.Torbjorn, Team.Team1, 5, TopPolePos());
     ball1 = LastCreatedEntity();
@@ -86,8 +55,6 @@ if (gamemode != Mode.Volleyball)
 {
     ball = false;
     ballReady = false;
-    DestroyHudText(blueScoreText);
-    DestroyHudText(redScoreText);
     DestroyEffect(ballEffect);
     DestroyDummyBot(TeamOf(ball1), SlotOf(ball1));
     DestroyDummyBot(TeamOf(ball2), SlotOf(ball2));

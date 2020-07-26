@@ -53,6 +53,19 @@ rule: "Setup"
     SetObjectiveDescription(AllPlayers(), "♥", ObjectiveRev.VisibleToSortOrderAndString);
     DisableCompletion();
     SetMatchTime(0);
+
+    // Team huds
+    // Blue's score text
+    CreateHudText(AllPlayers(Team.Team1), Text: <"Score: <0>", blueScore>, TextColor: Color.SkyBlue, Location: Location.Top, SortOrder: 1, Spectators: Spectators.VisibleNever);
+    CreateHudText(AllPlayers(Team.Team1), Subheader: <"Enemy Score: <0>", redScore>, SubheaderColor: Color.SkyBlue, Location: Location.Top, SortOrder: 2, Spectators: Spectators.VisibleNever);
+
+    // Red's score text
+    CreateHudText(AllPlayers(Team.Team2), Text: <"Score: <0>", redScore>, TextColor: Color.SkyBlue, Location: Location.Top, SortOrder: 1, Spectators: Spectators.VisibleNever);
+    CreateHudText(AllPlayers(Team.Team2), Subheader: <"Enemy Score: <0>", blueScore>, SubheaderColor: Color.SkyBlue, Location: Location.Top, SortOrder: 2, Spectators: Spectators.VisibleNever);
+
+    // Spectator score text
+    CreateHudText(null, Text: <"Blue Score: <0>", blueScore>, TextColor: Color.SkyBlue, Location: Location.Top, SortOrder: 1, Spectators: Spectators.VisibleAlways);
+    CreateHudText(null, Text: <"Red Score: <0>", redScore>, TextColor: Color.Red, Location: Location.Top, SortOrder: 2, Spectators: Spectators.VisibleAlways);
 }
 
 rule: "Player Setup"
