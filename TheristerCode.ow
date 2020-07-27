@@ -166,25 +166,6 @@ rule("Dodgeball: Destroy Boundary")
 	}
 }
 
-rule("dodgeball force start")
-{
-	event
-	{
-		Ongoing - Global;
-	}
-
-	conditions
-	{
-		Is Button Held(Host Player, Crouch) == True;
-		Is Button Held(Host Player, Interact) == True;
-	}
-
-	actions
-	{
-		Global.gamemode = 6;
-	}
-}
-
 rule("dodgeball global init")
 {
 	event
