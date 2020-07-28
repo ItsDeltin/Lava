@@ -180,34 +180,35 @@ rule("dodgeball global init")
 
 	actions
 	{
+		Call Subroutine(DestroyTutorialText);
 		Create HUD Text(All Players(All Teams), Ability Icon String(Hero(Reinhardt), Button(Primary Fire)), Null, Custom String(
 			"Dodgeball by Therister and Protowalker\r\nA collaborative effort of Grandeur Hammers\r\nhttps://bit.ly/thisiswhereourdiscordlinkgoes"),
-			Right, -2, Yellow, Red, Yellow, Visible To and String, Visible Always);
+			Right, 1, Yellow, Red, Yellow, Visible To and String, Visible Always);
 		Modify Global Variable(dodgeball_huds, Append To Array, Last Text ID);
-		Create HUD Text(All Players(All Teams), Hero Icon String(Hero(Sigma)), Null, Custom String("Controls:"), Right, -1, Aqua, White,
+		Create HUD Text(All Players(All Teams), Hero Icon String(Hero(Sigma)), Null, Custom String("Controls:"), Right, 2, Aqua, White,
 			Aqua, Visible To and String, Default Visibility);
 		Modify Global Variable(dodgeball_huds, Append To Array, Last Text ID);
 		Create HUD Text(All Players(All Teams), Null, Null, Custom String("Press and hold {0} (right click) to pick up a ball.", String(
-			"Secondary Fire")), Right, -0.900, Aqua, White, Aqua, Visible To and String, Default Visibility);
+			"Secondary Fire")), Right, 3, Aqua, White, Aqua, Visible To and String, Default Visibility);
 		Modify Global Variable(dodgeball_huds, Append To Array, Last Text ID);
 		Create HUD Text(All Players(All Teams), Null, Null, Custom String("Press and hold {0} (left click) to charge up your throw.",
-			String("Primary Fire")), Right, -0.800, Aqua, White, Aqua, Visible To and String, Default Visibility);
+			String("Primary Fire")), Right, 4, Aqua, White, Aqua, Visible To and String, Default Visibility);
 		Modify Global Variable(dodgeball_huds, Append To Array, Last Text ID);
 		Create HUD Text(All Players(All Teams), Null, Null, Custom String("Release {0} (left click) to throw.", String("Primary Fire")),
-			Right, -0.700, Aqua, White, Aqua, Visible To and String, Default Visibility);
+			Right, 5, Aqua, White, Aqua, Visible To and String, Default Visibility);
 		Modify Global Variable(dodgeball_huds, Append To Array, Last Text ID);
 		Create HUD Text(All Players(All Teams), Null, Null, Custom String("Use {0} Kinetic Grasp to catch an enemy's ball and kill them.",
-			Ability Icon String(Hero(Sigma), Button(Ability 1))), Right, -0.600, Aqua, White, Aqua, Visible To and String,
+			Ability Icon String(Hero(Sigma), Button(Ability 1))), Right, 6, Aqua, White, Aqua, Visible To and String,
 			Default Visibility);
 		Modify Global Variable(dodgeball_huds, Append To Array, Last Text ID);
 		Global.dodgeball_blue_kills = 0;
 		Global.dodgeball_red_kills = 0;
-		Create HUD Text(All Players(Team 1), Ability Icon String(Hero(Sigma), Button(Ability 2)), Custom String("Enemy kills: {0}",
-			Global.dodgeball_red_kills), Custom String("Your team's kills: {0}", Global.dodgeball_blue_kills), Top, 2, Aqua, Red, Aqua,
+		Create HUD Text(All Players(Team 1), Ability Icon String(Hero(Sigma), Button(Ability 2)), Custom String("Enemy kills: {0}/{1}",
+			Global.dodgeball_red_kills, Count Of(Filtered Array(All Players(Team 2), Has Spawned(Current Array Element)))), Custom String("Your team's kills: {0}/{1}", Global.dodgeball_blue_kills, Count Of(Filtered Array(All Players(Team 1), Has Spawned(Current Array Element)))), Top, 2, Aqua, Red, Aqua,
 			Visible To and String, Visible Always);
 		Modify Global Variable(dodgeball_huds, Append To Array, Last Text ID);
-		Create HUD Text(All Players(Team 2), Ability Icon String(Hero(Sigma), Button(Ability 2)), Custom String("Enemy kills: {0}",
-			Global.dodgeball_blue_kills), Custom String("Your team's kills: {0}", Global.dodgeball_red_kills), Top, 2, Aqua, Red, Aqua,
+		Create HUD Text(All Players(Team 2), Ability Icon String(Hero(Sigma), Button(Ability 2)), Custom String("Enemy kills: {0}/{1}",
+			Global.dodgeball_blue_kills, Count Of(Filtered Array(All Players(Team 1), Has Spawned(Current Array Element)))), Custom String("Your team's kills: {0}/{1}", Global.dodgeball_red_kills, Count Of(Filtered Array(All Players(Team 2), Has Spawned(Current Array Element)))), Top, 2, Aqua, Red, Aqua,
 			Visible To and String, Visible Always);
 		Modify Global Variable(dodgeball_huds, Append To Array, Last Text ID);
 		Global.dodgeball_scoring = False;
@@ -978,7 +979,8 @@ rule("dodgeball score increase - team 1")
 
 	conditions
 	{
-		Global.dodgeball_blue_kills >= 5 * Count Of(Filtered Array(All Players(Team 1), Has Spawned(Current Array Element)));
+		Global.dodgeball_blue_kills >= 1 * Count Of(Filtered Array(All Players(Team 1), Has Spawned(Current Array Element)));
+		Global.dodgeball_blue_kills != 0;
 		Global.dodgeball_scoring == False;
 		Global.gamemode == 6;
 	}
@@ -1005,7 +1007,8 @@ rule("dodgeball score increase - team 2")
 
 	conditions
 	{
-		Global.dodgeball_red_kills >= 5 * Count Of(Filtered Array(All Players(Team 2), Has Spawned(Current Array Element)));
+		Global.dodgeball_red_kills >= 1 * Count Of(Filtered Array(All Players(Team 2), Has Spawned(Current Array Element)));
+		Global.dodgeball_red_kills != 0;
 		Global.dodgeball_scoring == False;
 		Global.gamemode == 6;
 	}
@@ -1139,7 +1142,7 @@ rule("dodgeball out of bounds severe")
 	}
 }
 
-rule("dodgeball ball hogging check")
+disabled rule("dodgeball ball hogging check")
 {
 	event
 	{
@@ -1164,7 +1167,7 @@ rule("dodgeball ball hogging check")
 	}
 }
 
-rule("dodgeball ball hogging restart")
+disabled rule("dodgeball ball hogging restart")
 {
 	event
 	{
