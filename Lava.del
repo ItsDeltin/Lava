@@ -34,6 +34,7 @@ rule: "Setup"
         SortOrder     : 2
     );
     CreateHudText(AllPlayers(), Text: " \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", Location: Location.Left, SortOrder: 1);
+    CreateHudText(AllPlayers(), Text: " \n\n\n", Location: Location.Top, SortOrder: 4);
 
     CreateHudText(VisibleTo: AllPlayers(), Text: "Synthball - N69CC", TextColor: Color.Turquoise, Location: Location.Top, SortOrder: -1, Spectators: Spectators.VisibleAlways);
     CreateHudText(HostPlayer(), Subheader: "You are the host player. Press interact to open the host settings.", SubheaderColor: Color.Turquoise, Location: Location.Top, SortOrder: 1, Spectators: Spectators.VisibleNever);
@@ -41,6 +42,7 @@ rule: "Setup"
     SetObjectiveDescription(AllPlayers(), "♥", ObjectiveRev.VisibleToSortOrderAndString);
     DisableCompletion();
     SetMatchTime(0);
+    PauseMatchTime();
 
     // Team huds
     // Blue's score text

@@ -95,32 +95,26 @@ rule: "Player: Shield and brake HUD"
 {
     CreateHudText(
         VisibleTo  : FilteredArray(PlayersOnHero(Hero.Reinhardt), shieldIsOut(ArrayElement()) && VerticalFacingAngleOf(ArrayElement()) > -40),
-        Header     : IconString(Icon.ArrowUp),
-        HeaderColor: Color.Orange,
-        Text       : "Look up to become a ramp!",
-        TextColor  : Color.Yellow,
+        Text       : "△ Look up to become a ramp △",
+        TextColor  : Color.LimeGreen,
         Location   : Location.Top,
-        SortOrder  : 3,
+        SortOrder  : 5,
         Spectators : Spectators.VisibleNever
     );
     CreateHudText(
         VisibleTo  : FilteredArray(PlayersOnHero(Hero.Reinhardt), shieldIsOut(ArrayElement()) && VerticalFacingAngleOf(ArrayElement()) <= -40),
-        Header     : IconString(Icon.Moon),
-        HeaderColor: Color.Aqua,
-        Text       : "You are now a ramp.",
-        TextColor  : Color.Yellow,
+        Text       : "▲       You are now a ramp       ▲",
+        TextColor  : Color.LimeGreen,
         Location   : Location.Top,
-        SortOrder  : 3,
+        SortOrder  : 5,
         Spectators : Spectators.VisibleNever
     );
     CreateHudText(
-        VisibleTo  : FilteredArray(PlayersOnHero(Hero.Reinhardt), IsUsingAbility1(ArrayElement()) && IsOnGround(ArrayElement())),
-        Header     : IconString(Icon.ArrowDown),
-        HeaderColor: Color.Orange,
-        Text       : "Crouch to brake!",
+        VisibleTo  : FilteredArray(PlayersOnHero(Hero.Reinhardt), IsUsingAbility1(ArrayElement())),
+        Text       : <"▼ Crouch to brake ▼">,
         TextColor  : Color.Yellow,
         Location   : Location.Top,
-        SortOrder  : 4,
+        SortOrder  : 5,
         Spectators : Spectators.VisibleNever
     );
 }

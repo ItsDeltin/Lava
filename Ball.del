@@ -215,19 +215,24 @@ if (!IsInSpawnRoom(ball1) && !IsInSpawnRoom(ball2))
 
 globalvar define fuse;
 
-rule: "Ball: On Fire Strike"
+rule: "Ball: On Fire Strike: Impulse"
+Event.OnDamageTaken
+if (isBall)
+if (!ballIsOnStand)
+if (!ballOnGround)
+if (EventDamage() == 95)
+{
+    ApplyImpulse(rootBall, Attacker().fireStrikeDirection, SpeedOf(rootBall) * 3, Relative.ToWorld, ContraryMotion.Cancel);
+    thrower = Attacker();
+    throwType = 3;
+}
+
+rule: "Ball: On Fire Strike: Detonate"
 Event.OnDamageTaken
 if (isBall)
 if (EventDamage() == 95)
+if (Ball_Explosion.Value)
 {
-    if (!ballIsOnStand && !ballOnGround)
-    {
-        ApplyImpulse(rootBall, Attacker().fireStrikeDirection, SpeedOf(rootBall) * 3, Relative.ToWorld, ContraryMotion.Cancel);
-        thrower = Attacker();
-        throwType = 3;
-    }
-    if (!Ball_Explosion.Value) return;
-
     fuse = 0;
     ChaseVariableOverTime(fuse, 2, 3, TimeChaseReevaluation.None);
 

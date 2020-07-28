@@ -52,17 +52,22 @@ if (gamemode == Mode.Volleyball)
     DestroyTutorialText();
     CreateHudText(
         VisibleTo      : AllPlayers(),
-        Header         : IconString(Icon.Halo),
-        HeaderColor    : Color.Turquoise,
-        Text           : "Keep the ball on the enemy side!",
-        TextColor      : Color.White,
-        Subheader      : <"<0> seconds", detonationTime>,
-        SubheaderColor : Color.Orange,
+        Text           : "Keep the ball on the enemy side",
+        TextColor      : Color.Blue,
         Location       : Location.Top,
         SortOrder      : 2,
         Spectators     : Spectators.VisibleAlways
     );
     tutorialText[0] = LastTextID();
+    CreateHudText(
+        VisibleTo      : AllPlayers(),
+        Subheader      : <"<0> seconds on switch", detonationTime + 1>,
+        SubheaderColor : Color.Orange,
+        Location       : Location.Top,
+        SortOrder      : 3,
+        Spectators     : Spectators.VisibleAlways
+    );
+    tutorialText[1] = LastTextID();
 }
 
 rule: "Volleyball: Cleanup"
@@ -154,6 +159,8 @@ if (!isCountingDown)
 if (!ballIsOnStand)
 if (!ballIsGettingCharged)
 {
+    UnpauseMatchTime();
+    UnpauseMatchTime();
     ChaseVariableAtRate(detonationCounter, 0, 1, RateChaseReevaluation.None);
     isCountingDown = true;
 }
@@ -180,10 +187,12 @@ if (XOf(PositionOf(rootBall)) < 0)
 
 void sideSwitched()
 {
+    SetMatchTime(detonationTime);
     StopChasingVariable(detonationCounter);
     detonationCounter = detonationTime;
     isCountingDown = false;
     detonationTime = Max(2, detonationTime - 1);
+    PauseMatchTime();
 }
 
 rule: "Volleyball: Volleyball detonates"
