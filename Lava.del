@@ -31,41 +31,29 @@ rule: "Setup"
         SubheaderColor: Color.Orange,
         Location      : Location.Left,
         Spectators    : Spectators.VisibleAlways,
-        SortOrder     : -101
+        SortOrder     : 2
     );
-    CreateHudText(
-        VisibleTo: AllPlayers(),
-        Subheader: "https://github.com/ItsDeltin/Overwatch-Script-To-Workshop",
-        SubheaderColor: Color.Blue,
-        Location: Location.Left,
-        Spectators: Spectators.VisibleAlways,
-        SortOrder: -100
-    );
-    CreateHudText(AllPlayers(), Text: "Created By", TextColor: Color.LimeGreen, Location: Location.Left, SortOrder: -99.9);
-    CreateHudText(AllPlayers(), Subheader: "   Deltin", SubheaderColor: Color.Orange, Location: Location.Left, SortOrder: -99.9);
-    CreateHudText(AllPlayers(), Subheader: "   Protowalker", SubheaderColor: Color.LimeGreen, Location: Location.Left, SortOrder: -99.8);
-    CreateHudText(AllPlayers(), Subheader: "   Therister", SubheaderColor: Color.Aqua, Location: Location.Left, SortOrder: -99.7);
-    CreateHudText(AllPlayers(), Text: " \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", Location: Location.Left, SortOrder: -99);
+    CreateHudText(AllPlayers(), Text: " \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", Location: Location.Left, SortOrder: 1);
 
     CreateHudText(VisibleTo: AllPlayers(), Text: "Synthball - N69CC", TextColor: Color.Turquoise, Location: Location.Top, SortOrder: -1, Spectators: Spectators.VisibleAlways);
-    CreateHudText(HostPlayer(), Subheader: "You are the host player. Press interact to open the host settings.", SubheaderColor: Color.Turquoise, Location: Location.Top, SortOrder: -0.9, Spectators: Spectators.VisibleNever);
-    CreateHudText(HostPlayer(), Subheader: <"C-A-P: <0>-<1>-<2>", ServerLoad(), ServerLoadAverage(), ServerLoadPeak()>, SubheaderColor: Color.Green, Location: Location.Top, SortOrder: -0.8, Spectators: Spectators.VisibleAlways);
+    CreateHudText(HostPlayer(), Subheader: "You are the host player. Press interact to open the host settings.", SubheaderColor: Color.Turquoise, Location: Location.Top, SortOrder: 1, Spectators: Spectators.VisibleNever);
+    // CreateHudText(HostPlayer(), Subheader: <"C-A-P: <0>-<1>-<2>", ServerLoad(), ServerLoadAverage(), ServerLoadPeak()>, SubheaderColor: Color.Green, Location: Location.Top, SortOrder: 0.2, Spectators: Spectators.VisibleAlways);
     SetObjectiveDescription(AllPlayers(), "♥", ObjectiveRev.VisibleToSortOrderAndString);
     DisableCompletion();
     SetMatchTime(0);
 
     // Team huds
     // Blue's score text
-    CreateHudText(AllPlayers(Team.Team1), Text: <"Score: <0>", blueScore>, TextColor: Color.SkyBlue, Location: Location.Top, SortOrder: 1, Spectators: Spectators.VisibleNever);
-    CreateHudText(AllPlayers(Team.Team1), Subheader: <"Enemy Score: <0>", redScore>, SubheaderColor: Color.SkyBlue, Location: Location.Top, SortOrder: 2, Spectators: Spectators.VisibleNever);
+    CreateHudText(AllPlayers(Team.Team1), Text: <" \n\n\n                    <0>", <"                     ◈ Score: <0> ◈", blueScore>>, TextColor: Color.Aqua, Location: Location.Left, SortOrder: 0, Spectators: Spectators.VisibleNever);
+    CreateHudText(AllPlayers(Team.Team1), Text: <" \n\n\n◈ Enemy Score: <1> ◈               <0>", "                      ", redScore>, TextColor: Color.Red, Location: Location.Right, SortOrder: 0, Spectators: Spectators.VisibleNever);
 
     // Red's score text
-    CreateHudText(AllPlayers(Team.Team2), Text: <"Score: <0>", redScore>, TextColor: Color.SkyBlue, Location: Location.Top, SortOrder: 1, Spectators: Spectators.VisibleNever);
-    CreateHudText(AllPlayers(Team.Team2), Subheader: <"Enemy Score: <0>", blueScore>, SubheaderColor: Color.SkyBlue, Location: Location.Top, SortOrder: 2, Spectators: Spectators.VisibleNever);
+    CreateHudText(AllPlayers(Team.Team2), Text: <" \n\n\n                    <0>", <"                     ◈ Score: <0> ◈", redScore>>, TextColor: Color.Aqua, Location: Location.Left, SortOrder: 0, Spectators: Spectators.VisibleNever);
+    CreateHudText(AllPlayers(Team.Team2), Text: <" \n\n\n◈ Enemy Score: <1> ◈               <0>", "                      ", blueScore>, TextColor: Color.Red, Location: Location.Right, SortOrder: 0, Spectators: Spectators.VisibleNever);
 
     // Spectator score text
-    CreateHudText(null, Text: <"Blue Score: <0>", blueScore>, TextColor: Color.SkyBlue, Location: Location.Top, SortOrder: 1, Spectators: Spectators.VisibleAlways);
-    CreateHudText(null, Text: <"Red Score: <0>", redScore>, TextColor: Color.Red, Location: Location.Top, SortOrder: 2, Spectators: Spectators.VisibleAlways);
+    CreateHudText(null, Text: <"◈ Blue Score: <0> ◈", blueScore>, TextColor: Color.Aqua, Location: Location.Top, SortOrder: 0, Spectators: Spectators.VisibleAlways);
+    CreateHudText(null, Text: <"◈ Red Score: <0> ◈", redScore>, TextColor: Color.Red, Location: Location.Top, SortOrder: 0, Spectators: Spectators.VisibleAlways);
 }
 
 rule: "Player Setup"
@@ -83,7 +71,7 @@ Event.OngoingPlayer
         "In volleyball, the amount of time until the ball explodes decreases each\ntime the ball switches sides.",
         "The host player can press interact to open game settings.",
         "The source code is available at https://github.com/ItsDeltin/Lava\nYou can report bugs there, too!"
-    ][tipIndex], Subheader: "Press reload for the next tip.", SubheaderColor: Color.Aqua, Location: Location.Left, SortOrder: -98);
+    ][tipIndex], Subheader: "Press reload for the next tip.", SubheaderColor: Color.Aqua, Location: Location.Left, SortOrder: 3);
 }
 
 rule: "Next tip"

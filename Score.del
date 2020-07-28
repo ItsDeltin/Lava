@@ -177,7 +177,7 @@ if (gamemode == Mode.Soccer)
         Subheader      : "Keep the ball away from the red wall",
         SubheaderColor : Color.Orange,
         Location       : Location.Top,
-        SortOrder      : 2.1,
+        SortOrder      : 3,
         Spectators     : Spectators.VisibleAlways
     );
     tutorialText[1] = LastTextID();
