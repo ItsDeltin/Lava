@@ -222,7 +222,7 @@ if (!ballIsOnStand)
 if (!ballOnGround)
 if (EventDamage() == 95)
 {
-    ApplyImpulse(rootBall, Attacker().fireStrikeDirection, SpeedOf(rootBall) * 3, Relative.ToWorld, ContraryMotion.Cancel);
+    ApplyImpulse(rootBall, Attacker().fireStrikeDirection, SpeedOf(rootBall) * 3.5, Relative.ToWorld, ContraryMotion.Cancel);
     thrower = Attacker();
     throwType = 3;
 }

@@ -15,7 +15,7 @@ globalvar NumberOption FireStrikeCooldownTime = new NumberOption("Fire Strike co
 globalvar NumberOption CPS = new NumberOption("Ult", 0, 100, 2, 1, 0, "% per 2 seconds");
 globalvar NumberOption CPS_Dodgeball = new NumberOption("Dodgeball Ult", 0, 100, 5, 1, 0, "% per 2 seconds");
 globalvar NumberOption Bonus_Hammer = new NumberOption("Score Bonus: Hammer", 0, 100, 20, 5, 0, "% charge");
-globalvar NumberOption Bonus_Firestrike = new NumberOption("Score Bonus: Fire Strike", 0, 100, 50, 5, 0, "% charge");
+globalvar NumberOption Bonus_Firestrike = new NumberOption("Score Bonus: Fire Strike", 0, 120, 50, 5, 0, "% charge");
 globalvar NumberOption Bonus_Bump = new NumberOption("Score Bonus: Bump", 0, 100, 40, 5, 0, "% charge");
 globalvar NumberOption Bonus_Charge = new NumberOption("Score Bonus: Charge", 0, 100, 100, 5, 0, "% charge");
 globalvar SelectOption Ball_Color = new SelectOption("Ball Color", ["Blue", "Green", "Lime Green", "Orange", "Purple", "Red", "Sky Blue", "Turquoise", "White", "Yellow"], 7, 1);
@@ -60,7 +60,6 @@ globalvar HostMenuOption[][] options = [
     [
         Ball_Color,
         Ball_Trail_Color,
-        Ball_Size,
         Ball_Explosion
     ]
 ];
@@ -74,7 +73,7 @@ if (IsButtonHeld(HostPlayer(), Button.Interact))
         DisallowButton(HostPlayer(), Button.Ability1);
         DisallowButton(HostPlayer(), Button.Jump);
 
-        MakeHostHud(text: " \n\n\n\n\n\n", sortOrder: 5);
+        // MakeHostHud(text: " \n\n\n\n\n\n", sortOrder: 5);
         MakeHostHud(subheader: "Host Settings", sortOrder: 6);
         MakeHostHud(text: <"<1> <0> <2>", ["Arena", "Sports", "Player", "Ultimate", "Ball"][hostMenuCategory], hostMenuSelected == 0 ? "◀" : "", hostMenuSelected == 0 ? "▶" : "">, sortOrder: 7);
         MakeHostHud(header: renderedHostMenu, sortOrder: 8);
