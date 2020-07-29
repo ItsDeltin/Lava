@@ -23,6 +23,11 @@ enum Mode
     Dodgeball = 6
 }
 
+disabled rule: "* Hello! This is the source code of Synthball." -6 {}
+disabled rule: "* This code was generated using Overwatch Script To Workshop." -5 {}
+disabled rule: "* The source code can be found at https://github.com/ItsDeltin/Lava." -4 {}
+disabled rule: "* Created by Deltin, Protowalker, and Therister." -3 {}
+
 rule: "Setup"
 {
     CreateHudText(
@@ -132,16 +137,6 @@ rule: "Setup Arena"
 
     // Pole flair
     CreateEffect(AllPlayers(), Effect.Orb, Color.Orange, TopPolePos(), 0.25, EffectRev.VisibleTo);
-    // ModifyGlobalVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
-    // CreateBeamEffect(
-    //     AllPlayers(),
-    //     BeamType.GoodBeam,
-    //     flairPos(),
-    //     TopPolePos(),
-    //     Color.Red
-    // );
-    // ModifyGlobalVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
-    // ChaseVariableAtRate(killzoneRot, 180, 25, RateChaseReevaluation.DestinationAndRate);
 }
 
 rule: "Setup Arena: Floor"
@@ -149,22 +144,6 @@ if (gamemode == Mode.Soccer || gamemode == Mode.Volleyball || gamemode == Mode.W
 {
     MakeFloor();
 }
-
-// define flairPos(): Destination(PolePos() * Vector(1,0,1) + Vector(0, 136.42, 0), DirectionFromAngles(killzoneRot, 0), 11);
-
-// rule: "Reset killzone rot"
-// if (killzoneRot == 180)
-// {
-//     killzoneRot = -180;
-// }
-
-// rule: "Blip end"
-// if (AbsoluteValue(killzoneRot - 22.5) % 45 < 1)
-// {
-//     PlayEffect(AllPlayers(), PlayEffect.GoodExplosion, Color.Red, flairPos(), 1);
-// }
-
-// globalvar define killzoneRot = -180;
 
 globalvar define arenaType! = 0;
 globalvar define arenaColor! = 0;
@@ -310,16 +289,6 @@ define TopPolePos(): Vector(0, 161.5,  150);
 
 define isOnWall(define player): IsOnGround(player) && AbsoluteValue(YOf(PositionOf(player)) - 158.44) < 0.2;
 
-disabled rule: "I want to die"
-if (IsButtonHeld(HostPlayer(), Button.Melee))
-{
-    CreateDummyBot(Hero.Reinhardt, NumberOfPlayers(Team.Team1) < 6 ? Team.Team1 : Team.Team2, -1, PositionOf(HostPlayer()), FacingDirectionOf(HostPlayer()));
-    //LastCreatedEntity().isWorkingDummy = true;
-    StartHoldingButton(LastCreatedEntity(), Button.SecondaryFire);
-    MinWait();
-    SetFacing(LastCreatedEntity(), FacingDirectionOf(HostPlayer()), Relative.ToWorld);
-}
-
 rule: "Start"
 if (!started)
 if (IsTrueForAll(AllPlayers(), HasSpawned(ArrayElement()) || IsDead(ArrayElement())))
@@ -337,41 +306,3 @@ void DestroyTutorialText() "Destroy Tutorial Text"
     foreach (define text in tutorialText)
         DestroyHudText(text);
 }
-
-// globalvar define currentHeroIndex! = 0;
-// globalvar define currentHeroHud! = null;
-// rule: "Next hero index"
-// if (IsButtonHeld(HostPlayer(), Button.Interact))
-// {
-//     if (currentHeroHud == null)
-//     {
-//         CreateHudText(
-//             VisibleTo: HostPlayer(), 
-//             Header   : <"<0><1><2>",
-//                 AbilityIconString(AllHeroes()[currentHeroIndex], ButtonValue(Button.Ability1)),
-//                 AbilityIconString(AllHeroes()[currentHeroIndex], ButtonValue(Button.Ability2)),
-//                 AbilityIconString(AllHeroes()[currentHeroIndex], ButtonValue(Button.Ultimate))
-//             >
-//         );
-//         currentHeroHud[0] = LastTextID();
-//         CreateHudText(
-//             VisibleTo: HostPlayer(), 
-//             Header   : <"<0><1>",
-//                 AbilityIconString(AllHeroes()[currentHeroIndex], ButtonValue(Button.PrimaryFire)),
-//                 AbilityIconString(AllHeroes()[currentHeroIndex], ButtonValue(Button.SecondaryFire))
-//             >
-//         );
-//         currentHeroHud[1] = LastTextID();
-//     }
-//     else
-//     {
-//         currentHeroIndex++;
-//         if (currentHeroIndex == CountOf(AllHeroes()))
-//         {
-//             currentHeroIndex = 0;
-//             DestroyHudText(currentHeroHud[0]);
-//             DestroyHudText(currentHeroHud[1]);
-//             currentHeroHud = null;
-//         }
-//     }
-// }

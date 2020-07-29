@@ -66,6 +66,7 @@ globalvar HostMenuOption[][] options = [
 
 rule: "Host Menu: Toggle Host Menu"
 if (IsButtonHeld(HostPlayer(), Button.Interact))
+if (!IsUsingAbility1(HostPlayer()))
 {
     if (!hostMenuOpened)
     {
