@@ -65,6 +65,7 @@ rule: "Setup"
 
 rule: "Player Setup"
 Event.OngoingPlayer
+if (!IsDummyBot())
 {
     CreateHudText(EventPlayer(), Text: [
         "Charge into the center pole to knock the ball off.",

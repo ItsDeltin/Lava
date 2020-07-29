@@ -237,6 +237,7 @@ rule("dodgeball player init")
 
 	actions
 	{
+		Set Status(Event Player, Null, Phased Out, 9999);
 		Disallow Button(Event Player, Secondary Fire);
 		Start Forcing Player To Be Hero(Event Player, Hero(Sigma));
 		Teleport(Event Player, Vector(Team Of(Event Player) == Team 1 ? 28 : -28, 154.880, 150 + (Slot Of(Event Player) % 2 == 0 ? 4 : -4)
@@ -936,6 +937,7 @@ rule("dodgeball clean up -- per player")
 
 	actions
 	{
+		Clear Status(Event Player, Phased Out);
 		Start Forcing Player To Be Hero(Event Player, Hero(Reinhardt));
 		Allow Button(Event Player, Secondary Fire);
 		Allow Button(Event Player, Ability 2);
