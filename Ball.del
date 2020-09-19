@@ -165,7 +165,7 @@ void respawnBall() "Respawn Ball"
 
     stopNearbyCharging();
 
-    Teleport([ball1,ball2], ObjectivePosition(0))
+    Teleport([ball1,ball2], ObjectivePosition(0));
     Respawn(ball1);
     Respawn(ball2);
     Wait(1);

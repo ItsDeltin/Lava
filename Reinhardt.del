@@ -18,6 +18,20 @@ Player.Reinhardt
     SetGravity(EventPlayer(), gravity);
 }
 
+rule: "Player: Third Person"
+Event.OngoingPlayer
+if (ThirdPerson.Value)
+{
+    StartCamera(EventPlayer(), (EyePosition() - (FacingDirectionOf() * 3)) - FacingDirectionOf().CrossProduct(FacingDirectionOf().CrossProduct(Up())) * 1.5, EyePosition() + FacingDirectionOf() * 2, 50);
+}
+
+rule: "Player: Third Person"
+Event.OngoingPlayer
+if (!ThirdPerson.Value)
+{
+    StopCamera(EventPlayer());
+}
+
 rule: "Player: Ultimate Charge"
 Event.OngoingPlayer
 if (IsAlive())
@@ -321,34 +335,53 @@ if (IsOnGround())
 
 playervar define isUsingPowerHammer! = false;
 
-void UltimateHandler() "Player: Reinhardt Ultimate Handler"
+void UltimateHandler() playervar "Player: Reinhardt Ultimate Handler"
 {
-    define hitPos = PositionOf() + DirectionFromAngles(HorizontalFacingAngleOf(), 0) * 2.75;
+    Vector l = ultimatePointLeft;
+    Vector r = ultimatePointRight;
+    define affectPlayers = AllPlayers(OppositeTeamOf(TeamOf(EventPlayer())));
+    Vector direction = (VerticalFacingAngleOf() > -10) ? DirectionFromAngles(HorizontalFacingAngleOf(), -10) : FacingDirectionOf();
 
-    define affectPlayers = FilteredArray(AllPlayers(OppositeTeamOf(TeamOf(EventPlayer()))), !ArrayElement().isWorkingDummy);
-    foreach (define dmg in affectPlayers)
+    Vector beamLeft = PositionOf();
+    Vector beamRight = PositionOf();
+    ChaseVariableOverTime(beamLeft, l, 0.2, TimeChaseReevaluation.None);
+    ChaseVariableOverTime(beamRight, r, 0.2, TimeChaseReevaluation.None);
+    CreateBeamEffect(AllPlayers(), BeamType.BadBeam, beamLeft, beamRight, Color.Orange, EffectRev.VisibleToPositionAndRadius);
+    define ultimateEffect! = LastCreatedEntity();
+
+    foreach (define apply in affectPlayers)
+    if (AbsoluteValue(PositionOf().Y - PositionOf(apply).Y) < 3 &&
+        IsInLineOfSight(EventPlayer(), apply, BarrierLOS.EnemyBarriersBlock) &&
+        doesTriangleIntersect(PositionOf(apply), PositionOf(), l, r))
     {
-        define damage = 300 * Min(-DistanceBetween(dmg, hitPos) + 3.5, 1);
-        Damage(dmg, EventPlayer(), damage);
-    }
+        if (!apply.isWorkingDummy)
+            Damage(apply, EventPlayer(), 300);
 
-    define direction = (VerticalFacingAngleOf() > -10) ? DirectionFromAngles(HorizontalFacingAngleOf(), -10) : FacingDirectionOf();
-
-    ModifyVariable(affectPlayers, Operation.AppendToArray, [ball1, ball2]);
-    foreach (define dmg in affectPlayers)
-    {
-        define impulse = (dmg.isBall ? 70 : 50) * Min(-DistanceBetween(dmg, hitPos) + 4, 1);
-        if (impulse > 0)
+        ApplyImpulse(apply, direction, apply.isBall ? 70 : 50, Relative.ToWorld, ContraryMotion.Cancel);
+        if (rootBall == apply)
         {
-            ApplyImpulse(dmg, direction, impulse, Relative.ToWorld, ContraryMotion.Cancel);
-            if (rootBall == dmg)
-            {
-                thrower = EventPlayer();
-                throwType = 4;
-            }
+            thrower = EventPlayer();
+            throwType = 4;
         }
     }
+
+    Wait(0.2);
+    DestroyEffect(ultimateEffect);
 }
+
+define doesTriangleIntersect(Vector pt, Vector p1, Vector p2, Vector p3)
+{
+    define d1! = sign(pt, p1, p2);
+    define d2! = sign(pt, p2, p3);
+    define d3! = sign(pt, p3, p1);
+
+    return !((d1 < 0 || d2 < 0 || d3 < 0) && (d1 > 0 || d2 > 0 || d3 > 0));
+}
+
+define sign(Vector p1, Vector p2, Vector p3): (p1.X - p3.X) * (p2.Z - p3.Z) - (p2.X - p3.X) * (p1.Z - p3.Z);
+
+Vector ultimatePointLeft: WorldVectorOf(Vector(-3, 0, 7), EventPlayer(), LocalVector.RotationAndTranslation);
+Vector ultimatePointRight: WorldVectorOf(Vector(3, 0, 7), EventPlayer(), LocalVector.RotationAndTranslation);
 
 playervar define fireStrikeDirection!;
 

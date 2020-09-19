@@ -12,6 +12,7 @@ globalvar BooleanOption DodgeballEnabled = new BooleanOption("Cycle Dodgeball", 
 globalvar SelectOption PointSwitch = new SelectOption("Switch gamemode when number of points is reached", ["Off", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"], 5);
 globalvar BooleanOption PowerHammerMode = new BooleanOption("Power Hammer Mode", false);
 globalvar NumberOption FireStrikeCooldownTime = new NumberOption("Fire Strike cooldown time", 0, 10, 3, 1, 0, " seconds");
+globalvar BooleanOption ThirdPerson = new BooleanOption("Third Person", false);
 globalvar NumberOption CPS = new NumberOption("Ult", 0, 100, 2, 1, 0, "% per 2 seconds");
 globalvar NumberOption CPS_Dodgeball = new NumberOption("Dodgeball Ult", 0, 100, 5, 1, 0, "% per 2 seconds");
 globalvar NumberOption Bonus_Hammer = new NumberOption("Score Bonus: Hammer", 0, 100, 20, 5, 0, "% charge");
@@ -47,6 +48,7 @@ globalvar HostMenuOption[][] options = [
         new NumberOption("Regenerate health after", 0, 15, 10, 1, 5, " seconds"),
         new NumberOption("Regeneration rate", 0, 1000, 100, 10, 6, " health per second"),
         new NumberOption("Gravity", 0, 1000, 100, 10, 7, "%"),
+        ThirdPerson,
         new NumberOption("Size", 10, 2000, 100, 10, 8, "%")
     ],
     [
@@ -109,7 +111,7 @@ void RenderOptions() "Host Menu: Render Options"
     renderedHostMenu = "";
     for (define i = 0; i < options[hostMenuCategory].Length; i++)
     {
-        renderedHostMenu = <"<0><1><2>", renderedHostMenu, options[hostMenuCategory][i].RenderedLine(i == hostMenuSelected - 1), i < options[hostMenuCategory].Length - 1 ? "\n" : "">
+        renderedHostMenu = <"<0><1><2>", renderedHostMenu, options[hostMenuCategory][i].RenderedLine(i == hostMenuSelected - 1), i < options[hostMenuCategory].Length - 1 ? "\n" : "">;
     }
 }
 
@@ -244,6 +246,7 @@ class ArenaColorOption : SelectOption
     {
         Name = "Arena Color";
         Options = ["Grapple", "Purple", "White", "Orange", "Green", "Aqua"];
+        Value = 1;
     }
 
     protected override void Update()
@@ -397,12 +400,7 @@ class NumberOption : HostMenuOption
         }
         else if (Action == 8)
         {
-            StartScalingPlayer(FilteredArray(AllPlayers(), !ArrayElement().isWorkingDummy), Value / 100, false);
-        }
-        else if (Action == 9)
-        {
-            root.ballScale = Value / 100;
-            StartScalingPlayer([root.ball1, root.ball2], Value / 100, false);
+            StartScalingPlayer(FilteredArray(AllPlayers(), !ArrayElement().isWorkingDummy), Value / 100, true);
         }
     }
 }
