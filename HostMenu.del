@@ -316,7 +316,7 @@ class ActionButton : HostMenuOption
 }
 class NumberOption : HostMenuOption
 {
-    public override define Controls: <"Walk left or right to change the currently selected option.\nHold <0> to increase the amount the value is changed. Jump to reset.", AbilityIconString(HeroOf(HostPlayer()), ButtonValue(Button.Ability1))>;
+    public override define Controls: <"Walk left or right to change the currently selected option.\nHold <0> to increase the amount the value is changed. Jump to reset.", AbilityIconString(HeroOf(HostPlayer()), Button.Ability1)>;
     private define Min;
     private define Max;
     private define DefaultValue;
@@ -339,14 +339,14 @@ class NumberOption : HostMenuOption
     {
         Value = DefaultValue;
         root.RenderOptions();
-        Action();
+        ExecAction();
     }
 
     public override void OnLeft()
     {
         Value = Max(Value - Step * Scalar, Min);
         root.RenderOptions();
-        Action();
+        ExecAction();
 
         Wait(0.25, WaitBehavior.AbortWhenFalse);
         Loop();
@@ -356,7 +356,7 @@ class NumberOption : HostMenuOption
     {
         Value = Min(Value + Step * Scalar, Max);
         root.RenderOptions();
-        Action();
+        ExecAction();
 
         Wait(0.25, WaitBehavior.AbortWhenFalse);
         Loop();
@@ -364,7 +364,7 @@ class NumberOption : HostMenuOption
 
     private define Scalar: IsButtonHeld(HostPlayer(), Button.Ability1) ? 3 : 1;
 
-    private void Action() "Host Menu: Number Action"
+    private void ExecAction() "Host Menu: Number Action"
     {
         if (Action == 1)
         {

@@ -86,7 +86,7 @@ rule("Dodgeball: Team1 Boundary")
 			To World, Cancel Contrary Motion);
 		Wait(0.016, Ignore Condition);
 		Loop If Condition Is True;
-		disabled Play Effect(Event Player, Debuff Impact Sound, White, Event Player, 100);
+		disabled Play Effect(Event Player, Debuff Impact Sound, Color(White), Event Player, 100);
 	}
 }
 
@@ -115,7 +115,7 @@ rule("Dodgeball: Team2 Boundary")
 			To World, Cancel Contrary Motion);
 		Wait(0.016, Ignore Condition);
 		Loop If Condition Is True;
-		disabled Play Effect(Event Player, Debuff Impact Sound, White, Event Player, 100);
+		disabled Play Effect(Event Player, Debuff Impact Sound, Color(White), Event Player, 100);
 	}
 }
 
@@ -134,13 +134,13 @@ rule("Dodgeball: Draw Boundary")
 	actions
 	{
 		Create Beam Effect(All Players(All Teams), Bad Beam, Vector(Empty Array, 154.880, 150) - Vector(Empty Array, Empty Array, 20),
-			Vector(Empty Array, 154.880, 150) + Vector(Empty Array, Empty Array, 20), Aqua, Visible To);
+			Vector(Empty Array, 154.880, 150) + Vector(Empty Array, Empty Array, 20), Color(Aqua), Visible To);
 		Modify Global Variable(beamId, Append To Array, Last Created Entity);
-		Create Beam Effect(All Players(All Teams), Bad Beam, Vector(0, 154.880, 130), Vector(0, 171, 130.001), Aqua, Visible To);
+		Create Beam Effect(All Players(All Teams), Bad Beam, Vector(0, 154.880, 130), Vector(0, 171, 130.001), Color(Aqua), Visible To);
 		Modify Global Variable(beamId, Append To Array, Last Created Entity);
-		Create Beam Effect(All Players(All Teams), Bad Beam, Vector(0, 154.880, 170), Vector(0, 171, 170.001), Aqua, Visible To);
+		Create Beam Effect(All Players(All Teams), Bad Beam, Vector(0, 154.880, 170), Vector(0, 171, 170.001), Color(Aqua), Visible To);
 		Modify Global Variable(beamId, Append To Array, Last Created Entity);
-		Create Beam Effect(All Players(All Teams), Bad Beam, Vector(0, 171, 130), Vector(0, 171, 170), Aqua, Visible To);
+		Create Beam Effect(All Players(All Teams), Bad Beam, Vector(0, 171, 130), Vector(0, 171, 170), Color(Aqua), Visible To);
 		Modify Global Variable(beamId, Append To Array, Last Created Entity);
 	}
 }
@@ -182,33 +182,33 @@ rule("dodgeball global init")
 	{
 		Call Subroutine(DestroyTutorialText);
 		Create HUD Text(All Players(All Teams), Ability Icon String(Hero(Reinhardt), Button(Primary Fire)), Null, Custom String(
-			"Dodgeball by Therister and Protowalker\r\nA collaborative effort of Grandeur Hammers\r\nhttps://bit.ly/thisiswhereourdiscordlinkgoes"),
-			Right, 1, Yellow, Red, Yellow, Visible To and String, Visible Always);
+			"Dodgeball by Therister and Protowalker\r\nA collaborative effort of Grandeur Hammers\r\nhttps://bit.ly/ghgames"),
+			Right, 1, Color(Yellow), Color(Red), Color(Yellow), Visible To and String, Visible Always);
 		Modify Global Variable(dodgeball_huds, Append To Array, Last Text ID);
-		Create HUD Text(All Players(All Teams), Hero Icon String(Hero(Sigma)), Null, Custom String("Controls:"), Right, 2, Aqua, White,
-			Aqua, Visible To and String, Default Visibility);
+		Create HUD Text(All Players(All Teams), Hero Icon String(Hero(Sigma)), Null, Custom String("Controls:"), Right, 2, Color(Aqua), Color(White),
+			Color(Aqua), Visible To and String, Default Visibility);
 		Modify Global Variable(dodgeball_huds, Append To Array, Last Text ID);
 		Create HUD Text(All Players(All Teams), Null, Null, Custom String("Press and hold {0} (right click) to pick up a ball.", String(
-			"Secondary Fire")), Right, 3, Aqua, White, Aqua, Visible To and String, Default Visibility);
+			"Secondary Fire")), Right, 3, Color(Aqua), Color(White), Color(Aqua), Visible To and String, Default Visibility);
 		Modify Global Variable(dodgeball_huds, Append To Array, Last Text ID);
 		Create HUD Text(All Players(All Teams), Null, Null, Custom String("Press and hold {0} (left click) to charge up your throw.",
-			String("Primary Fire")), Right, 4, Aqua, White, Aqua, Visible To and String, Default Visibility);
+			String("Primary Fire")), Right, 4, Color(Aqua), Color(White), Color(Aqua), Visible To and String, Default Visibility);
 		Modify Global Variable(dodgeball_huds, Append To Array, Last Text ID);
 		Create HUD Text(All Players(All Teams), Null, Null, Custom String("Release {0} (left click) to throw.", String("Primary Fire")),
-			Right, 5, Aqua, White, Aqua, Visible To and String, Default Visibility);
+			Right, 5, Color(Aqua), Color(White), Color(Aqua), Visible To and String, Default Visibility);
 		Modify Global Variable(dodgeball_huds, Append To Array, Last Text ID);
 		Create HUD Text(All Players(All Teams), Null, Null, Custom String("Use {0} Kinetic Grasp to catch an enemy's ball and kill them.",
-			Ability Icon String(Hero(Sigma), Button(Ability 1))), Right, 6, Aqua, White, Aqua, Visible To and String,
+			Ability Icon String(Hero(Sigma), Button(Ability 1))), Right, 6, Color(Aqua), Color(White), Color(Aqua), Visible To and String,
 			Default Visibility);
 		Modify Global Variable(dodgeball_huds, Append To Array, Last Text ID);
 		Global.dodgeball_blue_kills = 0;
 		Global.dodgeball_red_kills = 0;
 		Create HUD Text(All Players(Team 1), Ability Icon String(Hero(Sigma), Button(Ability 2)), Custom String("Enemy kills: {0}/{1}",
-			Global.dodgeball_red_kills, Count Of(Filtered Array(All Players(Team 2), Has Spawned(Current Array Element)))), Custom String("Your team's kills: {0}/{1}", Global.dodgeball_blue_kills, Count Of(Filtered Array(All Players(Team 1), Has Spawned(Current Array Element)))), Top, 2, Aqua, Red, Aqua,
+			Global.dodgeball_red_kills, Count Of(Filtered Array(All Players(Team 2), Has Spawned(Current Array Element)))), Custom String("Your team's kills: {0}/{1}", Global.dodgeball_blue_kills, Count Of(Filtered Array(All Players(Team 1), Has Spawned(Current Array Element)))), Top, 2, Color(Aqua), Color(Red), Color(Aqua),
 			Visible To and String, Visible Always);
 		Modify Global Variable(dodgeball_huds, Append To Array, Last Text ID);
 		Create HUD Text(All Players(Team 2), Ability Icon String(Hero(Sigma), Button(Ability 2)), Custom String("Enemy kills: {0}/{1}",
-			Global.dodgeball_blue_kills, Count Of(Filtered Array(All Players(Team 1), Has Spawned(Current Array Element)))), Custom String("Your team's kills: {0}/{1}", Global.dodgeball_red_kills, Count Of(Filtered Array(All Players(Team 2), Has Spawned(Current Array Element)))), Top, 2, Aqua, Red, Aqua,
+			Global.dodgeball_blue_kills, Count Of(Filtered Array(All Players(Team 1), Has Spawned(Current Array Element)))), Custom String("Your team's kills: {0}/{1}", Global.dodgeball_red_kills, Count Of(Filtered Array(All Players(Team 2), Has Spawned(Current Array Element)))), Top, 2, Color(Aqua), Color(Red), Color(Aqua),
 			Visible To and String, Visible Always);
 		Modify Global Variable(dodgeball_huds, Append To Array, Last Text ID);
 		Global.dodgeball_scoring = False;
@@ -238,13 +238,13 @@ rule("dodgeball player init")
 	actions
 	{
 		Set Status(Event Player, Null, Phased Out, 9999);
-		Disallow Button(Event Player, Secondary Fire);
+		Disallow Button(Event Player, Button(Secondary Fire));
 		Start Forcing Player To Be Hero(Event Player, Hero(Sigma));
 		Teleport(Event Player, Vector(Team Of(Event Player) == Team 1 ? 28 : -28, 154.880, 150 + (Slot Of(Event Player) % 2 == 0 ? 4 : -4)
 			* Slot Of(Event Player)));
 		Set Facing(Event Player, Team Of(Event Player) == Team 1 ? Right : Left, To World);
 		Set Move Speed(Event Player, 200);
-		Disallow Button(Event Player, Ability 2);
+		Disallow Button(Event Player, Button(Ability 2));
 		Stop Accelerating(Event Player);
 		Wait(0.100, Ignore Condition);
 		If(Index Of Array Value(All Players(Team Of(Event Player)), Event Player) <= 3);
@@ -253,22 +253,22 @@ rule("dodgeball player init")
 			disabled Event Player.dodgeball_in_motion = True;
 			Create In-World Text(Filtered Array(Players Within Radius(Event Player.dodgeball_pos, 8, All Teams, Off),
 				!Event Player.dodgeball_holder), Custom String("hold {0} (right click) to pick up", String("Secondary Fire")),
-				Event Player.dodgeball_pos, 1, Do Not Clip, Visible To Position and String, White, Default Visibility);
+				Event Player.dodgeball_pos, 1, Do Not Clip, Visible To Position and String, Color(White), Default Visibility);
 			Event Player.dodgeball_in_world_text = Last Text ID;
-			disabled Create Effect(All Players(All Teams), Sphere, White, Event Player.dodgeball_pos, 1, Visible To Position and Radius);
+			disabled Create Effect(All Players(All Teams), Sphere, Color(White), Event Player.dodgeball_pos, 1, Visible To Position and Radius);
 			disabled Create In-World Text(All Players(All Teams), Custom String("holder: {0}, pos: {1}, vel: {2}", Event Player.dodgeball_holder,
 				Event Player.dodgeball_pos, Event Player.dodgeball_velocity), Event Player.dodgeball_pos, 1, Do Not Clip,
-				Visible To Position and String, White, Default Visibility);
+				Visible To Position and String, Color(White), Default Visibility);
 			disabled Teleport(Event Player, Vector(0, 154.880, 150 + Index Of Array Value(All Players(Team Of(Event Player)), Event Player) * (!(
 				Index Of Array Value(All Players(Team Of(Event Player)), Event Player) % 2) ? 1 : -1)));
-			Create Effect(Filtered Array(All Players(All Teams), !Event Player.dodgeball_holder), Sphere, White, Event Player.dodgeball_pos,
+			Create Effect(Filtered Array(All Players(All Teams), !Event Player.dodgeball_holder), Sphere, Color(White), Event Player.dodgeball_pos,
 				1.250, Visible To Position and Radius);
 			Modify Player Variable(Event Player, dodgeball_effect, Append To Array, Last Created Entity);
-			Create Effect(Filtered Array(All Players(All Teams), !Event Player.dodgeball_holder), Bad Aura, White, Event Player.dodgeball_pos,
+			Create Effect(Filtered Array(All Players(All Teams), !Event Player.dodgeball_holder), Bad Aura, Color(White), Event Player.dodgeball_pos,
 				1, Visible To Position and Radius);
 			Modify Player Variable(Event Player, dodgeball_effect, Append To Array, Last Created Entity);
 			Create Icon(Filtered Array(All Players(All Teams), !Event Player.dodgeball_holder), Event Player.dodgeball_pos, Circle,
-				Visible To and Position, White, True);
+				Visible To and Position, Color(White), True);
 			Modify Player Variable(Event Player, dodgeball_effect, Append To Array, Last Created Entity);
 			Create Effect(Filtered Array(All Players(All Teams), Team Of(Event Player.dodgeball_holder) == Team 1), Sphere, Team 1,
 				Event Player.dodgeball_pos, 1.250, Visible To Position and Radius);
@@ -326,7 +326,7 @@ rule("Setup Arena dogg balllll")
 		While(Global.x <= 15);
 			Global.a = Global.cliffBlue * (1 - Global.x * Global.rowFraction) + Global.cliffRed * Global.x * Global.rowFraction;
 			Global.b = Global.towerBlue * (1 - Global.x * Global.rowFraction) + Global.towerRed * Global.x * Global.rowFraction;
-			Create Beam Effect(All Players(All Teams), Good Beam, Global.a, Global.b, Purple, Visible To);
+			Create Beam Effect(All Players(All Teams), Good Beam, Global.a, Global.b, Color(Purple), Visible To);
 			Modify Global Variable(arenaEffects, Append To Array, Last Created Entity);
 			Global.x += 1;
 		End;
@@ -334,24 +334,24 @@ rule("Setup Arena dogg balllll")
 		While(Global.z <= 10);
 			Global.a_0 = Global.cliffBlue * (1 - Global.z * Global.columnFraction) + Global.towerBlue * Global.z * Global.columnFraction;
 			Global.b_0 = Global.cliffRed * (1 - Global.z * Global.columnFraction) + Global.towerRed * Global.z * Global.columnFraction;
-			Create Beam Effect(All Players(All Teams), Good Beam, Global.a_0, Global.b_0, Purple, Visible To);
+			Create Beam Effect(All Players(All Teams), Good Beam, Global.a_0, Global.b_0, Color(Purple), Visible To);
 			Modify Global Variable(arenaEffects, Append To Array, Last Created Entity);
 			Global.z += 1;
 		End;
-		Create Effect(All Players(All Teams), Orb, Orange, Vector(Empty Array, 161.500, 150), 0.250, Visible To);
-		Create Beam Effect(All Players(All Teams), Bad Beam, Global.cliffBlue + Left * 0.001, Global.cliffBlue + Up * 16.120, Aqua,
+		Create Effect(All Players(All Teams), Orb, Color(Orange), Vector(Empty Array, 161.500, 150), 0.250, Visible To);
+		Create Beam Effect(All Players(All Teams), Bad Beam, Global.cliffBlue + Left * 0.001, Global.cliffBlue + Up * 16.120, Color(Aqua),
 			Visible To);
 		Modify Global Variable(arenaEffects, Append To Array, Last Created Entity);
-		Create Beam Effect(All Players(All Teams), Bad Beam, Global.cliffRed + Left * 0.001, Global.cliffRed + Up * 16.120, Aqua,
+		Create Beam Effect(All Players(All Teams), Bad Beam, Global.cliffRed + Left * 0.001, Global.cliffRed + Up * 16.120, Color(Aqua),
 			Visible To);
 		Modify Global Variable(arenaEffects, Append To Array, Last Created Entity);
-		Create Beam Effect(All Players(All Teams), Bad Beam, Global.towerBlue + Left * 0.001, Global.towerBlue + Up * 16.120, Aqua,
+		Create Beam Effect(All Players(All Teams), Bad Beam, Global.towerBlue + Left * 0.001, Global.towerBlue + Up * 16.120, Color(Aqua),
 			Visible To);
 		Modify Global Variable(arenaEffects, Append To Array, Last Created Entity);
-		Create Beam Effect(All Players(All Teams), Bad Beam, Global.towerRed + Left * 0.001, Global.towerRed + Up * 16.120, Aqua,
+		Create Beam Effect(All Players(All Teams), Bad Beam, Global.towerRed + Left * 0.001, Global.towerRed + Up * 16.120, Color(Aqua),
 			Visible To);
 		Modify Global Variable(arenaEffects, Append To Array, Last Created Entity);
-		Create Beam Effect(All Players(All Teams), Good Beam, Global.cliffRed + Up * 16.120, Global.cliffBlue + Up * 16.120, Purple,
+		Create Beam Effect(All Players(All Teams), Good Beam, Global.cliffRed + Up * 16.120, Global.cliffBlue + Up * 16.120, Color(Purple),
 			Visible To);
 		Modify Global Variable(arenaEffects, Append To Array, Last Created Entity);
 		Create Beam Effect(All Players(All Teams), Bad Beam, Global.cliffRed + Up * 16.120, Global.towerRed + Up * 16.120, Team 2,
@@ -360,7 +360,7 @@ rule("Setup Arena dogg balllll")
 		Create Beam Effect(All Players(All Teams), Bad Beam, Global.towerBlue + Up * 16.120, Global.cliffBlue + Up * 16.120, Team 1,
 			Visible To);
 		Modify Global Variable(arenaEffects, Append To Array, Last Created Entity);
-		Create Beam Effect(All Players(All Teams), Good Beam, Global.towerBlue + Up * 16.120, Global.towerRed + Up * 16.120, Purple,
+		Create Beam Effect(All Players(All Teams), Good Beam, Global.towerBlue + Up * 16.120, Global.towerRed + Up * 16.120, Color(Purple),
 			Visible To);
 		Modify Global Variable(arenaEffects, Append To Array, Last Created Entity);
 	}
@@ -379,7 +379,7 @@ rule("dodgeball pickup")
 	{
 		Event Player.dodgeball_holder == False;
 		Is True For Any(Players Within Radius(Event Player.dodgeball_pos, 8, All Teams, Off), Is Button Held(Current Array Element,
-			Secondary Fire) && !Current Array Element.sigma_pickup_buffer && !Current Array Element.is_holding && Is In View Angle(
+			Button(Secondary Fire)) && !Current Array Element.sigma_pickup_buffer && !Current Array Element.is_holding && Is In View Angle(
 			Current Array Element, Event Player.dodgeball_pos, 45)) == True;
 		Global.dodgeball_scoring == False;
 	}
@@ -387,7 +387,7 @@ rule("dodgeball pickup")
 	actions
 	{
 		Event Player.dodgeball_holder = First Of(Sorted Array(Filtered Array(All Players(All Teams), Is Button Held(Current Array Element,
-			Secondary Fire) && !Current Array Element.sigma_pickup_buffer && !Current Array Element.is_holding), Distance Between(
+			Button(Secondary Fire)) && !Current Array Element.sigma_pickup_buffer && !Current Array Element.is_holding), Distance Between(
 			Current Array Element, Event Player.dodgeball_pos)));
 		Abort If(Event Player.dodgeball_holder == Null);
 		Chase Player Variable At Rate(Event Player, dodgeball_pos, World Vector Of(Vector(0, 1.500, 0), Event Player.dodgeball_holder,
@@ -409,7 +409,7 @@ rule("dodgeball drop - release")
 
 	conditions
 	{
-		Is Button Held(Event Player.dodgeball_holder, Secondary Fire) == False;
+		Is Button Held(Event Player.dodgeball_holder, Button(Secondary Fire)) == False;
 		Event Player.dodgeball_holder != False;
 		Event Player.dodgeball_holder.is_charging == False;
 		Event Player.dodgeball_thrown == False;
@@ -441,8 +441,8 @@ rule("dodgeball bounce")
 	actions
 	{
 		If(Distance Between(Vector(0, 0, 0), Event Player.dodgeball_velocity) > 10);
-			Play Effect(All Players(All Teams), Good Explosion, Purple, Event Player.dodgeball_pos, 2);
-			Play Effect(All Players(All Teams), Ring Explosion Sound, White, Event Player.dodgeball_pos, 100);
+			Play Effect(All Players(All Teams), Good Explosion, Color(Purple), Event Player.dodgeball_pos, 2);
+			Play Effect(All Players(All Teams), Ring Explosion Sound, Color(White), Event Player.dodgeball_pos, 100);
 		End;
 		If(X Component Of(Event Player.dodgeball_pos) <= -29.900);
 			Event Player.dodgeball_bounce_normal = Left;
@@ -491,7 +491,7 @@ rule("dodgeball charge")
 
 	conditions
 	{
-		Is Button Held(Event Player.dodgeball_holder, Primary Fire) == True;
+		Is Button Held(Event Player.dodgeball_holder, Button(Primary Fire)) == True;
 		Event Player.dodgeball_held == True;
 	}
 
@@ -501,11 +501,11 @@ rule("dodgeball charge")
 		Event Player.dodgeball_charge = 10;
 		Chase Player Variable At Rate(Event Player, dodgeball_charge, 50, 65, Destination and Rate);
 		Cancel Primary Action(Event Player.dodgeball_holder);
-		Allow Button(Event Player.dodgeball_holder, Ability 2);
-		Press Button(Event Player.dodgeball_holder, Ability 2);
+		Allow Button(Event Player.dodgeball_holder, Button(Ability 2));
+		Press Button(Event Player.dodgeball_holder, Button(Ability 2));
 		Event Player.dodgeball_holder.is_charging = True;
 		Wait(0.250, Ignore Condition);
-		Disallow Button(Event Player.dodgeball_holder, Ability 2);
+		Disallow Button(Event Player.dodgeball_holder, Button(Ability 2));
 	}
 }
 
@@ -520,7 +520,7 @@ rule("dodgeball launch")
 
 	conditions
 	{
-		(!Is Button Held(Event Player.dodgeball_holder, Primary Fire) || Event Player.dodgeball_charge >= 50) == True;
+		(!Is Button Held(Event Player.dodgeball_holder, Button(Primary Fire)) || Event Player.dodgeball_charge >= 50) == True;
 		Event Player.dodgeball_charge != 0;
 		Event Player.dodgeball_holder.is_charging == True;
 	}
@@ -540,8 +540,8 @@ rule("dodgeball launch")
 		disabled Wait(0.500, Ignore Condition);
 		Event Player.dodgeball_holder.is_charging = False;
 		Event Player.dodgeball_holder.is_holding = False;
-		Stop Holding Button(Event Player, Secondary Fire);
-		Disallow Button(Event Player, Secondary Fire);
+		Stop Holding Button(Event Player, Button(Secondary Fire));
+		Disallow Button(Event Player, Button(Secondary Fire));
 		Set Status(Event Player.dodgeball_holder, Null, Hacked, 1);
 		Event Player.dodgeball_holder.sigma_pickup_buffer = 1;
 		Chase Player Variable At Rate(Event Player.dodgeball_holder, sigma_pickup_buffer, 0, 1, Destination and Rate);
@@ -584,7 +584,7 @@ rule("sigma hand stretch start")
 
 	conditions
 	{
-		Is Button Held(Event Player, Secondary Fire) == True;
+		Is Button Held(Event Player, Button(Secondary Fire)) == True;
 		Event Player.is_charging == False;
 		Event Player.sigma_pickup_buffer <= 0;
 		Is Alive(Event Player) == True;
@@ -598,8 +598,8 @@ rule("sigma hand stretch start")
 			Event Player), 0);
 		Set Ability Cooldown(Event Player, Button(Secondary Fire), 0);
 		Wait(0.016, Ignore Condition);
-		Allow Button(Event Player, Secondary Fire);
-		Start Holding Button(Event Player, Secondary Fire);
+		Allow Button(Event Player, Button(Secondary Fire));
+		Start Holding Button(Event Player, Button(Secondary Fire));
 		Event Player.sigma_pos = Position Of(Event Player);
 		Teleport(Event Player, Vector(10000, 10000, 10000));
 		Wait(0.084, Ignore Condition);
@@ -620,14 +620,14 @@ rule("sigma hand stretch end")
 
 	conditions
 	{
-		Is Button Held(Event Player, Secondary Fire) == False;
+		Is Button Held(Event Player, Button(Secondary Fire)) == False;
 		Event Player.is_charging == False;
 	}
 
 	actions
 	{
-		Stop Holding Button(Event Player, Secondary Fire);
-		Disallow Button(Event Player, Secondary Fire);
+		Stop Holding Button(Event Player, Button(Secondary Fire));
+		Disallow Button(Event Player, Button(Secondary Fire));
 		Set Status(Event Player, Null, Hacked, 1);
 		Event Player.sigma_pickup_buffer = 1;
 		Chase Player Variable At Rate(Event Player, sigma_pickup_buffer, 0, 1, Destination and Rate);
@@ -684,10 +684,10 @@ rule("dodgeball player collide")
 		Small Message(All Players(All Teams), Custom String("{0} took out {1} {2}", Event Player.dodgeball_holder,
 			Event Player.dodgeball_victim, Event Player.dodgeball_bounce > 0 ? Custom String("with a bounced trick shot!!")
 			: Custom String("with a dodgeball!")));
-		Play Effect(All Players(All Teams), Bad Explosion, Orange, Event Player.dodgeball_victim, 5);
-		Play Effect(All Players(All Teams), Explosion Sound, Orange, Event Player.dodgeball_victim, 200);
-		Play Effect(All Players(All Teams), Ring Explosion, Orange, Event Player.dodgeball_holder, 10);
-		Play Effect(All Players(All Teams), Buff Explosion Sound, Orange, Event Player.dodgeball_holder, 200);
+		Play Effect(All Players(All Teams), Bad Explosion, Color(Orange), Event Player.dodgeball_victim, 5);
+		Play Effect(All Players(All Teams), Explosion Sound, Color(Orange), Event Player.dodgeball_victim, 200);
+		Play Effect(All Players(All Teams), Ring Explosion, Color(Orange), Event Player.dodgeball_holder, 10);
+		Play Effect(All Players(All Teams), Buff Explosion Sound, Color(Orange), Event Player.dodgeball_holder, 200);
 		Wait(0.100, Ignore Condition);
 		Event Player.dodgeball_bounce = 0;
 	}
@@ -721,10 +721,10 @@ rule("dodgeball catch")
 		Event Player.dodgeball_velocity = Up * 15;
 		Small Message(All Players(All Teams), Custom String("{0} caught {1}'s dodgeball in the air!", Event Player.dodgeball_catcher,
 			Event Player.dodgeball_holder));
-		Play Effect(All Players(All Teams), Bad Pickup Effect, Aqua, Event Player.dodgeball_holder, 5);
-		Play Effect(All Players(All Teams), Debuff Impact Sound, Orange, Event Player.dodgeball_holder, 200);
-		Play Effect(All Players(All Teams), Ring Explosion, Aqua, Event Player.dodgeball_catcher, 10);
-		Play Effect(All Players(All Teams), Buff Impact Sound, Orange, Event Player.dodgeball_catcher, 200);
+		Play Effect(All Players(All Teams), Bad Pickup Effect, Color(Aqua), Event Player.dodgeball_holder, 5);
+		Play Effect(All Players(All Teams), Debuff Impact Sound, Color(Orange), Event Player.dodgeball_holder, 200);
+		Play Effect(All Players(All Teams), Ring Explosion, Color(Aqua), Event Player.dodgeball_catcher, 10);
+		Play Effect(All Players(All Teams), Buff Impact Sound, Color(Orange), Event Player.dodgeball_catcher, 200);
 		Event Player.dodgeball_thrown = False;
 		Wait(0.100, Ignore Condition);
 		Event Player.dodgeball_holder = False;
@@ -939,8 +939,8 @@ rule("dodgeball clean up -- per player")
 	{
 		Clear Status(Event Player, Phased Out);
 		Start Forcing Player To Be Hero(Event Player, Hero(Reinhardt));
-		Allow Button(Event Player, Secondary Fire);
-		Allow Button(Event Player, Ability 2);
+		Allow Button(Event Player, Button(Secondary Fire));
+		Allow Button(Event Player, Button(Ability 2));
 		Destroy In-World Text(Event Player.dodgeball_in_world_text);
 		While(Event Player.dodgeball_effect != Empty Array);
 			Destroy Icon(First Of(Event Player.dodgeball_effect));
@@ -1080,8 +1080,8 @@ rule("dodgeball positions reset")
 			% 2 == 0 ? 4 : -4) * Slot Of(Event Player));
 		Event Player.dodgeball_velocity = Vector(0, -0.001, 0);
 		Event Player.dodgeball_in_motion = True;
-		Play Effect(All Players(All Teams), Good Explosion, Purple, Event Player.dodgeball_pos, 2);
-		Play Effect(All Players(All Teams), Buff Impact Sound, White, Event Player.dodgeball_pos, 100);
+		Play Effect(All Players(All Teams), Good Explosion, Color(Purple), Event Player.dodgeball_pos, 2);
+		Play Effect(All Players(All Teams), Buff Impact Sound, Color(White), Event Player.dodgeball_pos, 100);
 	}
 }
 

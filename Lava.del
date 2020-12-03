@@ -149,30 +149,36 @@ if (gamemode == Mode.Soccer || gamemode == Mode.Volleyball || gamemode == Mode.W
 globalvar define arenaType! = 0;
 globalvar define arenaColor! = 0;
 
-void MakeFloor() "Arena: Make Floor"
+void MakeFloor() "Arena: Make Floor Default"
 {
-    if (!ArrayContains([Mode.Waiting, Mode.Soccer, Mode.Volleyball], gamemode)) return;
+    if (gamemode == Mode.Dodgeball)
+        MakeFloor(dodgeballCliffBlue, dodgeballCliffRed, dodgeballTowerBlue, dodgeballTowerRed, 10, 10);
+    else
+        MakeFloor(cliffBlue, cliffRed, towerBlue, towerRed, rowCount(), columnCount());
+}
 
-    for (define i! = 0; i < CountOf(arenaEffects); i++) {
-        DestroyEffect(arenaEffects[i]);
+void MakeFloor(define cliffBlue, define cliffRed, define towerBlue, define towerRed, define rowCount, define columnCount) "Arena: Make Floor"
+{
+    while (arenaEffects != [])
+    {
+        DestroyEffect(FirstOf(arenaEffects));
+        ModifyVariable(arenaEffects, Operation.RemoveFromArrayByIndex, 0);
         MinWait();
     }
-    arenaEffects = [];
-    MinWait();
+
+    define rowFraction! = 1/rowCount;
+    define columnFraction! = 1/columnCount;
 
     if (arenaType == 0)
     {
-        define rowFraction! = 1/rowCount();
-        define columnFraction! = 1/columnCount();
-
-        for (define x! = 0; x <= rowCount(); x++)
+        for (define x! = 0; x <= rowCount; x++)
         {
             define a! = LinearInterpolate(cliffBlue, cliffRed, x*rowFraction);
             define b! = LinearInterpolate(towerBlue, towerRed, x*rowFraction);
             ArenaBeam(a, b);
             MinWait();
         }
-        for (define z! = 0; z <= columnCount(); z++)
+        for (define z! = 0; z <= columnCount; z++)
         {
             define a! = LinearInterpolate(cliffBlue, towerBlue, z*columnFraction);
             define b! = LinearInterpolate(cliffRed, towerRed, z*columnFraction);
@@ -191,8 +197,7 @@ void MakeFloor() "Arena: Make Floor"
     }
     else if (arenaType == 2)
     {
-        define columnFraction! = 1/columnCount();
-        for (define z! = 0; z <= columnCount(); z++)
+        for (define z! = 0; z <= columnCount; z++)
         {
             define a! = LinearInterpolate(cliffBlue, towerBlue, z*columnFraction);
             define b! = LinearInterpolate(cliffRed, towerRed, z*columnFraction);
@@ -213,7 +218,7 @@ void ArenaBeam(Vector a, Vector b) "Arena: Make Beam"
     ModifyVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
 }
 
-void ArenaBeam(ref Vector a, ref Vector b, BeamType type, Color color)
+void ArenaBeam(ref Vector a, ref Vector b, BeamType type, ref Color color)
 {
     CreateBeamEffect(
         AllPlayers(),

@@ -71,7 +71,7 @@ void RenderBall() "Ball: Render"
     DestroyIcon(ballIcon);
 
     // Convert the color.
-    ConvertColorToConstant(Ball_Color.Value, Color color => {
+    ConvertColorToConstant(Ball_Color.Value, (Color color) => {
         // Create and store the effect.
         CreateEffect(AllPlayers(), Effect.Sphere, color, ballLocation(), 1.25 * ballScale, EffectRev.VisibleToPositionAndRadius);
         ballEffect = LastCreatedEntity();
@@ -278,7 +278,7 @@ rule: "Ball: Effect when ball hits ground"
 if (ball)
 if (IsOnGround(rootBall))
 {
-    ConvertColorToConstant(Ball_Trail_Color.Value, Color color => {
+    ConvertColorToConstant(Ball_Trail_Color.Value, (Color color) => {
         PlayEffect(AllPlayers(), PlayEffect.RingExplosion, color, PositionOf(rootBall), 5);
     });
 }
@@ -288,7 +288,7 @@ if (ball)
 if (!ballIsOnStand)
 if (ballSpeed() >= 10 || IsInAir(rootBall))
 {
-    ConvertColorToConstant(Ball_Trail_Color.Value, Color color => {
+    ConvertColorToConstant(Ball_Trail_Color.Value, (Color color) => {
         PlayEffect(FilteredArray(AllPlayers(), DistanceBetween(ArrayElement(), rootBall) > 6), PlayEffect.BadExplosion, color, ballLocation(), 0.3);
     });
     MinWait();
@@ -375,9 +375,9 @@ rule: "Ball boundary pulse"
 if (ball)
 if (ballReady)
 if (!ballIsOnStand)
-if (BallBoundaries.IsTrueForAny(BallBoundary boundary => boundary.IsInRange))
+if (BallBoundaries.IsTrueForAny((BallBoundary boundary) => boundary.IsInRange))
 {
-    BallBoundary inRange = BallBoundaries.FilteredArray(BallBoundary boundary => boundary.IsInRange);
+    BallBoundary inRange = BallBoundaries.FilteredArray((BallBoundary boundary) => boundary.IsInRange);
     inRange.Pulse();
     stopNearbyCharging();
     Wait(0.3);
