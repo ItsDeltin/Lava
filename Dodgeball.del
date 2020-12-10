@@ -236,9 +236,10 @@ rule: "dodgeball pickup"
 Event.OngoingPlayer
 Player.Sigma
 if (dodgeball_holder == false)
-if (IsTrueForAny(PlayersWithinRadius(dodgeball_pos, 8, Team.All, RadiusLOS.Off), IsButtonHeld(ArrayElement(), Button.SecondaryFire) && !ArrayElement().sigma_pickup_buffer && !ArrayElement().is_holding && IsInViewAngle(ArrayElement(), dodgeball_pos, 45)) == true)
+if (IsTrueForAny(PlayersWithinRadius(dodgeball_pos, 8, Team.All, RadiusLOS.Off), ArrayElement().pickupReady && IsButtonHeld(ArrayElement(), Button.SecondaryFire) && !ArrayElement().sigma_pickup_buffer && !ArrayElement().is_holding && IsInViewAngle(ArrayElement(), dodgeball_pos, 45)) == true)
 if (dodgeball_scoring == false)
 {
+    pickupReady = false;
     dodgeball_holder = FirstOf(SortedArray(FilteredArray(AllPlayers(Team.All), IsButtonHeld(ArrayElement(), Button.SecondaryFire) && !ArrayElement().sigma_pickup_buffer && !ArrayElement().is_holding), DistanceBetween(ArrayElement(), dodgeball_pos)));
     AbortIf(dodgeball_holder == null);
     ChaseVariableAtRate(dodgeball_pos, WorldVectorOf(Vector(0, 1.5, 0), dodgeball_holder, LocalVector.RotationAndTranslation) + FacingDirectionOf(dodgeball_holder) * 2, 1000, RateChaseReevaluation.DestinationAndRate);
@@ -343,7 +344,7 @@ if (dodgeball_holder.is_charging == true)
     dodgeball_holder.is_holding = false;
     StopHoldingButton(EventPlayer(), Button.SecondaryFire);
     DisallowButton(EventPlayer(), Button.SecondaryFire);
-    SetStatus(dodgeball_holder, null, Status.Hacked, 1);
+    SetStatus(dodgeball_holder, null, Status.Hacked, 0.25);
     dodgeball_holder.sigma_pickup_buffer = 1;
     ChaseVariableAtRate(dodgeball_holder.sigma_pickup_buffer, 0, 1, RateChaseReevaluation.DestinationAndRate);
     if (IsDead(dodgeball_holder))
@@ -363,6 +364,8 @@ if (dodgeball_in_motion == true)
     LoopIfConditionIsTrue();
 }
 
+playervar define pickupReady = false;
+
 rule: "sigma hand stretch start"
 Event.OngoingPlayer
 Player.Sigma
@@ -371,6 +374,7 @@ if (!is_charging)
 if (sigma_pickup_buffer <= 0)
 if (IsAlive())
 {
+    pickupReady = false;
     SetInvisible(EventPlayer(), InvisibleTo.All);
 
     Vector eye = EyePosition();
@@ -382,12 +386,15 @@ if (IsAlive())
     AllowButton(EventPlayer(), Button.SecondaryFire);
     StartHoldingButton(EventPlayer(), Button.SecondaryFire);
 
-    Teleport(EventPlayer(), Vector(10000, 10000, 10000));
+    Teleport(EventPlayer(), ObjectivePosition(1));
     Wait(0.084, WaitBehavior.IgnoreCondition);
     Teleport(EventPlayer(), pos);
 
     StopCamera(EventPlayer());
     SetInvisible(EventPlayer(), InvisibleTo.None);
+
+    Wait(0.016);
+    pickupReady = true;
 }
 
 rule: "sigma hand stretch end"
@@ -396,9 +403,9 @@ Player.Sigma
 if (IsButtonHeld(EventPlayer(), Button.SecondaryFire) == false)
 if (!is_charging)
 {
+    pickupReady = false;
     StopHoldingButton(EventPlayer(), Button.SecondaryFire);
     DisallowButton(EventPlayer(), Button.SecondaryFire);
-    SetStatus(EventPlayer(), null, Status.Hacked, 1);
     sigma_pickup_buffer = 1;
     ChaseVariableAtRate(sigma_pickup_buffer, 0, 1, RateChaseReevaluation.DestinationAndRate);
 }

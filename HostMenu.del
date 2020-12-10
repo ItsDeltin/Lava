@@ -19,9 +19,8 @@ globalvar NumberOption Bonus_Hammer = new NumberOption("Score Bonus: Hammer", 0,
 globalvar NumberOption Bonus_Firestrike = new NumberOption("Score Bonus: Fire Strike", 0, 120, 50, 5, 0, "% charge");
 globalvar NumberOption Bonus_Bump = new NumberOption("Score Bonus: Bump", 0, 100, 40, 5, 0, "% charge");
 globalvar NumberOption Bonus_Charge = new NumberOption("Score Bonus: Charge", 0, 100, 100, 5, 0, "% charge");
-globalvar SelectOption Ball_Color = new SelectOption("Ball Color", ["Blue", "Green", "Lime Green", "Orange", "Purple", "Red", "Sky Blue", "Turquoise", "White", "Yellow"], 7, 1);
-globalvar SelectOption Ball_Trail_Color = new SelectOption("Trail Color", ["Blue", "Green", "Lime Green", "Orange", "Purple", "Red", "Sky Blue", "Turquoise", "White", "Yellow"], 7);
-globalvar NumberOption Ball_Size = new NumberOption("Ball Size", 10, 500, 100, 10, 9, "%");
+globalvar SelectOption Ball_Color = new SelectOption("Ball Color", ["Blue", "Green", "Lime Green", "Orange", "Purple", "Red", "Sky Blue", "Turquoise", "White", "Yellow", "Aqua", "Black", "Gray", "Rose", "Violet"], 7, 1);
+globalvar SelectOption Ball_Trail_Color = new SelectOption("Trail Color", ["Blue", "Green", "Lime Green", "Orange", "Purple", "Red", "Sky Blue", "Turquoise", "White", "Yellow", "Aqua", "Black", "Gray", "Rose", "Violet"], 7);
 globalvar BooleanOption Ball_Explosion = new BooleanOption("Explode ball when ignited", true);
 
 globalvar HostMenuOption[][] options = [
@@ -242,17 +241,23 @@ class ArenaTypeOption : SelectOption
 }
 class ArenaColorOption : SelectOption
 {
+    public static Color[] ColorArray = [Color.White, Color.Purple, Color.White, Color.Orange, Color.Green, Color.Aqua, Color.Black, Color.Rose, Color.Violet, Color.Gray];
+
     public ArenaColorOption()
     {
         Name = "Arena Color";
-        Options = ["Grapple", "Purple", "White", "Orange", "Green", "Aqua"];
+        Options = ["Grapple", "Purple", "White", "Orange", "Green", "Aqua", "Black", "Rose", "Violet", "Gray"];
         Value = 1;
     }
 
     protected override void Update()
     {
+        // 'shouldUpdate' will equal true if the arena floor should be regenerated.
+        // This will only happen when transitioning to (Value == 0) or from (root.arenaColor == 0) the grapple floor option.
+        define shouldUpdate = Value == 0 || root.arenaColor == 0;
         root.arenaColor = Value;
-        root.MakeFloor();
+
+        if (shouldUpdate) root.MakeFloor();
     }
 }
 class BooleanOption : HostMenuOption

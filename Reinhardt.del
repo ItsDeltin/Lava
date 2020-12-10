@@ -143,6 +143,11 @@ Event.OngoingPlayer
 Player.Reinhardt
 if (isRamp(EventPlayer()))
 {
+    DestroyEffect(arrowEffects[0]);
+    DestroyEffect(arrowEffects[1]);
+    DestroyEffect(arrowEffects[2]);
+    DestroyEffect(arrowEffects[3]);
+
     arrowAnimation = 0;
     arrowAnimation2 = 0.8;
     ChaseVariableAtRate(arrowAnimation, arrowDestination, 0.6, RateChaseReevaluation.None);
@@ -334,20 +339,23 @@ if (IsOnGround())
 }
 
 playervar define isUsingPowerHammer! = false;
+playervar define ultimateEffect!;
 
 void UltimateHandler() playervar "Player: Reinhardt Ultimate Handler"
 {
     Vector l = ultimatePointLeft;
     Vector r = ultimatePointRight;
     define affectPlayers = AllPlayers(OppositeTeamOf(TeamOf(EventPlayer())));
-    Vector direction = (VerticalFacingAngleOf() > -10) ? DirectionFromAngles(HorizontalFacingAngleOf(), -10) : FacingDirectionOf();
+    Vector direction = DirectionFromAngles(HorizontalFacingAngleOf(), -20);
 
-    Vector beamLeft = PositionOf();
-    Vector beamRight = PositionOf();
+    Vector beamLeft = WorldVectorOf(Vector(0, 0, -1), EventPlayer(), LocalVector.RotationAndTranslation);
+    Vector beamRight = beamLeft;
     ChaseVariableOverTime(beamLeft, l, 0.2, TimeChaseReevaluation.None);
     ChaseVariableOverTime(beamRight, r, 0.2, TimeChaseReevaluation.None);
+
+    DestroyEffect(ultimateEffect);
     CreateBeamEffect(AllPlayers(), BeamType.BadBeam, beamLeft, beamRight, Color.Orange, EffectRev.VisibleToPositionAndRadius);
-    define ultimateEffect! = LastCreatedEntity();
+    ultimateEffect = LastCreatedEntity();
 
     foreach (define apply in affectPlayers)
     if (AbsoluteValue(PositionOf().Y - PositionOf(apply).Y) < 3 &&
@@ -357,7 +365,7 @@ void UltimateHandler() playervar "Player: Reinhardt Ultimate Handler"
         if (!apply.isWorkingDummy)
             Damage(apply, EventPlayer(), 300);
 
-        ApplyImpulse(apply, direction, apply.isBall ? 70 : 50, Relative.ToWorld, ContraryMotion.Cancel);
+        ApplyImpulse(apply, direction, apply.isBall ? 80 : 60, Relative.ToWorld, ContraryMotion.Cancel);
         if (rootBall == apply)
         {
             thrower = EventPlayer();
@@ -380,8 +388,8 @@ define doesTriangleIntersect(Vector pt, Vector p1, Vector p2, Vector p3)
 
 define sign(Vector p1, Vector p2, Vector p3): (p1.X - p3.X) * (p2.Z - p3.Z) - (p2.X - p3.X) * (p1.Z - p3.Z);
 
-Vector ultimatePointLeft: WorldVectorOf(Vector(-3, 0, 7), EventPlayer(), LocalVector.RotationAndTranslation);
-Vector ultimatePointRight: WorldVectorOf(Vector(3, 0, 7), EventPlayer(), LocalVector.RotationAndTranslation);
+Vector ultimatePointLeft: WorldVectorOf(Vector(-5, 0, 15), EventPlayer(), LocalVector.RotationAndTranslation);
+Vector ultimatePointRight: WorldVectorOf(Vector(5, 0, 15), EventPlayer(), LocalVector.RotationAndTranslation);
 
 playervar define fireStrikeDirection!;
 

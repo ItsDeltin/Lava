@@ -80,6 +80,9 @@ if (!IsDummyBot())
         "The host player can press interact to open game settings.",
         "The source code is available at https://github.com/ItsDeltin/Lava\nYou can report bugs there, too!"
     ][tipIndex], Subheader: "Press reload for the next tip.", SubheaderColor: Color.Aqua, Location: Location.Left, SortOrder: 3);
+
+    DisableKillFeed();
+    DisableScoreboard();
 }
 
 rule: "Next tip"
@@ -147,7 +150,7 @@ if (gamemode == Mode.Soccer || gamemode == Mode.Volleyball || gamemode == Mode.W
 }
 
 globalvar define arenaType! = 0;
-globalvar define arenaColor! = 0;
+globalvar define arenaColor! = 6;
 
 void MakeFloor() "Arena: Make Floor Default"
 {
@@ -209,24 +212,22 @@ void MakeFloor(define cliffBlue, define cliffRed, define towerBlue, define tower
 
 void ArenaBeam(Vector a, Vector b) "Arena: Make Beam"
 {
-    if (arenaColor == 0) ArenaBeam(a, b, BeamType.GrappleBeam, Color.White);
-    else if (arenaColor == 1) ArenaBeam(a, b, BeamType.GoodBeam, Color.Purple);
-    else if (arenaColor == 2) ArenaBeam(a, b, BeamType.GoodBeam, Color.White);
-    else if (arenaColor == 3) ArenaBeam(a, b, BeamType.GoodBeam, Color.Orange);
-    else if (arenaColor == 4) ArenaBeam(a, b, BeamType.GoodBeam, Color.Green);
-    else if (arenaColor == 5) ArenaBeam(a, b, BeamType.GoodBeam, Color.Aqua);
+    if (arenaColor == 0)
+        ArenaBeam(a, b, BeamType.GrappleBeam);
+    else
+        ArenaBeam(a, b, BeamType.GoodBeam);
     ModifyVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
 }
 
-void ArenaBeam(ref Vector a, ref Vector b, BeamType type, ref Color color)
+void ArenaBeam(ref Vector a, ref Vector b, BeamType type)
 {
     CreateBeamEffect(
         AllPlayers(),
         type,
         a,
         b,
-        color,
-        EffectRev.VisibleTo
+        ArenaColorOption.ColorArray[arenaColor],
+        EffectRev.VisibleToAndColor
     );
 }
 

@@ -24,6 +24,8 @@ globalvar define ballReady;
 
 define ballIsGettingCharged: HasStatus(ball1, Status.Stunned) || HasStatus(ball2, Status.Stunned);
 
+globalvar Color[] ballColors = [Color.Blue, Color.Green, Color.LimeGreen, Color.Orange, Color.Purple, Color.Red, Color.SkyBlue, Color.Turquoise, Color.White, Color.Yellow, Color.Aqua, Color.Black, Color.Gray, Color.Rose, Color.Violet];
+
 rule: "Ball: Setup"
 if (gamemode == Mode.Soccer || gamemode == Mode.Volleyball)
 {
@@ -70,15 +72,13 @@ void RenderBall() "Ball: Render"
     DestroyEffect(ballEffect);
     DestroyIcon(ballIcon);
 
-    // Convert the color.
-    ConvertColorToConstant(Ball_Color.Value, (Color color) => {
-        // Create and store the effect.
-        CreateEffect(AllPlayers(), Effect.Sphere, color, ballLocation(), 1.25 * ballScale, EffectRev.VisibleToPositionAndRadius);
-        ballEffect = LastCreatedEntity();
+    // Create and store the effect.
+    CreateEffect(AllPlayers(), Effect.Sphere, ballColors[Ball_Color.Value], ballLocation(), 1.25 * ballScale, EffectRev.VisibleToPositionAndRadius);
+    ballEffect = LastCreatedEntity();
 
-        // Create the icon
-        CreateIcon(FilteredArray(AllPlayers(), ballReady && !IsInViewAngle(ArrayElement(), rootBall, 30)), ballLocation(), Icon.Circle, IconRev.VisibleToAndPosition, color, true);
-    });
+    // Create the icon
+    CreateIcon(FilteredArray(AllPlayers(), ballReady && !IsInViewAngle(ArrayElement(), rootBall, 30)), ballLocation(), Icon.Circle, IconRev.VisibleToAndPosition, ballColors[Ball_Color.Value], true);
+
     ballIcon = LastCreatedEntity();
 }
 
@@ -278,9 +278,7 @@ rule: "Ball: Effect when ball hits ground"
 if (ball)
 if (IsOnGround(rootBall))
 {
-    ConvertColorToConstant(Ball_Trail_Color.Value, (Color color) => {
-        PlayEffect(AllPlayers(), PlayEffect.RingExplosion, color, PositionOf(rootBall), 5);
-    });
+    PlayEffect(AllPlayers(), PlayEffect.RingExplosion, ballColors[Ball_Color.Value], PositionOf(rootBall), 5);
 }
 
 rule: "Ball: Fast ball effect"
@@ -288,9 +286,7 @@ if (ball)
 if (!ballIsOnStand)
 if (ballSpeed() >= 10 || IsInAir(rootBall))
 {
-    ConvertColorToConstant(Ball_Trail_Color.Value, (Color color) => {
-        PlayEffect(FilteredArray(AllPlayers(), DistanceBetween(ArrayElement(), rootBall) > 6), PlayEffect.BadExplosion, color, ballLocation(), 0.3);
-    });
+    PlayEffect(FilteredArray(AllPlayers(), DistanceBetween(ArrayElement(), rootBall) > 6), PlayEffect.BadExplosion, ballColors[Ball_Trail_Color.Value], ballLocation(), 0.3);
     MinWait();
     LoopIfConditionIsTrue();
 }
@@ -382,21 +378,4 @@ if (BallBoundaries.IsTrueForAny((BallBoundary boundary) => boundary.IsInRange))
     stopNearbyCharging();
     Wait(0.3);
     LoopIfConditionIsTrue();
-}
-
-void ConvertColorToConstant(ref define color, BlockLambda<Color> convert)
-{
-    switch (color)
-    {
-        case 0: convert.Invoke(Color.Blue); break;
-        case 1: convert.Invoke(Color.Green); break;
-        case 2: convert.Invoke(Color.LimeGreen); break;
-        case 3: convert.Invoke(Color.Orange); break;
-        case 4: convert.Invoke(Color.Purple); break;
-        case 5: convert.Invoke(Color.Red); break;
-        case 6: convert.Invoke(Color.SkyBlue); break;
-        case 7: convert.Invoke(Color.Turquoise); break;
-        case 8: convert.Invoke(Color.White); break;
-        case 9: convert.Invoke(Color.Yellow); break;
-    }
 }
