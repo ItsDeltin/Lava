@@ -3,11 +3,11 @@
         "General": {
             "Enabled Heroes": ["Reinhardt"],
             "Reinhardt": {
+                "Rocket Hammer Knockback Scalar": 150,
+                "Charge Knockback Scalar": 150,
                 "Charge Cooldown Time": 0,
-                "Charge Knockback Scalar": 200,
                 "Fire Strike Cooldown Time": 50,
-                "Rocket Hammer Knockback Scalar": 400,
-                "Ultimate Generation (Earthshatter)": 200
+                "Ultimate Generation (Earthshatter)": 400
             },
             "Sigma": {
                 "Primary Fire": false,
@@ -16,6 +16,9 @@
             },
             "Torbjörn": {
                 "Primary Fire": false
+            },
+            "Wrecking Ball": {
+                "Roll Always Active": true
             },
             "General": {
                 "Ultimate Generation - Passive": 0,

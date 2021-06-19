@@ -374,7 +374,7 @@ if (generateStep == 4)
     generateStep = 5;
 }
 
-void MakeWall(ref define start, ref define end)
+void MakeWall(in define start, in define end)
 {
     CreateBeamEffect(
         AllPlayers(),

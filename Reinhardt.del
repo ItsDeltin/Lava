@@ -3,7 +3,7 @@ import "Lava.del";
 playervar define chargeStart = null;
 
 globalvar define defaultMoveSpeed! = 150;
-globalvar define fireStrikeSpeed! = 100;
+globalvar define fireStrikeSpeed! = 130;
 globalvar define chargeSpeed! = 200;
 globalvar define maxHealth! = 100;
 globalvar define gravity! = 100;

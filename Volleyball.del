@@ -100,31 +100,19 @@ if (ballReady)
     counterTexts[0] = LastTextID();
 
     CreateInWorldText(
-        VisibleTo: FilteredArray(AllPlayers(onTeam), !ballIsGettingCharged && ballOnGround),
+        VisibleTo: FilteredArray(AllPlayers(onTeam), !ballIsGettingCharged),
         Header:<"<1> <0> <1>", detonationCounter, IconString(Icon.Warning)>,
         Position:PositionOf(rootBall) + Vector(0, 1.5, 0),
         Scale:2,
         Clipping:Clipping.ClipAgainstSurfaces,
-        TextColor:Color.Red,
+        TextColor: IsOnGround(rootBall) ? Color.Red : Color.Yellow,
         Spectators:Spectators.VisibleAlways
     );
     counterTexts[1] = LastTextID();
-
-    CreateInWorldText(
-        VisibleTo: FilteredArray(AllPlayers(onTeam), ballIsGettingCharged || !ballOnGround),
-        Header:<"<1> <0> <1>", detonationCounter, IconString(Icon.Warning)>,
-        Position:PositionOf(rootBall) + Vector(0, 1.5, 0),
-        Scale:2,
-        Clipping:Clipping.ClipAgainstSurfaces,
-        TextColor:Color.Orange,
-        Spectators:Spectators.VisibleAlways
-    );
-    counterTexts[2] = LastTextID();
 }
 
 playervar define blueSide = true;
 
-// For some reason, IsOnGround(rootBall) isn't reevaluating
 globalvar define ballOnGround;
 rule: "e"
 if (IsOnGround(rootBall))

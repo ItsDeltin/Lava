@@ -41,10 +41,10 @@ rule: "Setup"
     CreateHudText(AllPlayers(), Text: " \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", Location: Location.Left, SortOrder: 1);
     CreateHudText(AllPlayers(), Text: " \n\n\n", Location: Location.Top, SortOrder: 4);
 
-    CreateHudText(VisibleTo: AllPlayers(), Text: "Synthball - N69CC", TextColor: Color.Turquoise, Location: Location.Top, SortOrder: -1, Spectators: Spectators.VisibleAlways);
+    CreateHudText(VisibleTo: AllPlayers(), Text: "Synthball - WAK60", TextColor: Color.Turquoise, Location: Location.Top, SortOrder: -1, Spectators: Spectators.VisibleAlways);
     CreateHudText(HostPlayer(), Subheader: "You are the host player. Press interact to open the host settings.", SubheaderColor: Color.Turquoise, Location: Location.Top, SortOrder: 1, Spectators: Spectators.VisibleNever);
     // CreateHudText(HostPlayer(), Subheader: <"C-A-P: <0>-<1>-<2>", ServerLoad(), ServerLoadAverage(), ServerLoadPeak()>, SubheaderColor: Color.Green, Location: Location.Top, SortOrder: 0.2, Spectators: Spectators.VisibleAlways);
-    SetObjectiveDescription(AllPlayers(), "♥", ObjectiveRev.VisibleToSortOrderAndString);
+    SetObjectiveDescription(AllPlayers(), "♥", HudTextRev.VisibleToSortOrderAndString);
     DisableCompletion();
     SetMatchTime(0);
     PauseMatchTime();
@@ -219,7 +219,7 @@ void ArenaBeam(Vector a, Vector b) "Arena: Make Beam"
     ModifyVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
 }
 
-void ArenaBeam(ref Vector a, ref Vector b, BeamType type)
+void ArenaBeam(in Vector a, in Vector b, BeamType type)
 {
     CreateBeamEffect(
         AllPlayers(),

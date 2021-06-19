@@ -4,8 +4,6 @@ globalvar define ball1;
 globalvar define ball2;
 playervar define isBall;
 globalvar define ballIsOnStand = true;
-globalvar define tpFrom;
-globalvar define tpTo;
 globalvar define rootBall;
 
 globalvar define thrower = null;
@@ -31,21 +29,21 @@ if (gamemode == Mode.Soccer || gamemode == Mode.Volleyball)
 {
     ball = true;
 
-    CreateDummyBot(Hero.Torbjorn, Team.Team1, 5, TopPolePos());
+    CreateDummyBot(Hero.WreckingBall, Team.Team1, 5, TopPolePos());
     ball1 = LastCreatedEntity();
     ball1.isBall = true;
     ball1.isWorkingDummy = true;
     rootBall = ball1;
 
-    CreateDummyBot(Hero.Torbjorn, Team.Team2, 5, TopPolePos() + Vector(0, 1, 0));
+    CreateDummyBot(Hero.WreckingBall, Team.Team2, 5, TopPolePos() + Vector(0, 1, 0));
     ball2 = LastCreatedEntity();
     ball2.isBall = true;
     ball2.isWorkingDummy = true;
 
-    SetStatus(ball1, null, Status.Unkillable, 9999);
-    SetStatus(ball2, null, Status.Unkillable, 9999);
-    SetInvisible(ball1, InvisibleTo.All);
-    SetInvisible(ball2, InvisibleTo.All);
+    SetStatus([ball1, ball2], null, Status.Unkillable, 9999);
+    DisableMovementCollisionWithPlayers([ball1, ball2]);
+    StartScalingPlayer([ball1, ball2], IsInAir(rootBall) ? 2.2 : 1.1, true);
+    SetInvisible([ball1, ball2], InvisibleTo.All);
 
     RenderBall();
     ballReady = true;
@@ -61,8 +59,6 @@ if (gamemode != Mode.Volleyball)
     DestroyDummyBot(TeamOf(ball1), SlotOf(ball1));
     DestroyDummyBot(TeamOf(ball2), SlotOf(ball2));
     DestroyIcon(ballIcon);
-    tpFrom = null;
-    tpTo = null;
     rootBall = null;
 }
 
@@ -73,7 +69,7 @@ void RenderBall() "Ball: Render"
     DestroyIcon(ballIcon);
 
     // Create and store the effect.
-    CreateEffect(AllPlayers(), Effect.Sphere, ballColors[Ball_Color.Value], ballLocation(), 1.25 * ballScale, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(AllPlayers(), Effect.Sphere, ballColors[Ball_Color.Value], UpdateEveryFrame(ballLocation()), 1.25 * ballScale, EffectRev.VisibleToPositionAndRadius);
     ballEffect = LastCreatedEntity();
 
     // Create the icon
@@ -84,55 +80,18 @@ void RenderBall() "Ball: Render"
 
 globalvar define ballScale = 1;
 
-define ballLocation(): tpTo != null ? tpTo + Vector(0, 1, 0) : Midpoint(ball1,ball2) + Vector(0, 0.5, 0);
+define ballLocation(): rootBall != null ? rootBall + Vector(0, 1, 0) : Midpoint(ball1,ball2) + Vector(0, 1, 0);
 define ballSpeed(): SpeedOf(rootBall);
 
-rule: "Ball: (High Server Loa​d) Link"
+rule: "Ball: Link"
 if (ball)
 if (ballReady)
 if (!ballIsOnStand)
 {
-    if (isStunned(ball1))
-    {
-        tpFrom = ball2;
-        tpTo = ball1;
-    }
-    else if (isStunned(ball2))
-    {
-        tpFrom = ball1;
-        tpTo = ball2;
-    }
-    else if (IsInAir(ball1) || IsInAir(ball2))
-    {
-        if (tpTo == null || AbsoluteValue(SpeedOf(ball1) - SpeedOf(ball2)) > 2)
-        {
-            if (SpeedOf(ball1) >= SpeedOf(ball2))
-            {
-                tpFrom = ball2;
-                tpTo = ball1;
-            }
-            else
-            {
-                tpFrom = ball1;
-                tpTo = ball2;
-            }
-        }
-    }
-    else
-    {
-        tpFrom = null;
-        tpTo = null;
-    }
-
-    if (tpTo != null) rootBall = tpTo;
-
-    if (PositionOf(rootBall) < 171)
-        Teleport(tpFrom, PositionOf(tpTo) + Vector(0, 1 * ballScale + Max(YOf(VelocityOf(tpTo)) * 0.025, 0), 0));
-
+    Teleport(rootBall == ball1 ? ball2 : ball1, rootBall);
     Wait(0.1);
     LoopIfConditionIsTrue();
 }
-define isStunned(define player): HasStatus(player, Status.Stunned);
 
 rule: "Ball: Respawn ball"
 if (ballReady)
@@ -150,7 +109,7 @@ rule: "Ball: Bounce back ball"
 if (ballReady)
 if (!ballIsOnStand)
 if (!HasStatus(rootBall, Status.Stunned))
-if (ballSpeed() < 1)
+// if (ballSpeed() < 1)
 if (isOnWall(rootBall))
 {
     ApplyImpulse(rootBall, DirectionTowards(PositionOf(rootBall), TopPolePos() + Vector(0, 20, 0)), 15, Relative.ToWorld, ContraryMotion.Cancel);
@@ -160,7 +119,6 @@ if (isOnWall(rootBall))
 
 void respawnBall() "Respawn Ball"
 {
-    tpTo = null;
     ballReady = false;    
 
     stopNearbyCharging();
@@ -194,12 +152,14 @@ Event.OnDamageTaken
 if (isBall)
 if (!IsInSpawnRoom(ball1) && !IsInSpawnRoom(ball2))
 {
+    rootBall = EventPlayer();
+    SmallMessage(AllPlayers(), EventDamage());
     Heal(EventPlayer(), null, EventDamage());
 
     // Hammer hit
-    if (EventDamage() == 70)
+    if (EventDamage() == 80)
     {
-        ApplyImpulse(EventPlayer(), Vector(0, 1, 0), 20, Relative.ToWorld, ContraryMotion.Incorporate);
+        ApplyImpulse(EventPlayer(), Vector(0, 1, 0), 15, Relative.ToWorld, ContraryMotion.Incorporate);
         thrower = Attacker();
         throwType = 0;
         OffStand();
@@ -213,6 +173,14 @@ if (!IsInSpawnRoom(ball1) && !IsInSpawnRoom(ball2))
     }
 }
 
+rule: "Ball: On Stun"
+Event.OngoingPlayer
+if (isBall)
+if (HasStatus(EventPlayer(), Status.Stunned))
+{
+    rootBall = EventPlayer();
+}
+
 globalvar define fuse;
 
 rule: "Ball: On Fire Strike: Impulse"
@@ -222,6 +190,7 @@ if (!ballIsOnStand)
 if (!ballOnGround)
 if (EventDamage() == 95)
 {
+    rootBall = EventPlayer();
     ApplyImpulse(rootBall, Attacker().fireStrikeDirection, SpeedOf(rootBall) * 3.5, Relative.ToWorld, ContraryMotion.Cancel);
     thrower = Attacker();
     throwType = 3;
@@ -246,7 +215,7 @@ if (Ball_Explosion.Value)
     PlayEffect(AllPlayers(), PlayEffect.GoodExplosion, Color.Orange, ballLocation(), ExplosionRange());
     PlayEffect(AllPlayers(), PlayEffect.ExplosionSound, Color.Orange, ballLocation(), 100);
 
-    define inExplosionRange = FilteredArray(AllPlayers(), DistanceBetween(ArrayElement(), ballLocation()) < ExplosionRange() && !ArrayElement().isBall);
+    define inExplosionRange = <Player[]>FilteredArray(AllPlayers(), DistanceBetween(ArrayElement(), ballLocation()) < ExplosionRange() && !ArrayElement().isBall);
 
     Damage(inExplosionRange, Attacker(), 200);
     inExplosionRange.knockedFrom = ballLocation();
@@ -350,7 +319,7 @@ class BallBoundary
     private Vector Direction;
     private define _limitDistance;
 
-    public BallBoundary(ref Vector pos1, ref Vector pos2, ref define distance = -4, ref define limitDistance = false)
+    public constructor(in Vector pos1, in Vector pos2, in define distance = -4, in define limitDistance = false)
     {
         Pos1 = pos1;
         Pos2 = pos2;
@@ -364,7 +333,7 @@ class BallBoundary
         ApplyImpulse([root.ball1, root.ball2], Direction, Max(5, SpeedOf(root.rootBall)), Relative.ToWorld, ContraryMotion.Cancel);
     }
 
-    define IsInRange: (!_limitDistance || (PositionOf(root.rootBall).DistanceTo((Pos1 + Pos2) / 2) < DistanceBetween(Pos1, Pos2))) && root.signedDistance(PositionOf(root.rootBall), Pos1, Direction) < Distance;
+    public define IsInRange: (!_limitDistance || (PositionOf(root.rootBall).DistanceTo((Pos1 + Pos2) / 2) < DistanceBetween(Pos1, Pos2))) && root.signedDistance(PositionOf(root.rootBall), Pos1, Direction) < Distance;
 }
 
 rule: "Ball boundary pulse"
@@ -373,7 +342,7 @@ if (ballReady)
 if (!ballIsOnStand)
 if (BallBoundaries.IsTrueForAny((BallBoundary boundary) => boundary.IsInRange))
 {
-    BallBoundary inRange = BallBoundaries.FilteredArray((BallBoundary boundary) => boundary.IsInRange);
+    BallBoundary inRange = BallBoundaries.FilteredArray((BallBoundary boundary) => boundary.IsInRange).First;
     inRange.Pulse();
     stopNearbyCharging();
     Wait(0.3);

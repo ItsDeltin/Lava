@@ -18,7 +18,7 @@ if (IsButtonHeld(EventPlayer(), Button.PrimaryFire))
     CreateEffect(EventPlayer(), Effect.LightShaft, Color.Blue, lookingAtPlanePoint, 0.5, EffectRev.VisibleToPositionAndRadius);
     define entity = LastCreatedEntity();
 
-    define affected = FilteredArray(AllPlayers(), DistanceBetween(ArrayElement().dodgeball_pos * Vector(1,0,1), lookingAtPlanePoint * Vector(1, 0, 1)) < 10);
+    Player[] affected = FilteredArray(AllPlayers(), DistanceBetween(ArrayElement().dodgeball_pos * Vector(1,0,1), lookingAtPlanePoint * Vector(1, 0, 1)) < 10);
     affected.dodgeball_in_motion = false;
     affected.dodgeball_ultimate_used_on_ball = true;
     affected.dodgeball_holder = EventPlayer();
@@ -76,7 +76,7 @@ if (PositionOf().Y < 200)
 {
     MinWait();
     AbortIfConditionIsFalse();
-    ApplyImpulse(EventPlayer(), Left(), 5 + DistanceBetween(Vector([], [], []), VelocityOf(EventPlayer())), Relative.ToWorld, ContraryMotion.Cancel);
+    ApplyImpulse(EventPlayer(), Left(), 5 + DistanceBetween(Vector(0, 0, 0), VelocityOf(EventPlayer())), Relative.ToWorld, ContraryMotion.Cancel);
     MinWait();
     LoopIfConditionIsTrue();
     // PlayEffect(EventPlayer(), PlayEffect.DebuffImpactSound, Color.White, EventPlayer(), 100);
@@ -91,7 +91,7 @@ if (PositionOf().Y < 200)
 {
     MinWait();
     AbortIfConditionIsFalse();
-    ApplyImpulse(EventPlayer(), Right(), 5 + DistanceBetween(Vector([], [], []), VelocityOf(EventPlayer())), Relative.ToWorld, ContraryMotion.Cancel);
+    ApplyImpulse(EventPlayer(), Right(), 5 + DistanceBetween(Vector(0, 0, 0), VelocityOf(EventPlayer())), Relative.ToWorld, ContraryMotion.Cancel);
     MinWait();
     LoopIfConditionIsTrue();
     // PlayEffect(EventPlayer(), PlayEffect.DebuffImpactSound, Color.White, EventPlayer(), 100);
@@ -100,7 +100,7 @@ if (PositionOf().Y < 200)
 rule: "Dodgeball: Draw Boundary"
 if (gamemode == 6)
 {
-    CreateBeamEffect(AllPlayers(Team.All), BeamType.BadBeam, Vector([], 154.88, 150) - Vector([], [], 20), Vector([], 154.88, 150) + Vector([], [], 20), Color.Aqua, EffectRev.VisibleTo);
+    CreateBeamEffect(AllPlayers(Team.All), BeamType.BadBeam, Vector(0, 154.88, 150) - Vector(0, 0, 20), Vector(0, 154.88, 150) + Vector(0, 0, 20), Color.Aqua, EffectRev.VisibleTo);
     ModifyVariable(beamId, Operation.AppendToArray, LastCreatedEntity());
     CreateBeamEffect(AllPlayers(Team.All), BeamType.BadBeam, Vector(0, 154.88, 130), Vector(0, 171, 130.001), Color.Aqua, EffectRev.VisibleTo);
     ModifyVariable(beamId, Operation.AppendToArray, LastCreatedEntity());
@@ -213,7 +213,7 @@ if (gamemode == Mode.Dodgeball)
 {
     MakeFloor();
 
-    CreateEffect(AllPlayers(), Effect.Orb, Color.Orange, Vector([], 161.5, 150), 0.25, EffectRev.VisibleTo);
+    CreateEffect(AllPlayers(), Effect.Orb, Color.Orange, Vector(0, 161.5, 150), 0.25, EffectRev.VisibleTo);
     CreateBeamEffect(AllPlayers(), BeamType.BadBeam, dodgeballCliffBlue + Left() * 0.001, dodgeballCliffBlue + Up() * 16.12, Color.Aqua, EffectRev.VisibleTo);
     ModifyVariable(arenaEffects, Operation.AppendToArray, LastCreatedEntity());
     CreateBeamEffect(AllPlayers(), BeamType.BadBeam, dodgeballCliffRed + Left() * 0.001, dodgeballCliffRed + Up() * 16.12, Color.Aqua, EffectRev.VisibleTo);
@@ -304,6 +304,43 @@ if ((XOf(dodgeball_pos) < -30 || XOf(dodgeball_pos) > 30 || YOf(dodgeball_pos) <
 
     Wait(0.25, WaitBehavior.IgnoreCondition);
     LoopIfConditionIsTrue();
+}
+
+rule: "dodgeball bounce - pole"
+Event.OngoingPlayer
+Player.Sigma
+if (dodgeball_held == false)
+if (DistanceBetween(dodgeball_pos, RayCastHitPosition(dodgeball_pos, dodgeball_pos + VectorTowards(Vector(XOf(dodgeball_pos), 0, ZOf(dodgeball_pos)), Vector(0, 0, 150)), null, EventPlayer(), true)) < 1.25)
+if (YOf(dodgeball_pos) < 162.75)
+{
+    if (DistanceBetween(Vector(0, 0, 0), dodgeball_velocity) > 10)
+    {
+        PlayEffect(AllPlayers(Team.All), PlayEffect.RingExplosion, Color.SkyBlue, Vector(0, 161.5, 150), 7);
+        PlayEffect(AllPlayers(Team.All), PlayEffect.GoodExplosion, Color.Purple, dodgeball_pos, 2);
+        PlayEffect(AllPlayers(Team.All), PlayEffect.RingExplosionSound, Color.White, dodgeball_pos, 100);
+    }
+    // if (XOf(dodgeball_pos) <= -29.9)
+    {
+        // dodgeball_bounce_normal = Left() * (XOf(dodgeball_holder) < 0 ? 1 : -1) + RayCastHitNormal(dodgeball_pos, dodgeball_pos + VectorTowards(Vector(XOf(dodgeball_pos), 0, ZOf(dodgeball_pos)), Vector(0, 0, 150)), null, EventPlayer(), true);
+        dodgeball_bounce_normal = HorizontalAngleFromDirection(DirectionTowards(dodgeball_pos, Vector(0, 0, 150))) < 160 ? HorizontalAngleFromDirection(DirectionTowards(dodgeball_pos, Vector(0, 0, 150))) < 20 ? HorizontalAngleFromDirection(DirectionTowards(dodgeball_pos, Vector(0, 0, 150))) < -20 ? Left() : Backward() : Right() : Forward();
+        dodgeball_bounce += 1;
+        if (DistanceBetween(Vector(0, 0, 0), dodgeball_velocity) > 2)
+        {
+            if (dodgeball_bounce_normal == Up())
+            {
+                dodgeball_holder = false;
+                dodgeball_thrown = false;
+            }
+            dodgeball_velocity = VectorTowards(dodgeball_pos, dodgeball_pos + dodgeball_velocity + dodgeball_bounce_normal * CosineFromDegrees(AngleBetweenVectors(dodgeball_bounce_normal, dodgeball_velocity * -1)) * DistanceBetween(Vector(0, 0, 0), dodgeball_velocity) * 2) * 0.7;
+        }
+        else
+        {
+            dodgeball_holder = false;
+            dodgeball_thrown = false;
+        }
+        Wait(0.25, WaitBehavior.IgnoreCondition);
+        LoopIfConditionIsTrue();
+    }
 }
 
 rule: "dodgeball charge"

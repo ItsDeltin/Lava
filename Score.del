@@ -85,7 +85,7 @@ globalvar define redGoalSize;
 define considerBallPos: PositionOf(rootBall);
 define goalMod(define goalPos): Max(1 - (DistanceBetween(rootBall, goalPos) / 15), 0) * 10;
 Vector nearestPlanePoint(define pointPosition, define planePosition, define planeNormal): pointPosition + (-DotProduct(planeNormal, pointPosition - planePosition) / DotProduct(planeNormal, planeNormal)) * planeNormal;
-Vector signedDistance(define pointPosition, define planePoint, define planeNormal): DotProduct(planeNormal, (pointPosition - planePoint));
+Number signedDistance(define pointPosition, define planePoint, define planeNormal): DotProduct(planeNormal, (pointPosition - planePoint));
 // blue
 Vector blueNearest: nearestPlanePoint(considerBallPos, bluePos, blueNormal);
 globalvar Vector bluePos! = Vector(115.69, 156.68, 148.52);
@@ -102,13 +102,13 @@ globalvar Vector redUp! = CrossProduct(redNormal, Normalize(redNormal.CrossProdu
 
 define g_o(define p, define d, define size): p + d * size;
 
-define MakeBeam(Color color, ref define s, ref define e)
+define MakeBeam(in Color color, in define s, in define e)
 {
-    CreateBeamEffect(AllPlayers(), BeamType.GoodBeam, s, e, color, EffectRev.VisibleToPositionAndRadius);
+    CreateBeamEffect(AllPlayers(), BeamType.GoodBeam, UpdateEveryFrame(s), UpdateEveryFrame(e), color, EffectRev.VisibleToPositionAndRadius);
     return LastCreatedEntity();
 }
 
-void MakeBeams(Color color, ref define nearest, ref define up, ref define right, ref define size, ref define effectStart)
+void MakeBeams(Color color, in define nearest, in define up, in define right, in define size, in define effectStart)
 {
     goalEffects[effectStart]     = MakeBeam(color, g_o(nearest, up, size), g_o(nearest, right, size));
     Wait(0.016, WaitBehavior.AbortWhenFalse);
@@ -205,7 +205,7 @@ if (signedDistance(considerBallPos, bluePos, blueNormal) < 0)
     });
 }
 
-void Score(Color teamColor, ref define team, define nearest, BlockLambda score)
+void Score(Color teamColor, in define team, define nearest, () => void score)
 {
     async! PointScored();
     score.Invoke();
@@ -281,7 +281,7 @@ void messageThrower(define team, Color teamColor)
 
 globalvar define scoreboardOrder = 7;
 
-void ThrowHud(Color color, ref define icon)
+void ThrowHud(in Color color, in define icon)
 {
     CreateHudText(
         VisibleTo   : AllPlayers(),

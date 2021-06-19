@@ -41,7 +41,7 @@ globalvar HostMenuOption[][] options = [
         PowerHammerMode,
         new NumberOption("Move Speed", 0, 1000, 150, 10, 1, "%"),
         new NumberOption("Charge Speed", 0, 1000, 200, 10, 2, "%"),
-        new NumberOption("Fire Strike Speed", 0, 1000, 100, 10, 3, "%"),
+        new NumberOption("Fire Strike Speed", 0, 1000, 130, 10, 3, "%"),
         FireStrikeCooldownTime,
         new NumberOption("Health", 0, 1000, 100, 10, 4, "%"),
         new NumberOption("Regenerate health after", 0, 15, 10, 1, 5, " seconds"),
@@ -114,7 +114,7 @@ void RenderOptions() "Host Menu: Render Options"
     }
 }
 
-void MakeHostHud(ref define visibleTo = HostPlayer(), ref define header = null, ref define text = null, ref define subheader = null, ref define sortOrder = 0)
+void MakeHostHud(in define visibleTo = HostPlayer(), in define header = null, in define text = null, in define subheader = null, in define sortOrder = 0)
 {
     CreateHudText(HostPlayer(), Header:header, Text:text, Subheader: subheader, Location: Location.Top, SortOrder: sortOrder);
     ModifyVariable(hostMenuHuds, Operation.AppendToArray, LastTextID());
@@ -195,7 +195,7 @@ class SelectOption : HostMenuOption
     public override define Controls: "Walk left or right to choose an option for the currently selected setting.";
     private define _action;
 
-    public SelectOption(ref define name, ref define[] options, ref define defaultSelected = 0, define action = 0)
+    public constructor(in define name, in define[] options, in define defaultSelected = 0, define action = 0)
     {
         Name = name;
         Options = options;
@@ -227,7 +227,7 @@ class SelectOption : HostMenuOption
 }
 class ArenaTypeOption : SelectOption
 {
-    public ArenaTypeOption()
+    public constructor()
     {
         Name = "Arena Type";
         Options = ["Grid", "Minimal", "Striped"];
@@ -243,7 +243,7 @@ class ArenaColorOption : SelectOption
 {
     public static Color[] ColorArray = [Color.White, Color.Purple, Color.White, Color.Orange, Color.Green, Color.Aqua, Color.Black, Color.Rose, Color.Violet, Color.Gray];
 
-    public ArenaColorOption()
+    public constructor()
     {
         Name = "Arena Color";
         Options = ["Grapple", "Purple", "White", "Orange", "Green", "Aqua", "Black", "Rose", "Violet", "Gray"];
@@ -265,7 +265,7 @@ class BooleanOption : HostMenuOption
     protected override define ValueString: Value ? "On" : "Off";
     public override define Controls: "Walk left, right, or jump to switch the currently selected setting.";
 
-    public BooleanOption(ref define name, ref define defaultValue)
+    public constructor(in define name, in define defaultValue)
     {
         Name = name;
         Value = defaultValue;
@@ -292,7 +292,7 @@ class ActionButton : HostMenuOption
     private define Action;
     public override define Controls: "Jump to activate the currently selected option.";
 
-    public ActionButton(ref define name, ref define action)
+    public constructor(in define name, in define action)
     {
         Name = name;
         Action = action;
@@ -328,7 +328,7 @@ class NumberOption : HostMenuOption
     private define Step;
     private define Action;
 
-    public NumberOption(ref define name, ref define min, ref define max, ref define defaultValue, ref define step, ref define action, ref define valueTag = "")
+    public constructor(in define name, in define min, in define max, in define defaultValue, in define step, in define action, in define valueTag = "")
     {
         Name = name;
         Min = min;

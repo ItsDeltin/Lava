@@ -6,9 +6,9 @@ if (HasSpawned())
 if (IsAlive())
 if (!IsInSpawnRoom())
 if (SpeedOfInDirection(EventPlayer(), Up()) > 0)
-if (PositionOf(EventPlayer()).Y + SpeedOfInDirection(EventPlayer(), Up()) / 3.5 > 173)
+if (PositionOf(EventPlayer()).Y > 170.5)
 {
-    ApplyImpulse(EventPlayer(), Down(), Max(3, SpeedOfInDirection(EventPlayer(), Up())), Relative.ToWorld, ContraryMotion.Cancel);
-    Wait(0.07);
+    ApplyImpulse(EventPlayer(), Down(), 0.1, Relative.ToWorld, ContraryMotion.CancelXYZ);
+    Wait(0.035);
     LoopIfConditionIsTrue();
 }
